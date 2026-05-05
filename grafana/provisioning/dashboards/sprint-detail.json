@@ -936,12 +936,150 @@
       "type": "gauge"
     },
     {
+      "datasource": {
+        "type": "postgres",
+        "uid": "jira-metrics-pg"
+      },
+      "description": "Story points in Ready for Testing status. Excludes Epics.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "purple",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 0,
+        "y": 13
+      },
+      "id": 120,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.1.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawSql": "SELECT COALESCE(SUM(COALESCE(si.story_points_at_add,i.story_points,0)),0) AS value\nFROM sprint_issues si JOIN issues i ON i.key=si.issue_key\nWHERE si.sprint_id=$sprint::bigint AND si.removed_at IS NULL\n  AND i.issue_type != 'Epic'\n  AND LOWER(i.status) = 'ready for testing'",
+          "refId": "A"
+        }
+      ],
+      "title": "RFT SP",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "jira-metrics-pg"
+      },
+      "description": "Number of tickets currently in Ready for Testing status. Excludes Epics.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "purple",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 3,
+        "y": 13
+      },
+      "id": 121,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.1.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawSql": "SELECT COUNT(*) AS value\nFROM sprint_issues si JOIN issues i ON i.key=si.issue_key\nWHERE si.sprint_id=$sprint::bigint AND si.removed_at IS NULL\n  AND i.issue_type != 'Epic'\n  AND LOWER(i.status) = 'ready for testing'",
+          "refId": "A"
+        }
+      ],
+      "title": "RFT Tickets",
+      "type": "stat"
+    },
+    {
       "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 13
+        "y": 17
       },
       "id": 9,
       "title": "Story Readiness",
@@ -981,7 +1119,7 @@
         "h": 4,
         "w": 2,
         "x": 0,
-        "y": 14
+        "y": 18
       },
       "id": 53,
       "options": {
@@ -1050,7 +1188,7 @@
         "h": 4,
         "w": 2,
         "x": 2,
-        "y": 14
+        "y": 18
       },
       "id": 118,
       "options": {
@@ -1119,7 +1257,7 @@
         "h": 4,
         "w": 2,
         "x": 4,
-        "y": 14
+        "y": 18
       },
       "id": 119,
       "options": {
@@ -1188,7 +1326,7 @@
         "h": 4,
         "w": 2,
         "x": 6,
-        "y": 14
+        "y": 18
       },
       "id": 10,
       "options": {
@@ -1260,7 +1398,7 @@
         "h": 4,
         "w": 2,
         "x": 8,
-        "y": 14
+        "y": 18
       },
       "id": 104,
       "options": {
@@ -1332,7 +1470,7 @@
         "h": 4,
         "w": 2,
         "x": 10,
-        "y": 14
+        "y": 18
       },
       "id": 52,
       "options": {
@@ -1404,7 +1542,7 @@
         "h": 4,
         "w": 2,
         "x": 12,
-        "y": 14
+        "y": 18
       },
       "id": 11,
       "options": {
@@ -1476,7 +1614,7 @@
         "h": 4,
         "w": 2,
         "x": 14,
-        "y": 14
+        "y": 18
       },
       "id": 12,
       "options": {
@@ -1548,7 +1686,7 @@
         "h": 4,
         "w": 2,
         "x": 16,
-        "y": 14
+        "y": 18
       },
       "id": 117,
       "options": {
@@ -1622,7 +1760,7 @@
         "h": 4,
         "w": 2,
         "x": 18,
-        "y": 14
+        "y": 18
       },
       "id": 13,
       "options": {
@@ -1689,7 +1827,7 @@
         "h": 4,
         "w": 2,
         "x": 20,
-        "y": 14
+        "y": 18
       },
       "id": 102,
       "options": {
@@ -1758,7 +1896,7 @@
         "h": 4,
         "w": 2,
         "x": 22,
-        "y": 14
+        "y": 18
       },
       "id": 103,
       "options": {
@@ -1951,7 +2089,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 18
+        "y": 22
       },
       "id": 14,
       "options": {
@@ -1988,7 +2126,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 26
+        "y": 30
       },
       "id": 40,
       "title": "Scope Change",
@@ -2025,7 +2163,7 @@
         "h": 4,
         "w": 4,
         "x": 0,
-        "y": 27
+        "y": 31
       },
       "id": 41,
       "options": {
@@ -2091,7 +2229,7 @@
         "h": 4,
         "w": 4,
         "x": 4,
-        "y": 27
+        "y": 31
       },
       "id": 42,
       "options": {
@@ -2157,7 +2295,7 @@
         "h": 4,
         "w": 4,
         "x": 8,
-        "y": 27
+        "y": 31
       },
       "id": 43,
       "options": {
@@ -2223,7 +2361,7 @@
         "h": 4,
         "w": 4,
         "x": 12,
-        "y": 27
+        "y": 31
       },
       "id": 44,
       "options": {
@@ -2296,7 +2434,7 @@
         "h": 4,
         "w": 8,
         "x": 16,
-        "y": 27
+        "y": 31
       },
       "id": 45,
       "options": {
@@ -2605,7 +2743,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 31
+        "y": 35
       },
       "id": 46,
       "options": {
@@ -2641,7 +2779,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 39
+        "y": 43
       },
       "id": 105,
       "panels": [],
@@ -2684,7 +2822,7 @@
         "h": 4,
         "w": 4,
         "x": 0,
-        "y": 40
+        "y": 44
       },
       "id": 106,
       "options": {
@@ -2755,7 +2893,7 @@
         "h": 4,
         "w": 4,
         "x": 12,
-        "y": 40
+        "y": 44
       },
       "id": 107,
       "options": {
@@ -3081,7 +3219,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 44
+        "y": 48
       },
       "id": 108,
       "options": {
@@ -3379,7 +3517,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 44
+        "y": 48
       },
       "id": 109,
       "options": {
@@ -3416,7 +3554,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 51
+        "y": 55
       },
       "id": 55,
       "panels": [
@@ -3541,7 +3679,7 @@
             "h": 12,
             "w": 24,
             "x": 0,
-            "y": 69
+            "y": 73
           },
           "id": 56,
           "options": {
@@ -3580,7 +3718,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 52
+        "y": 56
       },
       "id": 100,
       "panels": [
@@ -3744,7 +3882,7 @@
             "h": 6,
             "w": 24,
             "x": 0,
-            "y": 70
+            "y": 74
           },
           "id": 101,
           "options": {
@@ -3784,7 +3922,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 53
+        "y": 57
       },
       "id": 15,
       "title": "Issue Counts",
@@ -3825,7 +3963,7 @@
         "h": 4,
         "w": 24,
         "x": 0,
-        "y": 54
+        "y": 58
       },
       "id": 16,
       "options": {
@@ -3862,7 +4000,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 58
+        "y": 62
       },
       "id": 17,
       "title": "All Issues in Sprint",
@@ -4163,7 +4301,7 @@
         "h": 12,
         "w": 24,
         "x": 0,
-        "y": 59
+        "y": 63
       },
       "id": 18,
       "options": {
@@ -4200,7 +4338,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 71
+        "y": 75
       },
       "id": 30,
       "panels": [
@@ -4231,7 +4369,7 @@
             "h": 4,
             "w": 6,
             "x": 0,
-            "y": 56
+            "y": 60
           },
           "id": 31,
           "options": {
@@ -4297,7 +4435,7 @@
             "h": 4,
             "w": 6,
             "x": 6,
-            "y": 56
+            "y": 60
           },
           "id": 32,
           "options": {
@@ -4370,7 +4508,7 @@
             "h": 4,
             "w": 6,
             "x": 12,
-            "y": 56
+            "y": 60
           },
           "id": 33,
           "options": {
@@ -4432,7 +4570,7 @@
             "h": 4,
             "w": 6,
             "x": 18,
-            "y": 56
+            "y": 60
           },
           "id": 34,
           "options": {
@@ -4692,7 +4830,7 @@
             "h": 10,
             "w": 24,
             "x": 0,
-            "y": 60
+            "y": 64
           },
           "id": 35,
           "options": {
@@ -4979,7 +5117,7 @@
             "h": 9,
             "w": 24,
             "x": 0,
-            "y": 70
+            "y": 74
           },
           "id": 36,
           "options": {
