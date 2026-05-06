@@ -1,0 +1,431 @@
+{
+  "id": null,
+  "uid": "jira-qase-linkage",
+  "title": "QASE Linkage",
+  "tags": ["jira", "quality", "qase"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "1h",
+  "time": { "from": "now-3M", "to": "now" },
+  "timepicker": {},
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "liveNow": null,
+  "links": [
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": false,
+      "targetBlank": false,
+      "title": "Sprint Detail",
+      "type": "link",
+      "url": "/d/cfih5an4hj7y8e"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": false,
+      "targetBlank": false,
+      "title": "Sprint Overview",
+      "type": "link",
+      "url": "/d/jira-sprint-health"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": false,
+      "targetBlank": false,
+      "title": "Quality & Bugs",
+      "type": "link",
+      "url": "/d/jira-quality-bugs"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": false,
+      "targetBlank": false,
+      "title": "PO KPIs",
+      "type": "link",
+      "url": "/d/jira-po-kpis"
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "https://bragi.atlassian.net",
+          "value": "https://bragi.atlassian.net"
+        },
+        "datasource": {
+          "type": "postgres",
+          "uid": "jira-metrics-pg"
+        },
+        "definition": "",
+        "hide": 2,
+        "includeAll": false,
+        "label": "Jira URL",
+        "multi": false,
+        "name": "jira_url",
+        "options": [],
+        "query": "SELECT value FROM app_settings WHERE key = 'jira_url'",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": ["All"],
+          "value": ["$__all"]
+        },
+        "datasource": {
+          "type": "postgres",
+          "uid": "jira-metrics-pg"
+        },
+        "definition": "",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Team / Project",
+        "multi": true,
+        "name": "project",
+        "options": [],
+        "query": "SELECT key FROM projects ORDER BY key",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "Q1 2026",
+          "value": "2026-01-01"
+        },
+        "datasource": {
+          "type": "postgres",
+          "uid": "jira-metrics-pg"
+        },
+        "definition": "",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Quarter",
+        "multi": false,
+        "name": "quarter",
+        "options": [],
+        "query": "SELECT CONCAT('Q', EXTRACT(QUARTER FROM created_at)::int, ' ', EXTRACT(YEAR FROM created_at)::int) AS __text, TO_CHAR(date_trunc('quarter', created_at), 'YYYY-MM-DD') AS __value FROM issues WHERE created_at IS NOT NULL GROUP BY 1, 2 ORDER BY 2 DESC",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      }
+    ]
+  },
+  "panels": [
+    {
+      "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
+      "description": "Issues confirmed to have no QASE test case linked. Excludes Epics and Sub-tasks.",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 1 },
+              { "color": "red", "value": 10 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "id": 1,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "pluginVersion": "11.1.0",
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
+          "format": "table",
+          "rawSql": "SELECT COUNT(*) AS value FROM issues WHERE project_key IN ($project) AND issue_type NOT IN ('Epic','Sub-task') AND date_trunc('quarter', created_at) = '$quarter'::date AND has_qase_link = FALSE",
+          "refId": "A"
+        }
+      ],
+      "title": "Without QASE Link",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
+      "description": "Issues confirmed to have a QASE test case linked. Excludes Epics and Sub-tasks.",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "id": 2,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "pluginVersion": "11.1.0",
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
+          "format": "table",
+          "rawSql": "SELECT COUNT(*) AS value FROM issues WHERE project_key IN ($project) AND issue_type NOT IN ('Epic','Sub-task') AND date_trunc('quarter', created_at) = '$quarter'::date AND has_qase_link = TRUE",
+          "refId": "A"
+        }
+      ],
+      "title": "With QASE Link",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
+      "description": "% of checked issues (excl. Epics, Sub-tasks) with a QASE test case linked.",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 50 },
+              { "color": "green", "value": 80 }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "id": 3,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "pluginVersion": "11.1.0",
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
+          "format": "table",
+          "rawSql": "SELECT ROUND(100.0 * COUNT(*) FILTER (WHERE has_qase_link = TRUE) / NULLIF(COUNT(*) FILTER (WHERE has_qase_link IS NOT NULL), 0), 1) AS value FROM issues WHERE project_key IN ($project) AND issue_type NOT IN ('Epic','Sub-task') AND date_trunc('quarter', created_at) = '$quarter'::date",
+          "refId": "A"
+        }
+      ],
+      "title": "QASE Coverage %",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
+      "description": "Issues where QASE status has not been fetched yet. Excludes Epics and Sub-tasks.",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 1 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "id": 4,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "pluginVersion": "11.1.0",
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
+          "format": "table",
+          "rawSql": "SELECT COUNT(*) AS value FROM issues WHERE project_key IN ($project) AND issue_type NOT IN ('Epic','Sub-task') AND date_trunc('quarter', created_at) = '$quarter'::date AND has_qase_link IS NULL",
+          "refId": "A"
+        }
+      ],
+      "title": "Not Yet Checked",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
+      "description": "All issues without a QASE test case link, ordered by creation date descending. Excludes Epics and Sub-tasks.",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "left",
+            "cellOptions": { "type": "auto" },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 80 }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "Key" },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "targetBlank": true,
+                    "title": "Open in Jira",
+                    "url": "${jira_url}/browse/${__value.text}"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Priority" },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "Blocker":  { "color": "dark-red", "index": 0, "text": "Blocker" },
+                      "Critical": { "color": "red",      "index": 1, "text": "Critical" },
+                      "High":     { "color": "orange",   "index": 2, "text": "High" },
+                      "Medium":   { "color": "yellow",   "index": 3, "text": "Medium" },
+                      "Low":      { "color": "green",    "index": 4, "text": "Low" }
+                    }
+                  }
+                ]
+              },
+              { "id": "custom.cellOptions", "value": { "type": "color-background" } },
+              { "id": "color", "value": { "mode": "thresholds" } },
+              { "id": "thresholds", "value": { "mode": "absolute", "steps": [{ "color": "text", "value": null }] } }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Status" },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "Done":                { "color": "green",  "index": 0 },
+                      "Closed":              { "color": "green",  "index": 1 },
+                      "In Progress":         { "color": "yellow", "index": 2 },
+                      "In Review":           { "color": "yellow", "index": 3 },
+                      "Ready for testing":   { "color": "blue",   "index": 4 },
+                      "Ready For Testing":   { "color": "blue",   "index": 5 },
+                      "Testing":             { "color": "blue",   "index": 6 },
+                      "Blocked":             { "color": "red",    "index": 7 },
+                      "Reopened":            { "color": "orange", "index": 8 },
+                      "Open":                { "color": "text",   "index": 9 },
+                      "To Do":               { "color": "text",   "index": 10 },
+                      "Backlog":             { "color": "text",   "index": 11 },
+                      "Obsolete / Won't Do": { "color": "gray",   "index": 12 }
+                    }
+                  }
+                ]
+              },
+              { "id": "custom.cellOptions", "value": { "type": "color-background" } },
+              { "id": "color", "value": { "mode": "thresholds" } },
+              { "id": "thresholds", "value": { "mode": "absolute", "steps": [{ "color": "text", "value": null }] } }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Type" },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "Bug":         { "color": "red",    "index": 0, "text": "Bug" },
+                      "Story":       { "color": "green",  "index": 1, "text": "Story" },
+                      "Task":        { "color": "blue",   "index": 2, "text": "Task" },
+                      "Improvement": { "color": "yellow", "index": 3, "text": "Improvement" }
+                    }
+                  }
+                ]
+              },
+              { "id": "custom.cellOptions", "value": { "type": "color-background" } },
+              { "id": "color", "value": { "mode": "thresholds" } },
+              { "id": "thresholds", "value": { "mode": "absolute", "steps": [{ "color": "text", "value": null }] } }
+            ]
+          }
+        ]
+      },
+      "gridPos": { "h": 18, "w": 24, "x": 0, "y": 4 },
+      "id": 10,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": ["sum"],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [{ "desc": true, "displayName": "Created" }]
+      },
+      "pluginVersion": "11.1.0",
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
+          "format": "table",
+          "rawSql": "SELECT key AS \"Key\", summary AS \"Summary\", issue_type AS \"Type\", priority AS \"Priority\", status AS \"Status\", COALESCE(assignee, 'Unassigned') AS \"Assignee\", TO_CHAR(created_at, 'YYYY-MM-DD') AS \"Created\" FROM issues WHERE project_key IN ($project) AND issue_type NOT IN ('Epic','Sub-task') AND date_trunc('quarter', created_at) = '$quarter'::date AND has_qase_link = FALSE ORDER BY created_at DESC",
+          "refId": "A"
+        }
+      ],
+      "title": "Issues Without QASE Link",
+      "type": "table"
+    }
+  ]
+}
