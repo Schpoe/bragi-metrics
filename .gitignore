@@ -2,3 +2,4 @@
 .backup.conf
 backup.log
 *.swp
+.claude
