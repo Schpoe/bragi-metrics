@@ -177,6 +177,30 @@
       {
         "current": {
           "selected": true,
+          "text": ["Story", "Bug"],
+          "value": ["Story", "Bug"]
+        },
+        "datasource": {
+          "type": "postgres",
+          "uid": "jira-metrics-pg"
+        },
+        "definition": "",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Issue Type",
+        "multi": true,
+        "name": "issue_type",
+        "options": [],
+        "query": "SELECT DISTINCT issue_type FROM issues WHERE issue_type IS NOT NULL AND issue_type NOT IN ('Epic','Sub-task') ORDER BY 1",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": true,
           "text": ["iOS", "Android"],
           "value": ["iOS", "Android"]
         },
@@ -234,7 +258,7 @@
         {
           "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
           "format": "table",
-          "rawSql": "SELECT COUNT(*) AS value FROM issues WHERE project_key IN ($project) AND issue_type NOT IN ('Epic','Sub-task') AND date_trunc('quarter', created_at) = '$quarter'::date AND has_qase_link = FALSE AND status IN ($status_filter) AND COALESCE((SELECT s.state FROM sprint_issues si JOIN sprints s ON s.id = si.sprint_id WHERE si.issue_key = issues.key AND si.removed_at IS NULL ORDER BY CASE s.state WHEN 'active' THEN 1 WHEN 'future' THEN 2 WHEN 'closed' THEN 3 END LIMIT 1), 'none') IN ($sprint_scope) AND (issue_type = 'Bug' OR EXISTS (SELECT 1 FROM unnest(components) AS c WHERE c IN ($component)))",
+          "rawSql": "SELECT COUNT(*) AS value FROM issues WHERE project_key IN ($project) AND issue_type IN ($issue_type) AND date_trunc('quarter', created_at) = '$quarter'::date AND has_qase_link = FALSE AND status IN ($status_filter) AND COALESCE((SELECT s.state FROM sprint_issues si JOIN sprints s ON s.id = si.sprint_id WHERE si.issue_key = issues.key AND si.removed_at IS NULL ORDER BY CASE s.state WHEN 'active' THEN 1 WHEN 'future' THEN 2 WHEN 'closed' THEN 3 END LIMIT 1), 'none') IN ($sprint_scope) AND (issue_type = 'Bug' OR EXISTS (SELECT 1 FROM unnest(components) AS c WHERE c IN ($component)))",
           "refId": "A"
         }
       ],
@@ -272,7 +296,7 @@
         {
           "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
           "format": "table",
-          "rawSql": "SELECT COUNT(*) AS value FROM issues WHERE project_key IN ($project) AND issue_type NOT IN ('Epic','Sub-task') AND date_trunc('quarter', created_at) = '$quarter'::date AND has_qase_link = TRUE AND status IN ($status_filter) AND COALESCE((SELECT s.state FROM sprint_issues si JOIN sprints s ON s.id = si.sprint_id WHERE si.issue_key = issues.key AND si.removed_at IS NULL ORDER BY CASE s.state WHEN 'active' THEN 1 WHEN 'future' THEN 2 WHEN 'closed' THEN 3 END LIMIT 1), 'none') IN ($sprint_scope) AND (issue_type = 'Bug' OR EXISTS (SELECT 1 FROM unnest(components) AS c WHERE c IN ($component)))",
+          "rawSql": "SELECT COUNT(*) AS value FROM issues WHERE project_key IN ($project) AND issue_type IN ($issue_type) AND date_trunc('quarter', created_at) = '$quarter'::date AND has_qase_link = TRUE AND status IN ($status_filter) AND COALESCE((SELECT s.state FROM sprint_issues si JOIN sprints s ON s.id = si.sprint_id WHERE si.issue_key = issues.key AND si.removed_at IS NULL ORDER BY CASE s.state WHEN 'active' THEN 1 WHEN 'future' THEN 2 WHEN 'closed' THEN 3 END LIMIT 1), 'none') IN ($sprint_scope) AND (issue_type = 'Bug' OR EXISTS (SELECT 1 FROM unnest(components) AS c WHERE c IN ($component)))",
           "refId": "A"
         }
       ],
@@ -313,7 +337,7 @@
         {
           "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
           "format": "table",
-          "rawSql": "SELECT ROUND(100.0 * COUNT(*) FILTER (WHERE has_qase_link = TRUE) / NULLIF(COUNT(*) FILTER (WHERE has_qase_link IS NOT NULL), 0), 1) AS value FROM issues WHERE project_key IN ($project) AND issue_type NOT IN ('Epic','Sub-task') AND date_trunc('quarter', created_at) = '$quarter'::date AND status IN ($status_filter) AND COALESCE((SELECT s.state FROM sprint_issues si JOIN sprints s ON s.id = si.sprint_id WHERE si.issue_key = issues.key AND si.removed_at IS NULL ORDER BY CASE s.state WHEN 'active' THEN 1 WHEN 'future' THEN 2 WHEN 'closed' THEN 3 END LIMIT 1), 'none') IN ($sprint_scope) AND (issue_type = 'Bug' OR EXISTS (SELECT 1 FROM unnest(components) AS c WHERE c IN ($component)))",
+          "rawSql": "SELECT ROUND(100.0 * COUNT(*) FILTER (WHERE has_qase_link = TRUE) / NULLIF(COUNT(*) FILTER (WHERE has_qase_link IS NOT NULL), 0), 1) AS value FROM issues WHERE project_key IN ($project) AND issue_type IN ($issue_type) AND date_trunc('quarter', created_at) = '$quarter'::date AND status IN ($status_filter) AND COALESCE((SELECT s.state FROM sprint_issues si JOIN sprints s ON s.id = si.sprint_id WHERE si.issue_key = issues.key AND si.removed_at IS NULL ORDER BY CASE s.state WHEN 'active' THEN 1 WHEN 'future' THEN 2 WHEN 'closed' THEN 3 END LIMIT 1), 'none') IN ($sprint_scope) AND (issue_type = 'Bug' OR EXISTS (SELECT 1 FROM unnest(components) AS c WHERE c IN ($component)))",
           "refId": "A"
         }
       ],
@@ -352,7 +376,7 @@
         {
           "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
           "format": "table",
-          "rawSql": "SELECT COUNT(*) AS value FROM issues WHERE project_key IN ($project) AND issue_type NOT IN ('Epic','Sub-task') AND date_trunc('quarter', created_at) = '$quarter'::date AND has_qase_link IS NULL AND status IN ($status_filter) AND COALESCE((SELECT s.state FROM sprint_issues si JOIN sprints s ON s.id = si.sprint_id WHERE si.issue_key = issues.key AND si.removed_at IS NULL ORDER BY CASE s.state WHEN 'active' THEN 1 WHEN 'future' THEN 2 WHEN 'closed' THEN 3 END LIMIT 1), 'none') IN ($sprint_scope) AND (issue_type = 'Bug' OR EXISTS (SELECT 1 FROM unnest(components) AS c WHERE c IN ($component)))",
+          "rawSql": "SELECT COUNT(*) AS value FROM issues WHERE project_key IN ($project) AND issue_type IN ($issue_type) AND date_trunc('quarter', created_at) = '$quarter'::date AND has_qase_link IS NULL AND status IN ($status_filter) AND COALESCE((SELECT s.state FROM sprint_issues si JOIN sprints s ON s.id = si.sprint_id WHERE si.issue_key = issues.key AND si.removed_at IS NULL ORDER BY CASE s.state WHEN 'active' THEN 1 WHEN 'future' THEN 2 WHEN 'closed' THEN 3 END LIMIT 1), 'none') IN ($sprint_scope) AND (issue_type = 'Bug' OR EXISTS (SELECT 1 FROM unnest(components) AS c WHERE c IN ($component)))",
           "refId": "A"
         }
       ],
@@ -490,7 +514,7 @@
         {
           "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
           "format": "table",
-          "rawSql": "SELECT key AS \"Key\", summary AS \"Summary\", issue_type AS \"Type\", priority AS \"Priority\", status AS \"Status\", COALESCE(assignee, 'Unassigned') AS \"Assignee\", TO_CHAR(created_at, 'YYYY-MM-DD') AS \"Created\", COALESCE((SELECT s.name FROM sprint_issues si JOIN sprints s ON s.id = si.sprint_id WHERE si.issue_key = issues.key AND si.removed_at IS NULL ORDER BY CASE s.state WHEN 'active' THEN 1 WHEN 'future' THEN 2 WHEN 'closed' THEN 3 END LIMIT 1), '—') AS \"Sprint\" FROM issues WHERE project_key IN ($project) AND issue_type NOT IN ('Epic','Sub-task') AND date_trunc('quarter', created_at) = '$quarter'::date AND has_qase_link = FALSE AND status IN ($status_filter) AND COALESCE((SELECT s.state FROM sprint_issues si JOIN sprints s ON s.id = si.sprint_id WHERE si.issue_key = issues.key AND si.removed_at IS NULL ORDER BY CASE s.state WHEN 'active' THEN 1 WHEN 'future' THEN 2 WHEN 'closed' THEN 3 END LIMIT 1), 'none') IN ($sprint_scope) AND (issue_type = 'Bug' OR EXISTS (SELECT 1 FROM unnest(components) AS c WHERE c IN ($component))) ORDER BY created_at DESC",
+          "rawSql": "SELECT key AS \"Key\", summary AS \"Summary\", issue_type AS \"Type\", priority AS \"Priority\", status AS \"Status\", COALESCE(assignee, 'Unassigned') AS \"Assignee\", TO_CHAR(created_at, 'YYYY-MM-DD') AS \"Created\", COALESCE((SELECT s.name FROM sprint_issues si JOIN sprints s ON s.id = si.sprint_id WHERE si.issue_key = issues.key AND si.removed_at IS NULL ORDER BY CASE s.state WHEN 'active' THEN 1 WHEN 'future' THEN 2 WHEN 'closed' THEN 3 END LIMIT 1), '—') AS \"Sprint\" FROM issues WHERE project_key IN ($project) AND issue_type IN ($issue_type) AND date_trunc('quarter', created_at) = '$quarter'::date AND has_qase_link = FALSE AND status IN ($status_filter) AND COALESCE((SELECT s.state FROM sprint_issues si JOIN sprints s ON s.id = si.sprint_id WHERE si.issue_key = issues.key AND si.removed_at IS NULL ORDER BY CASE s.state WHEN 'active' THEN 1 WHEN 'future' THEN 2 WHEN 'closed' THEN 3 END LIMIT 1), 'none') IN ($sprint_scope) AND (issue_type = 'Bug' OR EXISTS (SELECT 1 FROM unnest(components) AS c WHERE c IN ($component))) ORDER BY created_at DESC",
           "refId": "A"
         }
       ],
