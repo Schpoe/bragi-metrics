@@ -101,7 +101,7 @@
         "multi": false,
         "name": "release",
         "options": [],
-        "query": "SELECT name FROM releases WHERE (archived = FALSE OR archived IS NULL) ORDER BY released DESC, release_date DESC LIMIT 20",
+        "query": "SELECT name FROM releases ORDER BY released DESC, release_date DESC",
         "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
