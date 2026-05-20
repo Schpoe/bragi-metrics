@@ -469,13 +469,15 @@
         "fullHighlight": false,
         "groupWidth": 0.7,
         "legend": {
-          "calcs": [],
-          "displayMode": "list",
+          "calcs": [
+            "sum"
+          ],
+          "displayMode": "table",
           "placement": "bottom",
           "showLegend": true
         },
         "orientation": "horizontal",
-        "showValue": "auto",
+        "showValue": "always",
         "stacking": "none",
         "tooltip": {
           "mode": "multi",
@@ -662,17 +664,19 @@
         "fullHighlight": false,
         "groupWidth": 0.7,
         "legend": {
-          "calcs": [],
-          "displayMode": "list",
+          "calcs": [
+            "sum"
+          ],
+          "displayMode": "table",
           "placement": "bottom",
           "showLegend": true
         },
         "orientation": "horizontal",
-        "showValue": "auto",
+        "showValue": "always",
         "stacking": "normal",
         "tooltip": {
           "mode": "multi",
-          "sort": "none"
+          "sort": "desc"
         }
       },
       "pluginVersion": "11.1.0",
@@ -790,17 +794,19 @@
         "fullHighlight": false,
         "groupWidth": 0.7,
         "legend": {
-          "calcs": [],
-          "displayMode": "list",
+          "calcs": [
+            "sum"
+          ],
+          "displayMode": "table",
           "placement": "bottom",
-          "showLegend": false
+          "showLegend": true
         },
         "orientation": "horizontal",
         "showValue": "auto",
         "stacking": "none",
         "tooltip": {
           "mode": "single",
-          "sort": "none"
+          "sort": "desc"
         }
       },
       "pluginVersion": "11.1.0",
@@ -951,8 +957,10 @@
         "fullHighlight": false,
         "groupWidth": 0.7,
         "legend": {
-          "calcs": [],
-          "displayMode": "list",
+          "calcs": [
+            "sum"
+          ],
+          "displayMode": "table",
           "placement": "bottom",
           "showLegend": true
         },
@@ -961,7 +969,7 @@
         "stacking": "none",
         "tooltip": {
           "mode": "multi",
-          "sort": "none"
+          "sort": "desc"
         }
       },
       "pluginVersion": "11.1.0",
@@ -1081,18 +1089,21 @@
         "fullHighlight": false,
         "groupWidth": 0.7,
         "legend": {
-          "calcs": [],
-          "displayMode": "list",
+          "calcs": [
+            "sum"
+          ],
+          "displayMode": "table",
           "placement": "bottom",
           "showLegend": true
         },
         "orientation": "horizontal",
-        "showValue": "auto",
+        "showValue": "always",
         "stacking": "normal",
         "tooltip": {
           "mode": "multi",
-          "sort": "none"
-        }
+          "sort": "desc"
+        },
+        "xField": "metric"
       },
       "pluginVersion": "11.1.0",
       "targets": [
@@ -1102,19 +1113,50 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.issue_type AS issue_type, i.project_key AS team, COUNT(DISTINCT i.key) AS value FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.issue_type, i.project_key ORDER BY i.issue_type, i.project_key",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Bug\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Story\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Story' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Task\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Task' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Improvement\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Improvement' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "D"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Sub-task\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Sub-task' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "E"
         }
       ],
       "transformations": [
         {
-          "id": "groupingToMatrix",
-          "options": {
-            "columnField": "team",
-            "rowField": "issue_type",
-            "valueField": "value",
-            "emptyValue": "zero"
-          }
+          "id": "merge",
+          "options": {}
         }
       ],
       "title": "Issues by Type (by Team)",
@@ -1167,18 +1209,21 @@
         "fullHighlight": false,
         "groupWidth": 0.7,
         "legend": {
-          "calcs": [],
-          "displayMode": "list",
+          "calcs": [
+            "sum"
+          ],
+          "displayMode": "table",
           "placement": "bottom",
           "showLegend": true
         },
         "orientation": "horizontal",
-        "showValue": "auto",
+        "showValue": "always",
         "stacking": "normal",
         "tooltip": {
           "mode": "multi",
-          "sort": "none"
-        }
+          "sort": "desc"
+        },
+        "xField": "metric"
       },
       "pluginVersion": "11.1.0",
       "targets": [
@@ -1188,19 +1233,50 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.issue_type AS issue_type, i.project_key AS team, COUNT(DISTINCT i.key) AS value FROM issues i WHERE i.project_key IN ($project) AND i.resolved_at IS NULL AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.issue_type, i.project_key ORDER BY i.issue_type, i.project_key",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Bug\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.resolved_at IS NULL AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Story\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Story' AND i.resolved_at IS NULL AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Task\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Task' AND i.resolved_at IS NULL AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Improvement\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Improvement' AND i.resolved_at IS NULL AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "D"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Sub-task\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Sub-task' AND i.resolved_at IS NULL AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "E"
         }
       ],
       "transformations": [
         {
-          "id": "groupingToMatrix",
-          "options": {
-            "columnField": "team",
-            "rowField": "issue_type",
-            "valueField": "value",
-            "emptyValue": "zero"
-          }
+          "id": "merge",
+          "options": {}
         }
       ],
       "title": "Open Issues by Type (by Team)",
@@ -1263,8 +1339,10 @@
         "fullHighlight": false,
         "groupWidth": 0.7,
         "legend": {
-          "calcs": [],
-          "displayMode": "list",
+          "calcs": [
+            "sum"
+          ],
+          "displayMode": "table",
           "placement": "bottom",
           "showLegend": true
         },
@@ -1273,7 +1351,7 @@
         "stacking": "none",
         "tooltip": {
           "mode": "multi",
-          "sort": "none"
+          "sort": "desc"
         }
       },
       "pluginVersion": "11.1.0",
@@ -1347,7 +1425,83 @@
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Blocker"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "dark-red"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Critical"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "red"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "High"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "orange"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Medium"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "yellow"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Low"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "green"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
@@ -1362,18 +1516,21 @@
         "fullHighlight": false,
         "groupWidth": 0.7,
         "legend": {
-          "calcs": [],
-          "displayMode": "list",
+          "calcs": [
+            "sum"
+          ],
+          "displayMode": "table",
           "placement": "bottom",
           "showLegend": true
         },
         "orientation": "horizontal",
-        "showValue": "auto",
+        "showValue": "always",
         "stacking": "normal",
         "tooltip": {
           "mode": "multi",
-          "sort": "none"
-        }
+          "sort": "desc"
+        },
+        "xField": "metric"
       },
       "pluginVersion": "11.1.0",
       "targets": [
@@ -1383,19 +1540,50 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.priority AS priority, i.project_key AS team, COUNT(DISTINCT i.key) AS value FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.priority, i.project_key ORDER BY CASE i.priority WHEN 'Blocker' THEN 1 WHEN 'Critical' THEN 2 WHEN 'High' THEN 3 WHEN 'Medium' THEN 4 WHEN 'Low' THEN 5 ELSE 6 END, i.project_key",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Blocker\" FROM issues i WHERE i.project_key IN ($project) AND i.priority = 'Blocker' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Critical\" FROM issues i WHERE i.project_key IN ($project) AND i.priority = 'Critical' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"High\" FROM issues i WHERE i.project_key IN ($project) AND i.priority = 'High' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Medium\" FROM issues i WHERE i.project_key IN ($project) AND i.priority = 'Medium' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "D"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Low\" FROM issues i WHERE i.project_key IN ($project) AND i.priority = 'Low' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "E"
         }
       ],
       "transformations": [
         {
-          "id": "groupingToMatrix",
-          "options": {
-            "columnField": "team",
-            "rowField": "priority",
-            "valueField": "value",
-            "emptyValue": "zero"
-          }
+          "id": "merge",
+          "options": {}
         }
       ],
       "title": "Issues by Priority (by Team)",
@@ -1433,7 +1621,83 @@
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Blocker"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "dark-red"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Critical"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "red"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "High"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "orange"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Medium"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "yellow"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Low"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "green"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
@@ -1448,18 +1712,21 @@
         "fullHighlight": false,
         "groupWidth": 0.7,
         "legend": {
-          "calcs": [],
-          "displayMode": "list",
+          "calcs": [
+            "sum"
+          ],
+          "displayMode": "table",
           "placement": "bottom",
           "showLegend": true
         },
         "orientation": "horizontal",
-        "showValue": "auto",
+        "showValue": "always",
         "stacking": "normal",
         "tooltip": {
           "mode": "multi",
-          "sort": "none"
-        }
+          "sort": "desc"
+        },
+        "xField": "metric"
       },
       "pluginVersion": "11.1.0",
       "targets": [
@@ -1469,19 +1736,50 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.priority AS priority, i.project_key AS team, COUNT(DISTINCT i.key) AS value FROM issues i WHERE i.project_key IN ($project) AND i.resolved_at IS NULL AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.priority, i.project_key ORDER BY CASE i.priority WHEN 'Blocker' THEN 1 WHEN 'Critical' THEN 2 WHEN 'High' THEN 3 WHEN 'Medium' THEN 4 WHEN 'Low' THEN 5 ELSE 6 END, i.project_key",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Blocker\" FROM issues i WHERE i.project_key IN ($project) AND i.priority = 'Blocker' AND i.resolved_at IS NULL AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Critical\" FROM issues i WHERE i.project_key IN ($project) AND i.priority = 'Critical' AND i.resolved_at IS NULL AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"High\" FROM issues i WHERE i.project_key IN ($project) AND i.priority = 'High' AND i.resolved_at IS NULL AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Medium\" FROM issues i WHERE i.project_key IN ($project) AND i.priority = 'Medium' AND i.resolved_at IS NULL AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "D"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Low\" FROM issues i WHERE i.project_key IN ($project) AND i.priority = 'Low' AND i.resolved_at IS NULL AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "E"
         }
       ],
       "transformations": [
         {
-          "id": "groupingToMatrix",
-          "options": {
-            "columnField": "team",
-            "rowField": "priority",
-            "valueField": "value",
-            "emptyValue": "zero"
-          }
+          "id": "merge",
+          "options": {}
         }
       ],
       "title": "Open Issues by Priority (by Team)",
@@ -1519,7 +1817,83 @@
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Blocker"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "dark-red"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Critical"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "red"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "High"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "orange"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Medium"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "yellow"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Low"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "green"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
@@ -1534,18 +1908,21 @@
         "fullHighlight": false,
         "groupWidth": 0.7,
         "legend": {
-          "calcs": [],
-          "displayMode": "list",
+          "calcs": [
+            "sum"
+          ],
+          "displayMode": "table",
           "placement": "bottom",
           "showLegend": true
         },
         "orientation": "horizontal",
-        "showValue": "auto",
+        "showValue": "always",
         "stacking": "normal",
         "tooltip": {
           "mode": "multi",
-          "sort": "none"
-        }
+          "sort": "desc"
+        },
+        "xField": "metric"
       },
       "pluginVersion": "11.1.0",
       "targets": [
@@ -1555,19 +1932,50 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.priority AS priority, i.project_key AS team, COUNT(DISTINCT i.key) AS value FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.priority, i.project_key ORDER BY CASE i.priority WHEN 'Blocker' THEN 1 WHEN 'Critical' THEN 2 WHEN 'High' THEN 3 WHEN 'Medium' THEN 4 WHEN 'Low' THEN 5 ELSE 6 END, i.project_key",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Blocker\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.priority = 'Blocker' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Critical\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.priority = 'Critical' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"High\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.priority = 'High' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Medium\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.priority = 'Medium' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "D"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Low\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.priority = 'Low' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "E"
         }
       ],
       "transformations": [
         {
-          "id": "groupingToMatrix",
-          "options": {
-            "columnField": "team",
-            "rowField": "priority",
-            "valueField": "value",
-            "emptyValue": "zero"
-          }
+          "id": "merge",
+          "options": {}
         }
       ],
       "title": "Bugs by Priority (by Team)",
@@ -1633,17 +2041,19 @@
         "fullHighlight": false,
         "groupWidth": 0.7,
         "legend": {
-          "calcs": [],
-          "displayMode": "list",
+          "calcs": [
+            "sum"
+          ],
+          "displayMode": "table",
           "placement": "bottom",
           "showLegend": true
         },
         "orientation": "horizontal",
-        "showValue": "auto",
+        "showValue": "always",
         "stacking": "normal",
         "tooltip": {
           "mode": "multi",
-          "sort": "none"
+          "sort": "desc"
         }
       },
       "pluginVersion": "11.1.0",
@@ -1720,17 +2130,19 @@
         "fullHighlight": false,
         "groupWidth": 0.7,
         "legend": {
-          "calcs": [],
-          "displayMode": "list",
+          "calcs": [
+            "sum"
+          ],
+          "displayMode": "table",
           "placement": "bottom",
-          "showLegend": false
+          "showLegend": true
         },
         "orientation": "horizontal",
-        "showValue": "auto",
+        "showValue": "always",
         "stacking": "normal",
         "tooltip": {
           "mode": "single",
-          "sort": "none"
+          "sort": "desc"
         }
       },
       "pluginVersion": "11.1.0",
@@ -1819,17 +2231,19 @@
         "fullHighlight": false,
         "groupWidth": 0.7,
         "legend": {
-          "calcs": [],
-          "displayMode": "list",
+          "calcs": [
+            "sum"
+          ],
+          "displayMode": "table",
           "placement": "bottom",
-          "showLegend": false
+          "showLegend": true
         },
         "orientation": "horizontal",
-        "showValue": "auto",
+        "showValue": "always",
         "stacking": "normal",
         "tooltip": {
           "mode": "single",
-          "sort": "none"
+          "sort": "desc"
         }
       },
       "pluginVersion": "11.1.0",
@@ -1906,17 +2320,19 @@
         "fullHighlight": false,
         "groupWidth": 0.7,
         "legend": {
-          "calcs": [],
-          "displayMode": "list",
+          "calcs": [
+            "sum"
+          ],
+          "displayMode": "table",
           "placement": "bottom",
-          "showLegend": false
+          "showLegend": true
         },
         "orientation": "horizontal",
-        "showValue": "auto",
+        "showValue": "always",
         "stacking": "normal",
         "tooltip": {
           "mode": "single",
-          "sort": "none"
+          "sort": "desc"
         }
       },
       "pluginVersion": "11.1.0",
@@ -1993,17 +2409,19 @@
         "fullHighlight": false,
         "groupWidth": 0.7,
         "legend": {
-          "calcs": [],
-          "displayMode": "list",
+          "calcs": [
+            "sum"
+          ],
+          "displayMode": "table",
           "placement": "bottom",
-          "showLegend": false
+          "showLegend": true
         },
         "orientation": "horizontal",
-        "showValue": "auto",
+        "showValue": "always",
         "stacking": "normal",
         "tooltip": {
           "mode": "single",
-          "sort": "none"
+          "sort": "desc"
         }
       },
       "pluginVersion": "11.1.0",
