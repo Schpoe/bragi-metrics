@@ -1108,12 +1108,12 @@
       ],
       "transformations": [
         {
-          "id": "partitionByValues",
+          "id": "groupingToMatrix",
           "options": {
-            "fields": [
-              "team"
-            ],
-            "keepFields": false
+            "columnField": "team",
+            "rowField": "issue_type",
+            "valueField": "value",
+            "emptyValue": "zero"
           }
         }
       ],
@@ -1194,12 +1194,12 @@
       ],
       "transformations": [
         {
-          "id": "partitionByValues",
+          "id": "groupingToMatrix",
           "options": {
-            "fields": [
-              "team"
-            ],
-            "keepFields": false
+            "columnField": "team",
+            "rowField": "issue_type",
+            "valueField": "value",
+            "emptyValue": "zero"
           }
         }
       ],
@@ -1290,12 +1290,12 @@
       ],
       "transformations": [
         {
-          "id": "partitionByValues",
+          "id": "groupingToMatrix",
           "options": {
-            "fields": [
-              "team"
-            ],
-            "keepFields": false
+            "columnField": "team",
+            "rowField": "issue_type",
+            "valueField": "value",
+            "emptyValue": "zero"
           }
         }
       ],
@@ -1389,12 +1389,12 @@
       ],
       "transformations": [
         {
-          "id": "partitionByValues",
+          "id": "groupingToMatrix",
           "options": {
-            "fields": [
-              "team"
-            ],
-            "keepFields": false
+            "columnField": "team",
+            "rowField": "priority",
+            "valueField": "value",
+            "emptyValue": "zero"
           }
         }
       ],
@@ -1475,12 +1475,12 @@
       ],
       "transformations": [
         {
-          "id": "partitionByValues",
+          "id": "groupingToMatrix",
           "options": {
-            "fields": [
-              "team"
-            ],
-            "keepFields": false
+            "columnField": "team",
+            "rowField": "priority",
+            "valueField": "value",
+            "emptyValue": "zero"
           }
         }
       ],
@@ -1561,12 +1561,12 @@
       ],
       "transformations": [
         {
-          "id": "partitionByValues",
+          "id": "groupingToMatrix",
           "options": {
-            "fields": [
-              "team"
-            ],
-            "keepFields": false
+            "columnField": "team",
+            "rowField": "priority",
+            "valueField": "value",
+            "emptyValue": "zero"
           }
         }
       ],
@@ -1660,12 +1660,12 @@
       ],
       "transformations": [
         {
-          "id": "partitionByValues",
+          "id": "groupingToMatrix",
           "options": {
-            "fields": [
-              "team"
-            ],
-            "keepFields": false
+            "columnField": "team",
+            "rowField": "status",
+            "valueField": "value",
+            "emptyValue": "zero"
           }
         }
       ],
@@ -1727,15 +1727,11 @@
         },
         "orientation": "horizontal",
         "showValue": "auto",
-        "stacking": {
-          "mode": "normal",
-          "group": "A"
-        },
+        "stacking": "normal",
         "tooltip": {
           "mode": "single",
           "sort": "none"
-        },
-        "xField": "status"
+        }
       },
       "pluginVersion": "11.1.0",
       "targets": [
@@ -1753,12 +1749,12 @@
       "type": "barchart",
       "transformations": [
         {
-          "id": "partitionByValues",
+          "id": "groupingToMatrix",
           "options": {
-            "fields": [
-              "team"
-            ],
-            "keepFields": false
+            "columnField": "team",
+            "rowField": "status",
+            "valueField": "value",
+            "emptyValue": "zero"
           }
         }
       ]
@@ -1830,15 +1826,11 @@
         },
         "orientation": "horizontal",
         "showValue": "auto",
-        "stacking": {
-          "mode": "normal",
-          "group": "A"
-        },
+        "stacking": "normal",
         "tooltip": {
           "mode": "single",
           "sort": "none"
-        },
-        "xField": "component"
+        }
       },
       "pluginVersion": "11.1.0",
       "targets": [
@@ -1856,12 +1848,12 @@
       "type": "barchart",
       "transformations": [
         {
-          "id": "partitionByValues",
+          "id": "groupingToMatrix",
           "options": {
-            "fields": [
-              "team"
-            ],
-            "keepFields": false
+            "columnField": "team",
+            "rowField": "component",
+            "valueField": "value",
+            "emptyValue": "zero"
           }
         }
       ]
@@ -1921,15 +1913,11 @@
         },
         "orientation": "horizontal",
         "showValue": "auto",
-        "stacking": {
-          "mode": "normal",
-          "group": "A"
-        },
+        "stacking": "normal",
         "tooltip": {
           "mode": "single",
           "sort": "none"
-        },
-        "xField": "component"
+        }
       },
       "pluginVersion": "11.1.0",
       "targets": [
@@ -1947,12 +1935,12 @@
       "type": "barchart",
       "transformations": [
         {
-          "id": "partitionByValues",
+          "id": "groupingToMatrix",
           "options": {
-            "fields": [
-              "team"
-            ],
-            "keepFields": false
+            "columnField": "team",
+            "rowField": "component",
+            "valueField": "value",
+            "emptyValue": "zero"
           }
         }
       ]
@@ -2012,15 +2000,11 @@
         },
         "orientation": "horizontal",
         "showValue": "auto",
-        "stacking": {
-          "mode": "normal",
-          "group": "A"
-        },
+        "stacking": "normal",
         "tooltip": {
           "mode": "single",
           "sort": "none"
-        },
-        "xField": "component"
+        }
       },
       "pluginVersion": "11.1.0",
       "targets": [
@@ -2038,12 +2022,12 @@
       "type": "barchart",
       "transformations": [
         {
-          "id": "partitionByValues",
+          "id": "groupingToMatrix",
           "options": {
-            "fields": [
-              "team"
-            ],
-            "keepFields": false
+            "columnField": "team",
+            "rowField": "component",
+            "valueField": "value",
+            "emptyValue": "zero"
           }
         }
       ]
