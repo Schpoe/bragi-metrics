@@ -161,7 +161,7 @@
         {
           "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
           "format": "table",
-          "rawSql": "SELECT COUNT(DISTINCT i.key) AS value FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE release_name = '$release' AND removed_at IS NULL)",
+          "rawSql": "SELECT COUNT(DISTINCT i.key) AS value FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL)",
           "refId": "A"
         }
       ],
@@ -199,7 +199,7 @@
         {
           "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
           "format": "table",
-          "rawSql": "SELECT COUNT(DISTINCT i.key) AS value FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE release_name = '$release' AND removed_at IS NULL)",
+          "rawSql": "SELECT COUNT(DISTINCT i.key) AS value FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL)",
           "refId": "A"
         }
       ],
@@ -241,7 +241,7 @@
         {
           "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
           "format": "table",
-          "rawSql": "SELECT ROUND(AVG(EXTRACT(DAY FROM (i.resolved_at - i.created_at)))::numeric, 1) AS value FROM issues i WHERE i.project_key IN ($project) AND i.resolved_at IS NOT NULL AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE release_name = '$release' AND removed_at IS NULL)",
+          "rawSql": "SELECT ROUND(AVG(EXTRACT(DAY FROM (i.resolved_at - i.created_at)))::numeric, 1) AS value FROM issues i WHERE i.project_key IN ($project) AND i.resolved_at IS NOT NULL AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL)",
           "refId": "A"
         }
       ],
@@ -283,7 +283,7 @@
         {
           "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
           "format": "table",
-          "rawSql": "SELECT ROUND(100.0 * COUNT(*) FILTER (WHERE i.resolved_at IS NOT NULL) / NULLIF(COUNT(*), 0), 1) AS value FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE release_name = '$release' AND removed_at IS NULL)",
+          "rawSql": "SELECT ROUND(100.0 * COUNT(*) FILTER (WHERE i.resolved_at IS NOT NULL) / NULLIF(COUNT(*), 0), 1) AS value FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL)",
           "refId": "A"
         }
       ],
@@ -321,7 +321,7 @@
         {
           "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
           "format": "table",
-          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS value FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE release_name = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY value DESC",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS value FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY value DESC",
           "refId": "A"
         }
       ],
@@ -359,7 +359,7 @@
         {
           "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
           "format": "table",
-          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS value FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE release_name = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY value DESC",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS value FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY value DESC",
           "refId": "A"
         }
       ],
@@ -398,7 +398,7 @@
         {
           "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
           "format": "table",
-          "rawSql": "SELECT i.project_key AS metric, ROUND(AVG(EXTRACT(DAY FROM (i.resolved_at - i.created_at)))::numeric, 1) AS value FROM issues i WHERE i.project_key IN ($project) AND i.resolved_at IS NOT NULL AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE release_name = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY value DESC",
+          "rawSql": "SELECT i.project_key AS metric, ROUND(AVG(EXTRACT(DAY FROM (i.resolved_at - i.created_at)))::numeric, 1) AS value FROM issues i WHERE i.project_key IN ($project) AND i.resolved_at IS NOT NULL AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY value DESC",
           "refId": "A"
         }
       ],
@@ -436,7 +436,7 @@
         {
           "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
           "format": "table",
-          "rawSql": "SELECT unnest(i.components) AS metric, COUNT(DISTINCT i.key) AS value FROM issues i WHERE i.project_key IN ($project) AND i.components IS NOT NULL AND array_length(i.components, 1) > 0 AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE release_name = '$release' AND removed_at IS NULL) GROUP BY metric ORDER BY value DESC LIMIT 10",
+          "rawSql": "SELECT unnest(i.components) AS metric, COUNT(DISTINCT i.key) AS value FROM issues i WHERE i.project_key IN ($project) AND i.components IS NOT NULL AND array_length(i.components, 1) > 0 AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY metric ORDER BY value DESC LIMIT 10",
           "refId": "A"
         }
       ],
@@ -474,7 +474,7 @@
         {
           "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
           "format": "table",
-          "rawSql": "SELECT unnest(i.components) AS metric, COUNT(DISTINCT i.key) AS value FROM issues i WHERE i.project_key IN ($project) AND i.resolved_at IS NULL AND i.components IS NOT NULL AND array_length(i.components, 1) > 0 AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE release_name = '$release' AND removed_at IS NULL) GROUP BY metric ORDER BY value DESC LIMIT 10",
+          "rawSql": "SELECT unnest(i.components) AS metric, COUNT(DISTINCT i.key) AS value FROM issues i WHERE i.project_key IN ($project) AND i.resolved_at IS NULL AND i.components IS NOT NULL AND array_length(i.components, 1) > 0 AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY metric ORDER BY value DESC LIMIT 10",
           "refId": "A"
         }
       ],
@@ -592,7 +592,7 @@
         {
           "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
           "format": "table",
-          "rawSql": "SELECT i.key AS \"Key\", i.summary AS \"Summary\", i.issue_type AS \"Type\", i.project_key AS \"Team\", COALESCE(array_to_string(i.components, ', '), '—') AS \"Component\", i.priority AS \"Priority\", i.status AS \"Status\", COALESCE(i.assignee, 'Unassigned') AS \"Assignee\", TO_CHAR(i.created_at, 'YYYY-MM-DD') AS \"Created\", CASE WHEN i.resolved_at IS NOT NULL THEN TO_CHAR(i.resolved_at, 'YYYY-MM-DD') ELSE '—' END AS \"Resolved\", CASE WHEN i.resolved_at IS NOT NULL THEN EXTRACT(DAY FROM (i.resolved_at - i.created_at))::int ELSE NULL END AS \"Days to Fix\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE release_name = '$release' AND removed_at IS NULL) ORDER BY i.created_at DESC",
+          "rawSql": "SELECT i.key AS \"Key\", i.summary AS \"Summary\", i.issue_type AS \"Type\", i.project_key AS \"Team\", COALESCE(array_to_string(i.components, ', '), '—') AS \"Component\", i.priority AS \"Priority\", i.status AS \"Status\", COALESCE(i.assignee, 'Unassigned') AS \"Assignee\", TO_CHAR(i.created_at, 'YYYY-MM-DD') AS \"Created\", CASE WHEN i.resolved_at IS NOT NULL THEN TO_CHAR(i.resolved_at, 'YYYY-MM-DD') ELSE '—' END AS \"Resolved\", CASE WHEN i.resolved_at IS NOT NULL THEN EXTRACT(DAY FROM (i.resolved_at - i.created_at))::int ELSE NULL END AS \"Days to Fix\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) ORDER BY i.created_at DESC",
           "refId": "A"
         }
       ],
