@@ -1,0 +1,603 @@
+{
+  "id": null,
+  "uid": "jira-release-overview",
+  "title": "Release Overview",
+  "tags": ["jira", "release", "quality"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "1h",
+  "time": { "from": "now-6M", "to": "now" },
+  "timepicker": {},
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "liveNow": null,
+  "links": [
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": false,
+      "targetBlank": false,
+      "title": "Quality & Bugs",
+      "type": "link",
+      "url": "/d/jira-quality-bugs"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": false,
+      "targetBlank": false,
+      "title": "Team Overview",
+      "type": "link",
+      "url": "/d/jira-team-overview"
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "https://bragi.atlassian.net",
+          "value": "https://bragi.atlassian.net"
+        },
+        "datasource": {
+          "type": "postgres",
+          "uid": "jira-metrics-pg"
+        },
+        "definition": "",
+        "hide": 2,
+        "includeAll": false,
+        "label": "Jira URL",
+        "multi": false,
+        "name": "jira_url",
+        "options": [],
+        "query": "SELECT value FROM app_settings WHERE key = 'jira_url'",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": ["All"],
+          "value": ["$__all"]
+        },
+        "datasource": {
+          "type": "postgres",
+          "uid": "jira-metrics-pg"
+        },
+        "definition": "",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Team / Project",
+        "multi": true,
+        "name": "project",
+        "options": [],
+        "query": "SELECT key FROM projects ORDER BY key",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "",
+          "value": ""
+        },
+        "datasource": {
+          "type": "postgres",
+          "uid": "jira-metrics-pg"
+        },
+        "definition": "",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Release",
+        "multi": false,
+        "name": "release",
+        "options": [],
+        "query": "SELECT name FROM releases WHERE (archived = FALSE OR archived IS NULL) ORDER BY released DESC, release_date DESC LIMIT 20",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": "no",
+          "value": "no"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "label": "Include Archived",
+        "multi": false,
+        "name": "include_archived",
+        "options": [
+          { "selected": true,  "text": "no",  "value": "no" },
+          { "selected": false, "text": "yes", "value": "yes" }
+        ],
+        "query": "no : no,yes : yes",
+        "skipUrlSync": false,
+        "type": "custom"
+      }
+    ]
+  },
+  "panels": [
+    {
+      "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
+      "description": "Total issues assigned to this release (including resolved and unresolved).",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "blue", "value": null }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "id": 1,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "pluginVersion": "11.1.0",
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
+          "format": "table",
+          "rawSql": "SELECT COUNT(DISTINCT i.key) AS value FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE release_name = '$release' AND removed_at IS NULL)",
+          "refId": "A"
+        }
+      ],
+      "title": "Total Issues in Release",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
+      "description": "Count of bugs assigned to this release.",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "id": 2,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "pluginVersion": "11.1.0",
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
+          "format": "table",
+          "rawSql": "SELECT COUNT(DISTINCT i.key) AS value FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE release_name = '$release' AND removed_at IS NULL)",
+          "refId": "A"
+        }
+      ],
+      "title": "Bugs in Release",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
+      "description": "Average days from creation to resolution for resolved issues in this release.",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "decimals": 1,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 10 },
+              { "color": "red", "value": 20 }
+            ]
+          },
+          "unit": "d"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "id": 3,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "pluginVersion": "11.1.0",
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
+          "format": "table",
+          "rawSql": "SELECT ROUND(AVG(EXTRACT(DAY FROM (i.resolved_at - i.created_at)))::numeric, 1) AS value FROM issues i WHERE i.project_key IN ($project) AND i.resolved_at IS NOT NULL AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE release_name = '$release' AND removed_at IS NULL)",
+          "refId": "A"
+        }
+      ],
+      "title": "Avg Days to Resolution",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
+      "description": "Percentage of issues in release that have been resolved.",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "decimals": 1,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 50 },
+              { "color": "green", "value": 80 }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "id": 4,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "pluginVersion": "11.1.0",
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
+          "format": "table",
+          "rawSql": "SELECT ROUND(100.0 * COUNT(*) FILTER (WHERE i.resolved_at IS NOT NULL) / NULLIF(COUNT(*), 0), 1) AS value FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE release_name = '$release' AND removed_at IS NULL)",
+          "refId": "A"
+        }
+      ],
+      "title": "% Issues Resolved",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
+      "description": "Count of issues per team in this release. Shows team contribution to release.",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": { "type": "auto" },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 4 },
+      "id": 5,
+      "options": {
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "series": []
+      },
+      "pluginVersion": "11.1.0",
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
+          "format": "table",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS value FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE release_name = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY value DESC",
+          "refId": "A"
+        }
+      ],
+      "title": "Issues by Team",
+      "type": "barchart"
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
+      "description": "Count of bugs per team. Highlights team quality issues.",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": { "type": "auto" },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 4 },
+      "id": 6,
+      "options": {
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "series": []
+      },
+      "pluginVersion": "11.1.0",
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
+          "format": "table",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS value FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE release_name = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY value DESC",
+          "refId": "A"
+        }
+      ],
+      "title": "Bugs by Team",
+      "type": "barchart"
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
+      "description": "Average days to fix issues per team. Lower is better (faster team resolution).",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": { "type": "auto" },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null }
+            ]
+          },
+          "unit": "d"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 4 },
+      "id": 7,
+      "options": {
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "series": []
+      },
+      "pluginVersion": "11.1.0",
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
+          "format": "table",
+          "rawSql": "SELECT i.project_key AS metric, ROUND(AVG(EXTRACT(DAY FROM (i.resolved_at - i.created_at)))::numeric, 1) AS value FROM issues i WHERE i.project_key IN ($project) AND i.resolved_at IS NOT NULL AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE release_name = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY value DESC",
+          "refId": "A"
+        }
+      ],
+      "title": "Avg Days to Fix by Team",
+      "type": "barchart"
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
+      "description": "Distribution of issues across components. Shows problem hotspots.",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": { "type": "auto" },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+      "id": 8,
+      "options": {
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "series": []
+      },
+      "pluginVersion": "11.1.0",
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
+          "format": "table",
+          "rawSql": "SELECT unnest(i.components) AS metric, COUNT(DISTINCT i.key) AS value FROM issues i WHERE i.project_key IN ($project) AND i.components IS NOT NULL AND array_length(i.components, 1) > 0 AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE release_name = '$release' AND removed_at IS NULL) GROUP BY metric ORDER BY value DESC LIMIT 10",
+          "refId": "A"
+        }
+      ],
+      "title": "Issues by Component (Top 10)",
+      "type": "barchart"
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
+      "description": "Unresolved issues by component. Highlights remaining problem areas.",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": { "type": "auto" },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "orange", "value": null }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+      "id": 9,
+      "options": {
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "series": []
+      },
+      "pluginVersion": "11.1.0",
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
+          "format": "table",
+          "rawSql": "SELECT unnest(i.components) AS metric, COUNT(DISTINCT i.key) AS value FROM issues i WHERE i.project_key IN ($project) AND i.resolved_at IS NULL AND i.components IS NOT NULL AND array_length(i.components, 1) > 0 AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE release_name = '$release' AND removed_at IS NULL) GROUP BY metric ORDER BY value DESC LIMIT 10",
+          "refId": "A"
+        }
+      ],
+      "title": "Open Issues by Component (Top 10)",
+      "type": "barchart"
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
+      "description": "All issues in release. Sortable by any column.",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "left",
+            "cellOptions": { "type": "auto" },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "Key" },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "targetBlank": true,
+                    "title": "Open in Jira",
+                    "url": "${jira_url}/browse/${__value.text}"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Type" },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "Bug": { "color": "red", "index": 0, "text": "Bug" },
+                      "Story": { "color": "green", "index": 1, "text": "Story" },
+                      "Task": { "color": "blue", "index": 2, "text": "Task" },
+                      "Improvement": { "color": "yellow", "index": 3, "text": "Improvement" }
+                    }
+                  }
+                ]
+              },
+              { "id": "custom.cellOptions", "value": { "type": "color-background" } }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Status" },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "Done": { "color": "green", "index": 0 },
+                      "In Progress": { "color": "yellow", "index": 1 },
+                      "Blocked": { "color": "red", "index": 2 },
+                      "Open": { "color": "text", "index": 3 },
+                      "Backlog": { "color": "text", "index": 4 }
+                    }
+                  }
+                ]
+              },
+              { "id": "custom.cellOptions", "value": { "type": "color-background" } }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Priority" },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "Blocker": { "color": "dark-red", "index": 0, "text": "Blocker" },
+                      "Critical": { "color": "red", "index": 1, "text": "Critical" },
+                      "High": { "color": "orange", "index": 2, "text": "High" },
+                      "Medium": { "color": "yellow", "index": 3, "text": "Medium" },
+                      "Low": { "color": "green", "index": 4, "text": "Low" }
+                    }
+                  }
+                ]
+              },
+              { "id": "custom.cellOptions", "value": { "type": "color-background" } }
+            ]
+          }
+        ]
+      },
+      "gridPos": { "h": 16, "w": 24, "x": 0, "y": 20 },
+      "id": 10,
+      "options": {
+        "cellHeight": "sm",
+        "footer": { "countRows": false, "fields": "", "reducer": ["sum"], "show": false },
+        "showHeader": true,
+        "sortBy": [{ "desc": true, "displayName": "Created" }]
+      },
+      "pluginVersion": "11.1.0",
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
+          "format": "table",
+          "rawSql": "SELECT i.key AS \"Key\", i.summary AS \"Summary\", i.issue_type AS \"Type\", i.project_key AS \"Team\", COALESCE(array_to_string(i.components, ', '), '—') AS \"Component\", i.priority AS \"Priority\", i.status AS \"Status\", COALESCE(i.assignee, 'Unassigned') AS \"Assignee\", TO_CHAR(i.created_at, 'YYYY-MM-DD') AS \"Created\", CASE WHEN i.resolved_at IS NOT NULL THEN TO_CHAR(i.resolved_at, 'YYYY-MM-DD') ELSE '—' END AS \"Resolved\", CASE WHEN i.resolved_at IS NOT NULL THEN EXTRACT(DAY FROM (i.resolved_at - i.created_at))::int ELSE NULL END AS \"Days to Fix\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE release_name = '$release' AND removed_at IS NULL) ORDER BY i.created_at DESC",
+          "refId": "A"
+        }
+      ],
+      "title": "All Issues in Release",
+      "type": "table"
+    }
+  ]
+}
