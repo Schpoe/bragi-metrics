@@ -175,7 +175,7 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 6,
+        "w": 5,
         "x": 0,
         "y": 0
       },
@@ -235,8 +235,8 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 6,
-        "x": 6,
+        "w": 5,
+        "x": 5,
         "y": 0
       },
       "id": 2,
@@ -305,8 +305,8 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 6,
-        "x": 12,
+        "w": 5,
+        "x": 10,
         "y": 0
       },
       "id": 3,
@@ -375,8 +375,8 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 6,
-        "x": 18,
+        "w": 5,
+        "x": 15,
         "y": 0
       },
       "id": 4,
@@ -1370,8 +1370,8 @@
         {
           "id": "groupingToMatrix",
           "options": {
-            "columnField": "team",
-            "rowField": "issue_type",
+            "columnField": "issue_type",
+            "rowField": "team",
             "valueField": "value",
             "emptyValue": "zero"
           }
@@ -2072,8 +2072,8 @@
         {
           "id": "groupingToMatrix",
           "options": {
-            "columnField": "team",
-            "rowField": "status",
+            "columnField": "status",
+            "rowField": "team",
             "valueField": "value",
             "emptyValue": "zero"
           }
@@ -2163,8 +2163,8 @@
         {
           "id": "groupingToMatrix",
           "options": {
-            "columnField": "team",
-            "rowField": "status",
+            "columnField": "status",
+            "rowField": "team",
             "valueField": "value",
             "emptyValue": "zero"
           }
@@ -2264,8 +2264,8 @@
         {
           "id": "groupingToMatrix",
           "options": {
-            "columnField": "team",
-            "rowField": "component",
+            "columnField": "component",
+            "rowField": "team",
             "valueField": "value",
             "emptyValue": "zero"
           }
@@ -2353,8 +2353,8 @@
         {
           "id": "groupingToMatrix",
           "options": {
-            "columnField": "team",
-            "rowField": "component",
+            "columnField": "component",
+            "rowField": "team",
             "valueField": "value",
             "emptyValue": "zero"
           }
@@ -2442,8 +2442,8 @@
         {
           "id": "groupingToMatrix",
           "options": {
-            "columnField": "team",
-            "rowField": "component",
+            "columnField": "component",
+            "rowField": "team",
             "valueField": "value",
             "emptyValue": "zero"
           }
@@ -2913,6 +2913,76 @@
       ],
       "title": "All Issues in Release",
       "type": "table"
+    },
+    {
+      "id": 31,
+      "title": "Data Age",
+      "description": "Time since the most recent issue sync for this release.",
+      "type": "stat",
+      "datasource": {
+        "type": "postgres",
+        "uid": "jira-metrics-pg"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 20,
+        "y": 0
+      },
+      "pluginVersion": "11.1.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawSql": "SELECT EXTRACT(EPOCH FROM (NOW() - MAX(i.updated_at))) / 3600.0 AS value FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL)",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 12
+              },
+              {
+                "color": "red",
+                "value": 24
+              }
+            ]
+          },
+          "unit": "h",
+          "decimals": 1,
+          "mappings": []
+        },
+        "overrides": []
+      }
     }
   ]
 }

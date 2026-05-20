@@ -24,6 +24,45 @@ Jira Cloud → jira-sync (Python) → PostgreSQL → Grafana
 | PO KPIs | Planning accuracy, scope change %, blockers, velocity, release bug quality |
 | PROD Alignment | Epic progress against PROD items, customer-project tracking |
 | Quality & Bugs | Bug counts by priority, reopen rates, QASE coverage, release bug history |
+| Release Overview | Per-release health across one or more projects: total issues, bugs, resolution %, avg days to fix, data age. Breakdowns by team × type, team × priority (severity-coloured), team × status, team × component, assignee. All charts show per-segment value labels and per-series totals in the legend. |
+
+### Release Overview — panels
+
+| Section | Panel | What it shows |
+| --- | --- | --- |
+| Header stats | Total Issues in Release | Count of all issues assigned to the selected release |
+| | Bugs in Release | Count of issues with type = Bug |
+| | Avg Days to Resolution | Average calendar days from created to resolved |
+| | % Issues Resolved | Percentage of issues with a resolved date |
+| | Data Age | Hours since the most recent issue update in this release (green < 12 h, yellow < 24 h, red ≥ 24 h) |
+| By Team | Issues by Team (by Type) | Stacked bar — team on x-axis, series = issue type (Bug / Story / Task / Improvement / Sub-task) |
+| | Bugs by Team (by Severity) | Stacked bar — team on x-axis, series = priority with severity colours (Blocker=dark-red → Low=green) |
+| | Resolution % by Team | Bar — resolved % per team |
+| | Avg Days to Fix by Team (by Priority) | Grouped bar — team on x-axis, series = priority, severity colours |
+| By Issue Type | Issues by Type (by Team) | Stacked bar — team on x-axis, series = issue type |
+| | Open Issues by Type (by Team) | Same, unresolved only |
+| | Avg Days to Fix by Type (by Team) | Grouped bar — team on x-axis, series = issue type (dynamic) |
+| By Priority | Issues by Priority (by Team) | Stacked bar — team on x-axis, series = priority, severity colours |
+| | Open Issues by Priority (by Team) | Same, unresolved only |
+| | Bugs by Priority (by Team) | Same, bugs only |
+| By Status | Issues by Status (by Team) | Stacked bar — team on x-axis, series = Jira status (dynamic) |
+| | Bugs by Status (by Team) | Same, bugs only |
+| By Component | Issues by Component (by Team) | Stacked bar — team on x-axis, series = component (dynamic, all components) |
+| | Open Issues by Component (by Team) | Same, unresolved only |
+| | Bugs by Component (by Team) | Same, bugs only |
+| By Assignee | Open Issues by Assignee | Horizontal bar — all open issues per assignee |
+| | Total Issues by Assignee | Horizontal bar — all issues per assignee |
+| | Open Bugs by Assignee | Horizontal bar — open bugs per assignee |
+| Detail | All Issues in Release | Full issue table with key, type, priority, status, assignee, components, resolution date |
+
+#### Variables
+
+| Variable | Description |
+| --- | --- |
+| `project` | Multi-select Jira project keys; all charts filter to selected projects |
+| `release` | Fix-version / release name; all charts filter via `issue_fix_version_history` |
+
+**Data source:** `jira-metrics-pg` (PostgreSQL). Queries use `issue_fix_version_history` (not `issues.fix_versions`) so a release stays visible even after an issue's fix-version is later changed.
 
 📖 See [docs/metrics-reference.md](docs/metrics-reference.md) for a full explanation of how every metric is calculated.
 
