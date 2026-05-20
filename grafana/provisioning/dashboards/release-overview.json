@@ -2254,11 +2254,11 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT c.component AS component, i.project_key AS team, COUNT(DISTINCT i.key) AS value FROM issues i, unnest(i.components) AS c(component) WHERE i.project_key IN ($project) AND i.components IS NOT NULL AND array_length(i.components, 1) > 0 AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY c.component, i.project_key ORDER BY SUM(COUNT(DISTINCT i.key)) OVER (PARTITION BY c.component) DESC, c.component, i.project_key LIMIT 100",
+          "rawSql": "SELECT c.component AS component, i.project_key AS team, COUNT(DISTINCT i.key) AS value FROM issues i, unnest(i.components) AS c(component) WHERE i.project_key IN ($project) AND i.components IS NOT NULL AND array_length(i.components, 1) > 0 AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY c.component, i.project_key ORDER BY SUM(COUNT(DISTINCT i.key)) OVER (PARTITION BY c.component) DESC, c.component, i.project_key",
           "refId": "A"
         }
       ],
-      "title": "Issues by Component (Top 10, by Team)",
+      "title": "Issues by Component (by Team)",
       "type": "barchart",
       "transformations": [
         {
@@ -2343,11 +2343,11 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT c.component AS component, i.project_key AS team, COUNT(DISTINCT i.key) AS value FROM issues i, unnest(i.components) AS c(component) WHERE i.project_key IN ($project) AND i.resolved_at IS NULL AND i.components IS NOT NULL AND array_length(i.components, 1) > 0 AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY c.component, i.project_key ORDER BY SUM(COUNT(DISTINCT i.key)) OVER (PARTITION BY c.component) DESC, c.component, i.project_key LIMIT 100",
+          "rawSql": "SELECT c.component AS component, i.project_key AS team, COUNT(DISTINCT i.key) AS value FROM issues i, unnest(i.components) AS c(component) WHERE i.project_key IN ($project) AND i.resolved_at IS NULL AND i.components IS NOT NULL AND array_length(i.components, 1) > 0 AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY c.component, i.project_key ORDER BY SUM(COUNT(DISTINCT i.key)) OVER (PARTITION BY c.component) DESC, c.component, i.project_key",
           "refId": "A"
         }
       ],
-      "title": "Open Issues by Component (Top 10, by Team)",
+      "title": "Open Issues by Component (by Team)",
       "type": "barchart",
       "transformations": [
         {
@@ -2432,11 +2432,11 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT c.component AS component, i.project_key AS team, COUNT(DISTINCT i.key) AS value FROM issues i, unnest(i.components) AS c(component) WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.components IS NOT NULL AND array_length(i.components, 1) > 0 AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY c.component, i.project_key ORDER BY SUM(COUNT(DISTINCT i.key)) OVER (PARTITION BY c.component) DESC, c.component, i.project_key LIMIT 100",
+          "rawSql": "SELECT c.component AS component, i.project_key AS team, COUNT(DISTINCT i.key) AS value FROM issues i, unnest(i.components) AS c(component) WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.components IS NOT NULL AND array_length(i.components, 1) > 0 AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY c.component, i.project_key ORDER BY SUM(COUNT(DISTINCT i.key)) OVER (PARTITION BY c.component) DESC, c.component, i.project_key",
           "refId": "A"
         }
       ],
-      "title": "Bugs by Component (Top 10, by Team)",
+      "title": "Bugs by Component (by Team)",
       "type": "barchart",
       "transformations": [
         {
@@ -2532,11 +2532,11 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT COALESCE(i.assignee, 'Unassigned') AS metric, COUNT(DISTINCT i.key) AS value FROM issues i WHERE i.project_key IN ($project) AND i.resolved_at IS NULL AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.assignee ORDER BY value DESC LIMIT 10",
+          "rawSql": "SELECT COALESCE(i.assignee, 'Unassigned') AS metric, COUNT(DISTINCT i.key) AS value FROM issues i WHERE i.project_key IN ($project) AND i.resolved_at IS NULL AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.assignee ORDER BY value DESC",
           "refId": "A"
         }
       ],
-      "title": "Open Issues by Assignee (Top 10)",
+      "title": "Open Issues by Assignee",
       "type": "barchart"
     },
     {
@@ -2607,11 +2607,11 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT COALESCE(i.assignee, 'Unassigned') AS metric, COUNT(DISTINCT i.key) AS value FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.assignee ORDER BY value DESC LIMIT 10",
+          "rawSql": "SELECT COALESCE(i.assignee, 'Unassigned') AS metric, COUNT(DISTINCT i.key) AS value FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.assignee ORDER BY value DESC",
           "refId": "A"
         }
       ],
-      "title": "Total Issues by Assignee (Top 10)",
+      "title": "Total Issues by Assignee",
       "type": "barchart"
     },
     {
@@ -2683,11 +2683,11 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT COALESCE(i.assignee, 'Unassigned') AS metric, COUNT(DISTINCT i.key) AS value FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.resolved_at IS NULL AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.assignee ORDER BY value DESC LIMIT 10",
+          "rawSql": "SELECT COALESCE(i.assignee, 'Unassigned') AS metric, COUNT(DISTINCT i.key) AS value FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.resolved_at IS NULL AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.assignee ORDER BY value DESC",
           "refId": "A"
         }
       ],
-      "title": "Open Bugs by Assignee (Top 10)",
+      "title": "Open Bugs by Assignee",
       "type": "barchart"
     },
     {
