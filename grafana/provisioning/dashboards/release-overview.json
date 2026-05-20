@@ -1362,21 +1362,11 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.issue_type AS issue_type, i.project_key AS team, ROUND(AVG(EXTRACT(DAY FROM (i.resolved_at - i.created_at)))::numeric, 1) AS value FROM issues i WHERE i.project_key IN ($project) AND i.resolved_at IS NOT NULL AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.issue_type, i.project_key ORDER BY i.issue_type, i.project_key",
+          "rawSql": "SELECT i.project_key AS metric, ROUND(AVG(EXTRACT(DAY FROM (i.resolved_at - i.created_at))) FILTER (WHERE i.issue_type = 'Bug')::numeric, 1) AS \"Bug\", ROUND(AVG(EXTRACT(DAY FROM (i.resolved_at - i.created_at))) FILTER (WHERE i.issue_type = 'Story')::numeric, 1) AS \"Story\", ROUND(AVG(EXTRACT(DAY FROM (i.resolved_at - i.created_at))) FILTER (WHERE i.issue_type = 'Task')::numeric, 1) AS \"Task\", ROUND(AVG(EXTRACT(DAY FROM (i.resolved_at - i.created_at))) FILTER (WHERE i.issue_type = 'Improvement')::numeric, 1) AS \"Improvement\", ROUND(AVG(EXTRACT(DAY FROM (i.resolved_at - i.created_at))) FILTER (WHERE i.issue_type = 'Sub-task')::numeric, 1) AS \"Sub-task\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND i.resolved_at IS NOT NULL GROUP BY i.project_key ORDER BY i.project_key",
           "refId": "A"
         }
       ],
-      "transformations": [
-        {
-          "id": "groupingToMatrix",
-          "options": {
-            "columnField": "issue_type",
-            "rowField": "team",
-            "valueField": "value",
-            "emptyValue": "zero"
-          }
-        }
-      ],
+      "transformations": [],
       "title": "Avg Days to Fix by Type (by Team)",
       "type": "barchart"
     },
@@ -2064,21 +2054,11 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.status AS status, i.project_key AS team, COUNT(DISTINCT i.key) AS value FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.status, i.project_key ORDER BY i.status, i.project_key",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) FILTER (WHERE LOWER(i.status) = 'open') AS \"Open\", COUNT(DISTINCT i.key) FILTER (WHERE LOWER(i.status) = 'to do') AS \"To Do\", COUNT(DISTINCT i.key) FILTER (WHERE LOWER(i.status) = 'in progress') AS \"In Progress\", COUNT(DISTINCT i.key) FILTER (WHERE LOWER(i.status) = 'ready for testing') AS \"ready for testing\", COUNT(DISTINCT i.key) FILTER (WHERE LOWER(i.status) = 'done') AS \"Done\", COUNT(DISTINCT i.key) FILTER (WHERE LOWER(i.status) = 'obsolete / won') AS \"Obsolete / Won\", COUNT(DISTINCT i.key) FILTER (WHERE LOWER(i.status) NOT IN ('open', 'to do', 'in progress', 'ready for testing', 'done', 'obsolete / won', 'done')) AS \"Other\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
           "refId": "A"
         }
       ],
-      "transformations": [
-        {
-          "id": "groupingToMatrix",
-          "options": {
-            "columnField": "status",
-            "rowField": "team",
-            "valueField": "value",
-            "emptyValue": "zero"
-          }
-        }
-      ],
+      "transformations": [],
       "title": "Issues by Status (by Team)",
       "type": "barchart"
     },
@@ -2153,23 +2133,13 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.status AS status, i.project_key AS team, COUNT(DISTINCT i.key) AS value FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.status, i.project_key ORDER BY i.status, i.project_key",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) FILTER (WHERE LOWER(i.status) = 'open') AS \"Open\", COUNT(DISTINCT i.key) FILTER (WHERE LOWER(i.status) = 'to do') AS \"To Do\", COUNT(DISTINCT i.key) FILTER (WHERE LOWER(i.status) = 'in progress') AS \"In Progress\", COUNT(DISTINCT i.key) FILTER (WHERE LOWER(i.status) = 'ready for testing') AS \"ready for testing\", COUNT(DISTINCT i.key) FILTER (WHERE LOWER(i.status) = 'done') AS \"Done\", COUNT(DISTINCT i.key) FILTER (WHERE LOWER(i.status) = 'obsolete / won') AS \"Obsolete / Won\", COUNT(DISTINCT i.key) FILTER (WHERE LOWER(i.status) NOT IN ('open', 'to do', 'in progress', 'ready for testing', 'done', 'obsolete / won', 'done')) AS \"Other\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND i.issue_type = 'Bug' GROUP BY i.project_key ORDER BY i.project_key",
           "refId": "A"
         }
       ],
       "title": "Bugs by Status (by Team)",
       "type": "barchart",
-      "transformations": [
-        {
-          "id": "groupingToMatrix",
-          "options": {
-            "columnField": "status",
-            "rowField": "team",
-            "valueField": "value",
-            "emptyValue": "zero"
-          }
-        }
-      ]
+      "transformations": []
     },
     {
       "collapsed": false,
@@ -2193,7 +2163,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-classic"
+            "mode": "continuous-GrYlRd"
           },
           "custom": {
             "fillOpacity": 80,
@@ -2254,23 +2224,13 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT c.component AS component, i.project_key AS team, COUNT(DISTINCT i.key) AS value FROM issues i, unnest(i.components) AS c(component) WHERE i.project_key IN ($project) AND i.components IS NOT NULL AND array_length(i.components, 1) > 0 AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY c.component, i.project_key ORDER BY SUM(COUNT(DISTINCT i.key)) OVER (PARTITION BY c.component) DESC, c.component, i.project_key",
+          "rawSql": "SELECT unnest(i.components) AS metric, COUNT(DISTINCT i.key) AS value FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND i.components IS NOT NULL AND array_length(i.components, 1) > 0 GROUP BY 1 ORDER BY value DESC",
           "refId": "A"
         }
       ],
-      "title": "Issues by Component (by Team)",
+      "title": "Issues by Component",
       "type": "barchart",
-      "transformations": [
-        {
-          "id": "groupingToMatrix",
-          "options": {
-            "columnField": "component",
-            "rowField": "team",
-            "valueField": "value",
-            "emptyValue": "zero"
-          }
-        }
-      ]
+      "transformations": []
     },
     {
       "datasource": {
@@ -2281,8 +2241,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "fixed",
-            "fixedColor": "orange"
+            "mode": "continuous-GrYlRd"
           },
           "custom": {
             "fillOpacity": 80,
@@ -2343,23 +2302,13 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT c.component AS component, i.project_key AS team, COUNT(DISTINCT i.key) AS value FROM issues i, unnest(i.components) AS c(component) WHERE i.project_key IN ($project) AND i.resolved_at IS NULL AND i.components IS NOT NULL AND array_length(i.components, 1) > 0 AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY c.component, i.project_key ORDER BY SUM(COUNT(DISTINCT i.key)) OVER (PARTITION BY c.component) DESC, c.component, i.project_key",
+          "rawSql": "SELECT unnest(i.components) AS metric, COUNT(DISTINCT i.key) AS value FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND i.resolved_at IS NULL AND i.components IS NOT NULL AND array_length(i.components, 1) > 0 GROUP BY 1 ORDER BY value DESC",
           "refId": "A"
         }
       ],
-      "title": "Open Issues by Component (by Team)",
+      "title": "Open Issues by Component",
       "type": "barchart",
-      "transformations": [
-        {
-          "id": "groupingToMatrix",
-          "options": {
-            "columnField": "component",
-            "rowField": "team",
-            "valueField": "value",
-            "emptyValue": "zero"
-          }
-        }
-      ]
+      "transformations": []
     },
     {
       "datasource": {
@@ -2370,8 +2319,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "fixed",
-            "fixedColor": "red"
+            "mode": "continuous-GrYlRd"
           },
           "custom": {
             "fillOpacity": 80,
@@ -2432,23 +2380,13 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT c.component AS component, i.project_key AS team, COUNT(DISTINCT i.key) AS value FROM issues i, unnest(i.components) AS c(component) WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.components IS NOT NULL AND array_length(i.components, 1) > 0 AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY c.component, i.project_key ORDER BY SUM(COUNT(DISTINCT i.key)) OVER (PARTITION BY c.component) DESC, c.component, i.project_key",
+          "rawSql": "SELECT unnest(i.components) AS metric, COUNT(DISTINCT i.key) AS value FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND i.issue_type = 'Bug' AND i.components IS NOT NULL AND array_length(i.components, 1) > 0 GROUP BY 1 ORDER BY value DESC",
           "refId": "A"
         }
       ],
-      "title": "Bugs by Component (by Team)",
+      "title": "Bugs by Component",
       "type": "barchart",
-      "transformations": [
-        {
-          "id": "groupingToMatrix",
-          "options": {
-            "columnField": "component",
-            "rowField": "team",
-            "valueField": "value",
-            "emptyValue": "zero"
-          }
-        }
-      ]
+      "transformations": []
     },
     {
       "collapsed": false,
