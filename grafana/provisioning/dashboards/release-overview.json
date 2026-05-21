@@ -3548,12 +3548,131 @@
       "description": "Open issues in this release that are blocked, showing what is blocking them.",
       "fieldConfig": {
         "defaults": {
-          "color": {
-            "mode": "thresholds"
+          "custom": {
+            "align": "left",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
           },
-          "mappings": []
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
         },
         "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Key"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "targetBlank": true,
+                    "title": "Open in Jira",
+                    "url": "${jira_url}/browse/${__value.text}"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Type"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "Bug": {
+                        "color": "red",
+                        "index": 0,
+                        "text": "Bug"
+                      },
+                      "Story": {
+                        "color": "green",
+                        "index": 1,
+                        "text": "Story"
+                      },
+                      "Task": {
+                        "color": "blue",
+                        "index": 2,
+                        "text": "Task"
+                      },
+                      "Improvement": {
+                        "color": "yellow",
+                        "index": 3,
+                        "text": "Improvement"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Status"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "Done": {
+                        "color": "green",
+                        "index": 0
+                      },
+                      "In Progress": {
+                        "color": "yellow",
+                        "index": 1
+                      },
+                      "Blocked": {
+                        "color": "red",
+                        "index": 2
+                      },
+                      "Open": {
+                        "color": "text",
+                        "index": 3
+                      },
+                      "Backlog": {
+                        "color": "text",
+                        "index": 4
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              }
+            ]
+          },
           {
             "matcher": {
               "id": "byName",
@@ -3561,54 +3680,79 @@
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": 90
-              },
-              {
                 "id": "mappings",
                 "value": [
                   {
+                    "type": "value",
                     "options": {
                       "Blocker": {
                         "color": "dark-red",
-                        "index": 0
+                        "index": 0,
+                        "text": "Blocker"
                       },
                       "Critical": {
                         "color": "red",
-                        "index": 1
+                        "index": 1,
+                        "text": "Critical"
                       },
                       "High": {
                         "color": "orange",
-                        "index": 2
+                        "index": 2,
+                        "text": "High"
                       },
                       "Medium": {
                         "color": "yellow",
-                        "index": 3
+                        "index": 3,
+                        "text": "Medium"
                       },
                       "Low": {
                         "color": "green",
-                        "index": 4
+                        "index": 4,
+                        "text": "Low"
                       }
-                    },
-                    "type": "value"
+                    }
                   }
                 ]
               },
               {
-                "id": "custom.displayMode",
-                "value": "color-text"
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
               }
             ]
           },
           {
             "matcher": {
               "id": "byName",
-              "options": "Issue"
+              "options": "Key"
             },
             "properties": [
               {
                 "id": "custom.width",
-                "value": 90
+                "value": 100
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Blocked By"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "targetBlank": true,
+                    "title": "Open in Jira",
+                    "url": "${jira_url}/browse/${__value.text}"
+                  }
+                ]
+              },
+              {
+                "id": "custom.width",
+                "value": 100
               }
             ]
           },
@@ -3627,12 +3771,24 @@
           {
             "matcher": {
               "id": "byName",
+              "options": "Priority"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 90
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
               "options": "Status"
             },
             "properties": [
               {
                 "id": "custom.width",
-                "value": 110
+                "value": 130
               }
             ]
           },
@@ -3651,18 +3807,6 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "Blocked By"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 90
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
               "options": "Blocking Assignee"
             },
             "properties": [
@@ -3675,7 +3819,7 @@
         ]
       },
       "gridPos": {
-        "h": 12,
+        "h": 8,
         "w": 24,
         "x": 0,
         "y": 78
@@ -3694,7 +3838,7 @@
         "showHeader": true,
         "sortBy": [
           {
-            "desc": true,
+            "desc": false,
             "displayName": "Priority"
           }
         ]
@@ -3708,7 +3852,7 @@
           },
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT  il.from_key AS \"Issue\",  i1.issue_type AS \"Type\",  i1.priority AS \"Priority\",  i1.status AS \"Status\",  COALESCE(i1.assignee, 'Unassigned') AS \"Assignee\",  i1.summary AS \"Summary\",  il.to_key AS \"Blocked By\",  COALESCE(il.to_summary, '\u2014') AS \"Blocking Issue\",  COALESCE(i2.assignee, 'Unknown') AS \"Blocking Assignee\" FROM issue_links il JOIN issues i1 ON i1.key = il.from_key LEFT JOIN issues i2 ON i2.key = il.to_key WHERE il.link_label = 'is blocked by' AND i1.project_key IN ($project) AND i1.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i1.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i1.resolved_at IS NULL ORDER BY CASE i1.priority WHEN 'Blocker' THEN 1 WHEN 'Critical' THEN 2 WHEN 'High' THEN 3 WHEN 'Medium' THEN 4 WHEN 'Low' THEN 5 ELSE 6 END, i1.status",
+          "rawSql": "SELECT  il.from_key AS \"Key\",  i1.issue_type AS \"Type\",  i1.priority AS \"Priority\",  i1.status AS \"Status\",  COALESCE(i1.assignee, 'Unassigned') AS \"Assignee\",  i1.summary AS \"Summary\",  il.to_key AS \"Blocked By\",  COALESCE(il.to_summary, '\u2014') AS \"Blocking Issue\",  COALESCE(i2.assignee, 'Unknown') AS \"Blocking Assignee\" FROM issue_links il JOIN issues i1 ON i1.key = il.from_key LEFT JOIN issues i2 ON i2.key = il.to_key WHERE il.link_label = 'is blocked by' AND i1.project_key IN ($project) AND i1.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i1.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i1.resolved_at IS NULL ORDER BY CASE i1.priority WHEN 'Blocker' THEN 1 WHEN 'Critical' THEN 2 WHEN 'High' THEN 3 WHEN 'Medium' THEN 4 WHEN 'Low' THEN 5 ELSE 6 END, i1.status",
           "refId": "A"
         }
       ],
