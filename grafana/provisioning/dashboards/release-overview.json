@@ -3049,7 +3049,24 @@
           "mappings": []
         },
         "overrides": []
-      }
+      },
+      "transformations": [
+        {
+          "id": "rowsToFields",
+          "options": {
+            "mappings": [
+              {
+                "fieldName": "metric",
+                "handlerKey": "fieldName"
+              },
+              {
+                "fieldName": "value",
+                "handlerKey": "fieldValue"
+              }
+            ]
+          }
+        }
+      ]
     },
     {
       "id": 34,
@@ -3179,7 +3196,24 @@
             ]
           }
         ]
-      }
+      },
+      "transformations": [
+        {
+          "id": "rowsToFields",
+          "options": {
+            "mappings": [
+              {
+                "fieldName": "metric",
+                "handlerKey": "fieldName"
+              },
+              {
+                "fieldName": "value",
+                "handlerKey": "fieldValue"
+              }
+            ]
+          }
+        }
+      ]
     },
     {
       "id": 35,
@@ -3309,7 +3343,24 @@
             ]
           }
         ]
-      }
+      },
+      "transformations": [
+        {
+          "id": "rowsToFields",
+          "options": {
+            "mappings": [
+              {
+                "fieldName": "metric",
+                "handlerKey": "fieldName"
+              },
+              {
+                "fieldName": "value",
+                "handlerKey": "fieldValue"
+              }
+            ]
+          }
+        }
+      ]
     },
     {
       "id": 36,
@@ -3333,8 +3384,9 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "refId": "A",
-          "rawSql": "SELECT ROUND(AVG(EXTRACT(DAY FROM (i.resolved_at - i.created_at)))::numeric, 1) AS \"Blocker\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i.priority = 'Blocker' AND i.resolved_at IS NOT NULL"
+          "rawQuery": true,
+          "rawSql": "SELECT 'Overall' AS metric, ROUND(AVG(EXTRACT(EPOCH FROM (i.resolved_at - i.created_at)) / 86400)::numeric, 1) AS \"Blocker\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i.resolved_at IS NOT NULL AND i.priority = 'Blocker'",
+          "refId": "A"
         },
         {
           "datasource": {
@@ -3342,8 +3394,9 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "refId": "B",
-          "rawSql": "SELECT ROUND(AVG(EXTRACT(DAY FROM (i.resolved_at - i.created_at)))::numeric, 1) AS \"Critical\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i.priority = 'Critical' AND i.resolved_at IS NOT NULL"
+          "rawQuery": true,
+          "rawSql": "SELECT 'Overall' AS metric, ROUND(AVG(EXTRACT(EPOCH FROM (i.resolved_at - i.created_at)) / 86400)::numeric, 1) AS \"Critical\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i.resolved_at IS NOT NULL AND i.priority = 'Critical'",
+          "refId": "B"
         },
         {
           "datasource": {
@@ -3351,8 +3404,9 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "refId": "C",
-          "rawSql": "SELECT ROUND(AVG(EXTRACT(DAY FROM (i.resolved_at - i.created_at)))::numeric, 1) AS \"High\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i.priority = 'High' AND i.resolved_at IS NOT NULL"
+          "rawQuery": true,
+          "rawSql": "SELECT 'Overall' AS metric, ROUND(AVG(EXTRACT(EPOCH FROM (i.resolved_at - i.created_at)) / 86400)::numeric, 1) AS \"High\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i.resolved_at IS NOT NULL AND i.priority = 'High'",
+          "refId": "C"
         },
         {
           "datasource": {
@@ -3360,8 +3414,9 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "refId": "D",
-          "rawSql": "SELECT ROUND(AVG(EXTRACT(DAY FROM (i.resolved_at - i.created_at)))::numeric, 1) AS \"Medium\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i.priority = 'Medium' AND i.resolved_at IS NOT NULL"
+          "rawQuery": true,
+          "rawSql": "SELECT 'Overall' AS metric, ROUND(AVG(EXTRACT(EPOCH FROM (i.resolved_at - i.created_at)) / 86400)::numeric, 1) AS \"Medium\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i.resolved_at IS NOT NULL AND i.priority = 'Medium'",
+          "refId": "D"
         },
         {
           "datasource": {
@@ -3369,8 +3424,9 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "refId": "E",
-          "rawSql": "SELECT ROUND(AVG(EXTRACT(DAY FROM (i.resolved_at - i.created_at)))::numeric, 1) AS \"Low\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i.priority = 'Low' AND i.resolved_at IS NOT NULL"
+          "rawQuery": true,
+          "rawSql": "SELECT 'Overall' AS metric, ROUND(AVG(EXTRACT(EPOCH FROM (i.resolved_at - i.created_at)) / 86400)::numeric, 1) AS \"Low\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i.resolved_at IS NOT NULL AND i.priority = 'Low'",
+          "refId": "E"
         }
       ],
       "transformations": [
@@ -3395,7 +3451,8 @@
         "tooltip": {
           "mode": "multi",
           "sort": "desc"
-        }
+        },
+        "xField": "metric"
       },
       "fieldConfig": {
         "defaults": {
