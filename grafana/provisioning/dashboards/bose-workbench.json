@@ -36,6 +36,16 @@
       "url": "/d/jira-sprint-health"
     },
     {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": false,
+      "targetBlank": false,
+      "title": "Release Overview",
+      "type": "link",
+      "url": "/d/jira-release-overview"
+    },
+    {
       "type": "link",
       "icon": "external link",
       "targetBlank": false,
@@ -61,7 +71,7 @@
       "id": 999,
       "type": "stat",
       "title": "Data Age",
-      "description": "Hours since the last Jira sync attempt and its status. Green ≤ 12 h • Yellow 12–24 h • Red > 24 h or ERROR status.",
+      "description": "Hours since the last Jira sync attempt and its status. Green \u2264 12 h \u2022 Yellow 12\u201324 h \u2022 Red > 24 h or ERROR status.",
       "gridPos": {
         "h": 2,
         "w": 24,
@@ -489,7 +499,7 @@
             "type": "postgres",
             "uid": "jira-metrics-pg"
           },
-          "rawSql": "SELECT\n  e.key                                                                     AS \"Epic\",\n  e.customer_project                                                        AS \"Workpackage\",\n  e.summary                                                                 AS \"Summary\",\n  e.status                                                                  AS \"Status\",\n  COALESCE(e.assignee, '—')                                                 AS \"Owner\",\n  COUNT(ci.key) FILTER (WHERE ci.key IN (\n    SELECT DISTINCT issue_key FROM issue_transitions\n    WHERE UPPER(to_status) = 'DONE'\n      AND TO_CHAR(date_trunc('month', transitioned_at), 'YYYY-MM') IN (${month:sqlstring})\n  ) AND ci.status_category = 'Done')                                        AS \"Done in Period\",\n  COALESCE(SUM(ci.story_points) FILTER (WHERE ci.key IN (\n    SELECT DISTINCT issue_key FROM issue_transitions\n    WHERE UPPER(to_status) = 'DONE'\n      AND TO_CHAR(date_trunc('month', transitioned_at), 'YYYY-MM') IN (${month:sqlstring})\n  ) AND ci.status_category = 'Done'), 0)::int                               AS \"SP Done (Period)\",\n  COALESCE(SUM(ci.story_points), 0)::int                                    AS \"Total SP\"\nFROM issues e\nLEFT JOIN issues ci\n  ON  ci.epic_key    = e.key\n  AND ci.issue_type NOT IN ('Epic', 'Sub-task')\n  AND ci.status     != 'Obsolete / Won''t Do'\nWHERE e.issue_type        = 'Epic'\n  AND e.customer_project LIKE '% / WP-%'\n  AND e.status           != 'Obsolete / Won''t Do'\nGROUP BY e.key, e.customer_project, e.summary, e.status, e.assignee\nHAVING COUNT(ci.key) FILTER (WHERE ci.key IN (\n    SELECT DISTINCT issue_key FROM issue_transitions\n    WHERE UPPER(to_status) = 'DONE'\n      AND TO_CHAR(date_trunc('month', transitioned_at), 'YYYY-MM') IN (${month:sqlstring})\n  ) AND ci.status_category = 'Done') > 0\nORDER BY e.customer_project, e.key",
+          "rawSql": "SELECT\n  e.key                                                                     AS \"Epic\",\n  e.customer_project                                                        AS \"Workpackage\",\n  e.summary                                                                 AS \"Summary\",\n  e.status                                                                  AS \"Status\",\n  COALESCE(e.assignee, '\u2014')                                                 AS \"Owner\",\n  COUNT(ci.key) FILTER (WHERE ci.key IN (\n    SELECT DISTINCT issue_key FROM issue_transitions\n    WHERE UPPER(to_status) = 'DONE'\n      AND TO_CHAR(date_trunc('month', transitioned_at), 'YYYY-MM') IN (${month:sqlstring})\n  ) AND ci.status_category = 'Done')                                        AS \"Done in Period\",\n  COALESCE(SUM(ci.story_points) FILTER (WHERE ci.key IN (\n    SELECT DISTINCT issue_key FROM issue_transitions\n    WHERE UPPER(to_status) = 'DONE'\n      AND TO_CHAR(date_trunc('month', transitioned_at), 'YYYY-MM') IN (${month:sqlstring})\n  ) AND ci.status_category = 'Done'), 0)::int                               AS \"SP Done (Period)\",\n  COALESCE(SUM(ci.story_points), 0)::int                                    AS \"Total SP\"\nFROM issues e\nLEFT JOIN issues ci\n  ON  ci.epic_key    = e.key\n  AND ci.issue_type NOT IN ('Epic', 'Sub-task')\n  AND ci.status     != 'Obsolete / Won''t Do'\nWHERE e.issue_type        = 'Epic'\n  AND e.customer_project LIKE '% / WP-%'\n  AND e.status           != 'Obsolete / Won''t Do'\nGROUP BY e.key, e.customer_project, e.summary, e.status, e.assignee\nHAVING COUNT(ci.key) FILTER (WHERE ci.key IN (\n    SELECT DISTINCT issue_key FROM issue_transitions\n    WHERE UPPER(to_status) = 'DONE'\n      AND TO_CHAR(date_trunc('month', transitioned_at), 'YYYY-MM') IN (${month:sqlstring})\n  ) AND ci.status_category = 'Done') > 0\nORDER BY e.customer_project, e.key",
           "format": "table",
           "refId": "A"
         }
@@ -1020,7 +1030,7 @@
             "type": "postgres",
             "uid": "jira-metrics-pg"
           },
-          "rawSql": "SELECT\n  i.key                     AS \"Key\",\n  i.summary                 AS \"Summary\",\n  i.issue_type              AS \"Type\",\n  i.priority                AS \"Priority\",\n  COALESCE(i.assignee, '—') AS \"Assignee\",\n  i.story_points            AS \"SP\",\n  e.customer_project        AS \"Workpackage\"\nFROM issues i\nJOIN issues e ON e.key = i.epic_key\nWHERE e.issue_type        = 'Epic'\n  AND e.customer_project LIKE '% / WP-%'\n  AND e.status           != 'Obsolete / Won''t Do'\n  AND i.issue_type NOT IN ('Epic', 'Sub-task')\n  AND i.key IN (\n    SELECT DISTINCT issue_key FROM issue_transitions\n    WHERE UPPER(to_status) = 'DONE'\n      AND TO_CHAR(date_trunc('month', transitioned_at), 'YYYY-MM') IN (${month:sqlstring})\n  )\n  AND i.status_category = 'Done'\nORDER BY e.customer_project, i.key",
+          "rawSql": "SELECT\n  i.key                     AS \"Key\",\n  i.summary                 AS \"Summary\",\n  i.issue_type              AS \"Type\",\n  i.priority                AS \"Priority\",\n  COALESCE(i.assignee, '\u2014') AS \"Assignee\",\n  i.story_points            AS \"SP\",\n  e.customer_project        AS \"Workpackage\"\nFROM issues i\nJOIN issues e ON e.key = i.epic_key\nWHERE e.issue_type        = 'Epic'\n  AND e.customer_project LIKE '% / WP-%'\n  AND e.status           != 'Obsolete / Won''t Do'\n  AND i.issue_type NOT IN ('Epic', 'Sub-task')\n  AND i.key IN (\n    SELECT DISTINCT issue_key FROM issue_transitions\n    WHERE UPPER(to_status) = 'DONE'\n      AND TO_CHAR(date_trunc('month', transitioned_at), 'YYYY-MM') IN (${month:sqlstring})\n  )\n  AND i.status_category = 'Done'\nORDER BY e.customer_project, i.key",
           "format": "table",
           "refId": "A"
         }
@@ -1267,7 +1277,7 @@
             "type": "postgres",
             "uid": "jira-metrics-pg"
           },
-          "rawSql": "SELECT\n  COALESCE(e.customer_project, '—') AS \"Workpackage\",\n  COUNT(i.key)                      AS \"Done\",\n  COALESCE(SUM(i.story_points), 0)  AS \"Done SP\"\nFROM issues i\nJOIN issues e ON e.key = i.epic_key\nWHERE e.issue_type        = 'Epic'\n  AND e.customer_project LIKE '% / WP-%'\n  AND e.status           != 'Obsolete / Won''t Do'\n  AND i.issue_type NOT IN ('Epic', 'Sub-task')\n  AND i.key IN (\n    SELECT DISTINCT issue_key FROM issue_transitions\n    WHERE UPPER(to_status) = 'DONE'\n      AND TO_CHAR(date_trunc('month', transitioned_at), 'YYYY-MM') IN (${month:sqlstring})\n  )\n  AND i.status_category = 'Done'\nGROUP BY e.customer_project\nORDER BY SUM(i.story_points) DESC NULLS LAST",
+          "rawSql": "SELECT\n  COALESCE(e.customer_project, '\u2014') AS \"Workpackage\",\n  COUNT(i.key)                      AS \"Done\",\n  COALESCE(SUM(i.story_points), 0)  AS \"Done SP\"\nFROM issues i\nJOIN issues e ON e.key = i.epic_key\nWHERE e.issue_type        = 'Epic'\n  AND e.customer_project LIKE '% / WP-%'\n  AND e.status           != 'Obsolete / Won''t Do'\n  AND i.issue_type NOT IN ('Epic', 'Sub-task')\n  AND i.key IN (\n    SELECT DISTINCT issue_key FROM issue_transitions\n    WHERE UPPER(to_status) = 'DONE'\n      AND TO_CHAR(date_trunc('month', transitioned_at), 'YYYY-MM') IN (${month:sqlstring})\n  )\n  AND i.status_category = 'Done'\nGROUP BY e.customer_project\nORDER BY SUM(i.story_points) DESC NULLS LAST",
           "format": "table",
           "refId": "A"
         }
@@ -1544,7 +1554,7 @@
     {
       "id": 42,
       "type": "table",
-      "title": "Potential Bose Tickets — Detail",
+      "title": "Potential Bose Tickets \u2014 Detail",
       "description": "Open issues mentioning 'Bose' in title with no Epic link. Review and assign to a Bose workpackage epic if applicable.",
       "gridPos": {
         "h": 14,
@@ -1562,7 +1572,7 @@
             "type": "postgres",
             "uid": "jira-metrics-pg"
           },
-          "rawSql": "SELECT\n  i.key                                AS \"Key\",\n  i.summary                            AS \"Summary\",\n  i.issue_type                         AS \"Type\",\n  i.priority                           AS \"Priority\",\n  i.status                             AS \"Status\",\n  COALESCE(i.assignee, '—')           AS \"Assignee\",\n  COALESCE(i.story_points::text, '—') AS \"SP\",\n  i.project_key                        AS \"Team\",\n  COALESCE(\n    (SELECT il.to_key FROM issue_links il JOIN issues e ON e.key = il.to_key\n     WHERE il.from_key = i.key AND e.issue_type = 'Epic' LIMIT 1),\n    (SELECT il.from_key FROM issue_links il JOIN issues e ON e.key = il.from_key\n     WHERE il.to_key = i.key AND e.issue_type = 'Epic' LIMIT 1),\n    '—'\n  )                                    AS \"Linked Epic\",\n  COALESCE(\n    (SELECT il.link_label FROM issue_links il JOIN issues e ON e.key = il.to_key\n     WHERE il.from_key = i.key AND e.issue_type = 'Epic' LIMIT 1),\n    (SELECT il.link_label FROM issue_links il JOIN issues e ON e.key = il.from_key\n     WHERE il.to_key = i.key AND e.issue_type = 'Epic' LIMIT 1),\n    '—'\n  )                                    AS \"Link Type\",\n  DATE_PART('day', NOW() - i.created_at)::int AS \"Age (days)\"\nFROM issues i\nWHERE i.epic_key IS NULL\n  AND i.issue_type NOT IN ('Epic', 'Sub-task')\n  AND i.status_category != 'Done'\n  AND i.status != 'Obsolete / Won''t Do'\n  AND i.summary ILIKE '%bose%'\nORDER BY\n  CASE i.priority WHEN 'Blocker' THEN 1 WHEN 'Critical' THEN 2 WHEN 'High' THEN 3 WHEN 'Medium' THEN 4 ELSE 5 END,\n  i.created_at ASC",
+          "rawSql": "SELECT\n  i.key                                AS \"Key\",\n  i.summary                            AS \"Summary\",\n  i.issue_type                         AS \"Type\",\n  i.priority                           AS \"Priority\",\n  i.status                             AS \"Status\",\n  COALESCE(i.assignee, '\u2014')           AS \"Assignee\",\n  COALESCE(i.story_points::text, '\u2014') AS \"SP\",\n  i.project_key                        AS \"Team\",\n  COALESCE(\n    (SELECT il.to_key FROM issue_links il JOIN issues e ON e.key = il.to_key\n     WHERE il.from_key = i.key AND e.issue_type = 'Epic' LIMIT 1),\n    (SELECT il.from_key FROM issue_links il JOIN issues e ON e.key = il.from_key\n     WHERE il.to_key = i.key AND e.issue_type = 'Epic' LIMIT 1),\n    '\u2014'\n  )                                    AS \"Linked Epic\",\n  COALESCE(\n    (SELECT il.link_label FROM issue_links il JOIN issues e ON e.key = il.to_key\n     WHERE il.from_key = i.key AND e.issue_type = 'Epic' LIMIT 1),\n    (SELECT il.link_label FROM issue_links il JOIN issues e ON e.key = il.from_key\n     WHERE il.to_key = i.key AND e.issue_type = 'Epic' LIMIT 1),\n    '\u2014'\n  )                                    AS \"Link Type\",\n  DATE_PART('day', NOW() - i.created_at)::int AS \"Age (days)\"\nFROM issues i\nWHERE i.epic_key IS NULL\n  AND i.issue_type NOT IN ('Epic', 'Sub-task')\n  AND i.status_category != 'Done'\n  AND i.status != 'Obsolete / Won''t Do'\n  AND i.summary ILIKE '%bose%'\nORDER BY\n  CASE i.priority WHEN 'Blocker' THEN 1 WHEN 'Critical' THEN 2 WHEN 'High' THEN 3 WHEN 'Medium' THEN 4 ELSE 5 END,\n  i.created_at ASC",
           "format": "table",
           "refId": "A"
         }

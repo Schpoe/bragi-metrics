@@ -2,12 +2,19 @@
   "id": null,
   "uid": "jira-qase-linkage",
   "title": "QASE Linkage",
-  "tags": ["jira", "quality", "qase"],
+  "tags": [
+    "jira",
+    "quality",
+    "qase"
+  ],
   "timezone": "browser",
   "schemaVersion": 39,
   "version": 1,
   "refresh": "1h",
-  "time": { "from": "now-3M", "to": "now" },
+  "time": {
+    "from": "now-3M",
+    "to": "now"
+  },
   "timepicker": {},
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
@@ -32,6 +39,16 @@
       "title": "Sprint Overview",
       "type": "link",
       "url": "/d/jira-sprint-health"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": false,
+      "targetBlank": false,
+      "title": "Release Overview",
+      "type": "link",
+      "url": "/d/jira-release-overview"
     },
     {
       "asDropdown": false,
@@ -83,8 +100,12 @@
       {
         "current": {
           "selected": false,
-          "text": ["All"],
-          "value": ["$__all"]
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
         },
         "datasource": {
           "type": "postgres",
@@ -131,8 +152,12 @@
       {
         "current": {
           "selected": false,
-          "text": ["All"],
-          "value": ["$__all"]
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
         },
         "datasource": {
           "type": "postgres",
@@ -155,8 +180,12 @@
       {
         "current": {
           "selected": true,
-          "text": ["All"],
-          "value": ["$__all"]
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
         },
         "hide": 0,
         "includeAll": true,
@@ -164,11 +193,31 @@
         "multi": true,
         "name": "sprint_scope",
         "options": [
-          { "selected": true,  "text": "All",          "value": "$__all" },
-          { "selected": false, "text": "Active Sprint", "value": "active" },
-          { "selected": false, "text": "Closed Sprint", "value": "closed" },
-          { "selected": false, "text": "Future Sprint", "value": "future" },
-          { "selected": false, "text": "No Sprint",     "value": "none" }
+          {
+            "selected": true,
+            "text": "All",
+            "value": "$__all"
+          },
+          {
+            "selected": false,
+            "text": "Active Sprint",
+            "value": "active"
+          },
+          {
+            "selected": false,
+            "text": "Closed Sprint",
+            "value": "closed"
+          },
+          {
+            "selected": false,
+            "text": "Future Sprint",
+            "value": "future"
+          },
+          {
+            "selected": false,
+            "text": "No Sprint",
+            "value": "none"
+          }
         ],
         "query": "Active Sprint : active,Closed Sprint : closed,Future Sprint : future,No Sprint : none",
         "skipUrlSync": false,
@@ -177,8 +226,14 @@
       {
         "current": {
           "selected": true,
-          "text": ["Story", "Bug"],
-          "value": ["Story", "Bug"]
+          "text": [
+            "Story",
+            "Bug"
+          ],
+          "value": [
+            "Story",
+            "Bug"
+          ]
         },
         "datasource": {
           "type": "postgres",
@@ -201,8 +256,14 @@
       {
         "current": {
           "selected": true,
-          "text": ["iOS", "Android"],
-          "value": ["iOS", "Android"]
+          "text": [
+            "iOS",
+            "Android"
+          ],
+          "value": [
+            "iOS",
+            "Android"
+          ]
         },
         "datasource": {
           "type": "postgres",
@@ -226,37 +287,136 @@
   },
   "panels": [
     {
-      "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
+      "datasource": {
+        "type": "postgres",
+        "uid": "jira-metrics-pg"
+      },
+      "description": "Hours since the last Jira sync. Green \u2264 12 h \u00b7 Yellow 12\u201324 h \u00b7 Red > 24 h.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 12
+              },
+              {
+                "color": "red",
+                "value": 24
+              }
+            ]
+          },
+          "unit": "h"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 998,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value_and_name",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.1.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawSql": "SELECT ROUND(EXTRACT(EPOCH FROM (NOW() - finished_at)) / 3600.0, 1) AS \"Age (h)\", UPPER(status) AS \"Status\" FROM sync_log WHERE finished_at IS NOT NULL ORDER BY finished_at DESC LIMIT 1",
+          "refId": "A"
+        }
+      ],
+      "title": "Data Age",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "jira-metrics-pg"
+      },
       "description": "Issues confirmed to have no QASE test case linked. Excludes Epics and Sub-tasks.",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "green", "value": null },
-              { "color": "yellow", "value": 1 },
-              { "color": "red", "value": 10 }
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 10
+              }
             ]
           }
         },
         "overrides": []
       },
-      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 2
+      },
       "id": 1,
       "options": {
         "colorMode": "background",
         "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto",
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
         "textMode": "auto"
       },
       "pluginVersion": "11.1.0",
       "targets": [
         {
-          "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
           "format": "table",
           "rawSql": "SELECT COUNT(*) AS value FROM issues WHERE project_key IN ($project) AND issue_type IN ($issue_type) AND date_trunc('quarter', created_at) = '$quarter'::date AND has_qase_link = FALSE AND status IN ($status_filter) AND COALESCE((SELECT s.state FROM sprint_issues si JOIN sprints s ON s.id = si.sprint_id WHERE si.issue_key = issues.key AND si.removed_at IS NULL ORDER BY CASE s.state WHEN 'active' THEN 1 WHEN 'future' THEN 2 WHEN 'closed' THEN 3 END LIMIT 1), 'none') IN ($sprint_scope) AND (issue_type = 'Bug' OR EXISTS (SELECT 1 FROM unnest(components) AS c WHERE c IN ($component)))",
           "refId": "A"
@@ -266,35 +426,57 @@
       "type": "stat"
     },
     {
-      "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
+      "datasource": {
+        "type": "postgres",
+        "uid": "jira-metrics-pg"
+      },
       "description": "Issues confirmed to have a QASE test case linked. Excludes Epics and Sub-tasks.",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "green", "value": null }
+              {
+                "color": "green",
+                "value": null
+              }
             ]
           }
         },
         "overrides": []
       },
-      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 2
+      },
       "id": 2,
       "options": {
         "colorMode": "background",
         "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto",
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
         "textMode": "auto"
       },
       "pluginVersion": "11.1.0",
       "targets": [
         {
-          "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
           "format": "table",
           "rawSql": "SELECT COUNT(*) AS value FROM issues WHERE project_key IN ($project) AND issue_type IN ($issue_type) AND date_trunc('quarter', created_at) = '$quarter'::date AND has_qase_link = TRUE AND status IN ($status_filter) AND COALESCE((SELECT s.state FROM sprint_issues si JOIN sprints s ON s.id = si.sprint_id WHERE si.issue_key = issues.key AND si.removed_at IS NULL ORDER BY CASE s.state WHEN 'active' THEN 1 WHEN 'future' THEN 2 WHEN 'closed' THEN 3 END LIMIT 1), 'none') IN ($sprint_scope) AND (issue_type = 'Bug' OR EXISTS (SELECT 1 FROM unnest(components) AS c WHERE c IN ($component)))",
           "refId": "A"
@@ -304,38 +486,66 @@
       "type": "stat"
     },
     {
-      "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
+      "datasource": {
+        "type": "postgres",
+        "uid": "jira-metrics-pg"
+      },
       "description": "% of checked issues (excl. Epics, Sub-tasks) with a QASE test case linked.",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "red", "value": null },
-              { "color": "yellow", "value": 50 },
-              { "color": "green", "value": 80 }
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 50
+              },
+              {
+                "color": "green",
+                "value": 80
+              }
             ]
           },
           "unit": "percent"
         },
         "overrides": []
       },
-      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 2
+      },
       "id": 3,
       "options": {
         "colorMode": "background",
         "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto",
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
         "textMode": "auto"
       },
       "pluginVersion": "11.1.0",
       "targets": [
         {
-          "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
           "format": "table",
           "rawSql": "SELECT ROUND(100.0 * COUNT(*) FILTER (WHERE has_qase_link = TRUE) / NULLIF(COUNT(*) FILTER (WHERE has_qase_link IS NOT NULL), 0), 1) AS value FROM issues WHERE project_key IN ($project) AND issue_type IN ($issue_type) AND date_trunc('quarter', created_at) = '$quarter'::date AND status IN ($status_filter) AND COALESCE((SELECT s.state FROM sprint_issues si JOIN sprints s ON s.id = si.sprint_id WHERE si.issue_key = issues.key AND si.removed_at IS NULL ORDER BY CASE s.state WHEN 'active' THEN 1 WHEN 'future' THEN 2 WHEN 'closed' THEN 3 END LIMIT 1), 'none') IN ($sprint_scope) AND (issue_type = 'Bug' OR EXISTS (SELECT 1 FROM unnest(components) AS c WHERE c IN ($component)))",
           "refId": "A"
@@ -345,36 +555,61 @@
       "type": "stat"
     },
     {
-      "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
+      "datasource": {
+        "type": "postgres",
+        "uid": "jira-metrics-pg"
+      },
       "description": "Issues where QASE status has not been fetched yet. Excludes Epics and Sub-tasks.",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "green", "value": null },
-              { "color": "yellow", "value": 1 }
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              }
             ]
           }
         },
         "overrides": []
       },
-      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 2
+      },
       "id": 4,
       "options": {
         "colorMode": "background",
         "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto",
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
         "textMode": "auto"
       },
       "pluginVersion": "11.1.0",
       "targets": [
         {
-          "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
           "format": "table",
           "rawSql": "SELECT COUNT(*) AS value FROM issues WHERE project_key IN ($project) AND issue_type IN ($issue_type) AND date_trunc('quarter', created_at) = '$quarter'::date AND has_qase_link IS NULL AND status IN ($status_filter) AND COALESCE((SELECT s.state FROM sprint_issues si JOIN sprints s ON s.id = si.sprint_id WHERE si.issue_key = issues.key AND si.removed_at IS NULL ORDER BY CASE s.state WHEN 'active' THEN 1 WHEN 'future' THEN 2 WHEN 'closed' THEN 3 END LIMIT 1), 'none') IN ($sprint_scope) AND (issue_type = 'Bug' OR EXISTS (SELECT 1 FROM unnest(components) AS c WHERE c IN ($component)))",
           "refId": "A"
@@ -384,27 +619,41 @@
       "type": "stat"
     },
     {
-      "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
+      "datasource": {
+        "type": "postgres",
+        "uid": "jira-metrics-pg"
+      },
       "description": "All issues without a QASE test case link, ordered by creation date descending. Excludes Epics and Sub-tasks.",
       "fieldConfig": {
         "defaults": {
           "custom": {
             "align": "left",
-            "cellOptions": { "type": "auto" },
+            "cellOptions": {
+              "type": "auto"
+            },
             "inspect": false
           },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "green", "value": null },
-              { "color": "red", "value": 80 }
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
             ]
           }
         },
         "overrides": [
           {
-            "matcher": { "id": "byName", "options": "Key" },
+            "matcher": {
+              "id": "byName",
+              "options": "Key"
+            },
             "properties": [
               {
                 "id": "links",
@@ -419,7 +668,10 @@
             ]
           },
           {
-            "matcher": { "id": "byName", "options": "Priority" },
+            "matcher": {
+              "id": "byName",
+              "options": "Priority"
+            },
             "properties": [
               {
                 "id": "mappings",
@@ -427,22 +679,66 @@
                   {
                     "type": "value",
                     "options": {
-                      "Blocker":  { "color": "dark-red", "index": 0, "text": "Blocker" },
-                      "Critical": { "color": "red",      "index": 1, "text": "Critical" },
-                      "High":     { "color": "orange",   "index": 2, "text": "High" },
-                      "Medium":   { "color": "yellow",   "index": 3, "text": "Medium" },
-                      "Low":      { "color": "green",    "index": 4, "text": "Low" }
+                      "Blocker": {
+                        "color": "dark-red",
+                        "index": 0,
+                        "text": "Blocker"
+                      },
+                      "Critical": {
+                        "color": "red",
+                        "index": 1,
+                        "text": "Critical"
+                      },
+                      "High": {
+                        "color": "orange",
+                        "index": 2,
+                        "text": "High"
+                      },
+                      "Medium": {
+                        "color": "yellow",
+                        "index": 3,
+                        "text": "Medium"
+                      },
+                      "Low": {
+                        "color": "green",
+                        "index": 4,
+                        "text": "Low"
+                      }
                     }
                   }
                 ]
               },
-              { "id": "custom.cellOptions", "value": { "type": "color-background" } },
-              { "id": "color", "value": { "mode": "thresholds" } },
-              { "id": "thresholds", "value": { "mode": "absolute", "steps": [{ "color": "text", "value": null }] } }
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "thresholds"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "text",
+                      "value": null
+                    }
+                  ]
+                }
+              }
             ]
           },
           {
-            "matcher": { "id": "byName", "options": "Status" },
+            "matcher": {
+              "id": "byName",
+              "options": "Status"
+            },
             "properties": [
               {
                 "id": "mappings",
@@ -450,30 +746,93 @@
                   {
                     "type": "value",
                     "options": {
-                      "Done":                { "color": "green",  "index": 0 },
-                      "Closed":              { "color": "green",  "index": 1 },
-                      "In Progress":         { "color": "yellow", "index": 2 },
-                      "In Review":           { "color": "yellow", "index": 3 },
-                      "Ready for testing":   { "color": "blue",   "index": 4 },
-                      "Ready For Testing":   { "color": "blue",   "index": 5 },
-                      "Testing":             { "color": "blue",   "index": 6 },
-                      "Blocked":             { "color": "red",    "index": 7 },
-                      "Reopened":            { "color": "orange", "index": 8 },
-                      "Open":                { "color": "text",   "index": 9 },
-                      "To Do":               { "color": "text",   "index": 10 },
-                      "Backlog":             { "color": "text",   "index": 11 },
-                      "Obsolete / Won't Do": { "color": "gray",   "index": 12 }
+                      "Done": {
+                        "color": "green",
+                        "index": 0
+                      },
+                      "Closed": {
+                        "color": "green",
+                        "index": 1
+                      },
+                      "In Progress": {
+                        "color": "yellow",
+                        "index": 2
+                      },
+                      "In Review": {
+                        "color": "yellow",
+                        "index": 3
+                      },
+                      "Ready for testing": {
+                        "color": "blue",
+                        "index": 4
+                      },
+                      "Ready For Testing": {
+                        "color": "blue",
+                        "index": 5
+                      },
+                      "Testing": {
+                        "color": "blue",
+                        "index": 6
+                      },
+                      "Blocked": {
+                        "color": "red",
+                        "index": 7
+                      },
+                      "Reopened": {
+                        "color": "orange",
+                        "index": 8
+                      },
+                      "Open": {
+                        "color": "text",
+                        "index": 9
+                      },
+                      "To Do": {
+                        "color": "text",
+                        "index": 10
+                      },
+                      "Backlog": {
+                        "color": "text",
+                        "index": 11
+                      },
+                      "Obsolete / Won't Do": {
+                        "color": "gray",
+                        "index": 12
+                      }
                     }
                   }
                 ]
               },
-              { "id": "custom.cellOptions", "value": { "type": "color-background" } },
-              { "id": "color", "value": { "mode": "thresholds" } },
-              { "id": "thresholds", "value": { "mode": "absolute", "steps": [{ "color": "text", "value": null }] } }
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "thresholds"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "text",
+                      "value": null
+                    }
+                  ]
+                }
+              }
             ]
           },
           {
-            "matcher": { "id": "byName", "options": "Type" },
+            "matcher": {
+              "id": "byName",
+              "options": "Type"
+            },
             "properties": [
               {
                 "id": "mappings",
@@ -481,40 +840,92 @@
                   {
                     "type": "value",
                     "options": {
-                      "Bug":         { "color": "red",    "index": 0, "text": "Bug" },
-                      "Story":       { "color": "green",  "index": 1, "text": "Story" },
-                      "Task":        { "color": "blue",   "index": 2, "text": "Task" },
-                      "Improvement": { "color": "yellow", "index": 3, "text": "Improvement" }
+                      "Bug": {
+                        "color": "red",
+                        "index": 0,
+                        "text": "Bug"
+                      },
+                      "Story": {
+                        "color": "green",
+                        "index": 1,
+                        "text": "Story"
+                      },
+                      "Task": {
+                        "color": "blue",
+                        "index": 2,
+                        "text": "Task"
+                      },
+                      "Improvement": {
+                        "color": "yellow",
+                        "index": 3,
+                        "text": "Improvement"
+                      }
                     }
                   }
                 ]
               },
-              { "id": "custom.cellOptions", "value": { "type": "color-background" } },
-              { "id": "color", "value": { "mode": "thresholds" } },
-              { "id": "thresholds", "value": { "mode": "absolute", "steps": [{ "color": "text", "value": null }] } }
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "thresholds"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "text",
+                      "value": null
+                    }
+                  ]
+                }
+              }
             ]
           }
         ]
       },
-      "gridPos": { "h": 18, "w": 24, "x": 0, "y": 4 },
+      "gridPos": {
+        "h": 18,
+        "w": 24,
+        "x": 0,
+        "y": 6
+      },
       "id": 10,
       "options": {
         "cellHeight": "sm",
         "footer": {
           "countRows": false,
           "fields": "",
-          "reducer": ["sum"],
+          "reducer": [
+            "sum"
+          ],
           "show": false
         },
         "showHeader": true,
-        "sortBy": [{ "desc": true, "displayName": "Created" }]
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "Created"
+          }
+        ]
       },
       "pluginVersion": "11.1.0",
       "targets": [
         {
-          "datasource": { "type": "postgres", "uid": "jira-metrics-pg" },
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
           "format": "table",
-          "rawSql": "SELECT key AS \"Key\", summary AS \"Summary\", issue_type AS \"Type\", priority AS \"Priority\", status AS \"Status\", COALESCE(assignee, 'Unassigned') AS \"Assignee\", TO_CHAR(created_at, 'YYYY-MM-DD') AS \"Created\", COALESCE((SELECT s.name FROM sprint_issues si JOIN sprints s ON s.id = si.sprint_id WHERE si.issue_key = issues.key AND si.removed_at IS NULL ORDER BY CASE s.state WHEN 'active' THEN 1 WHEN 'future' THEN 2 WHEN 'closed' THEN 3 END LIMIT 1), '—') AS \"Sprint\" FROM issues WHERE project_key IN ($project) AND issue_type IN ($issue_type) AND date_trunc('quarter', created_at) = '$quarter'::date AND has_qase_link = FALSE AND status IN ($status_filter) AND COALESCE((SELECT s.state FROM sprint_issues si JOIN sprints s ON s.id = si.sprint_id WHERE si.issue_key = issues.key AND si.removed_at IS NULL ORDER BY CASE s.state WHEN 'active' THEN 1 WHEN 'future' THEN 2 WHEN 'closed' THEN 3 END LIMIT 1), 'none') IN ($sprint_scope) AND (issue_type = 'Bug' OR EXISTS (SELECT 1 FROM unnest(components) AS c WHERE c IN ($component))) ORDER BY created_at DESC",
+          "rawSql": "SELECT key AS \"Key\", summary AS \"Summary\", issue_type AS \"Type\", priority AS \"Priority\", status AS \"Status\", COALESCE(assignee, 'Unassigned') AS \"Assignee\", TO_CHAR(created_at, 'YYYY-MM-DD') AS \"Created\", COALESCE((SELECT s.name FROM sprint_issues si JOIN sprints s ON s.id = si.sprint_id WHERE si.issue_key = issues.key AND si.removed_at IS NULL ORDER BY CASE s.state WHEN 'active' THEN 1 WHEN 'future' THEN 2 WHEN 'closed' THEN 3 END LIMIT 1), '\u2014') AS \"Sprint\" FROM issues WHERE project_key IN ($project) AND issue_type IN ($issue_type) AND date_trunc('quarter', created_at) = '$quarter'::date AND has_qase_link = FALSE AND status IN ($status_filter) AND COALESCE((SELECT s.state FROM sprint_issues si JOIN sprints s ON s.id = si.sprint_id WHERE si.issue_key = issues.key AND si.removed_at IS NULL ORDER BY CASE s.state WHEN 'active' THEN 1 WHEN 'future' THEN 2 WHEN 'closed' THEN 3 END LIMIT 1), 'none') IN ($sprint_scope) AND (issue_type = 'Bug' OR EXISTS (SELECT 1 FROM unnest(components) AS c WHERE c IN ($component))) ORDER BY created_at DESC",
           "refId": "A"
         }
       ],

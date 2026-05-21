@@ -45,6 +45,16 @@
       "includeVars": true,
       "keepTime": false,
       "targetBlank": false,
+      "title": "Release Overview",
+      "type": "link",
+      "url": "/d/jira-release-overview"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": false,
+      "targetBlank": false,
       "title": "Quality & Bugs",
       "type": "link",
       "url": "/d/jira-quality-bugs"

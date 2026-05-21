@@ -36,6 +36,16 @@
       "url": "/d/jira-sprint-health"
     },
     {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": false,
+      "targetBlank": false,
+      "title": "Release Overview",
+      "type": "link",
+      "url": "/d/jira-release-overview"
+    },
+    {
       "type": "link",
       "icon": "external link",
       "targetBlank": false,

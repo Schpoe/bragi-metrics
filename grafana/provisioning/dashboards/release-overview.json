@@ -26,8 +26,38 @@
       "includeVars": true,
       "keepTime": false,
       "targetBlank": false,
-      "title": "Quality & Bugs",
       "type": "link",
+      "title": "Sprint Detail",
+      "url": "/d/cfih5an4hj7y8e"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": false,
+      "targetBlank": false,
+      "type": "link",
+      "title": "Sprint Overview",
+      "url": "/d/jira-sprint-health"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": false,
+      "targetBlank": false,
+      "type": "link",
+      "title": "Release Overview",
+      "url": "/d/jira-release-overview"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": false,
+      "targetBlank": false,
+      "type": "link",
+      "title": "Quality & Bugs",
       "url": "/d/jira-quality-bugs"
     },
     {
@@ -36,8 +66,18 @@
       "includeVars": true,
       "keepTime": false,
       "targetBlank": false,
-      "title": "Team Overview",
       "type": "link",
+      "title": "PO KPIs",
+      "url": "/d/jira-po-kpis"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": false,
+      "targetBlank": false,
+      "type": "link",
+      "title": "Team Overview",
       "url": "/d/jira-team-overview"
     }
   ],
