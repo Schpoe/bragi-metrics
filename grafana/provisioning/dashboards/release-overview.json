@@ -3019,8 +3019,59 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.issue_type AS metric, COUNT(DISTINCT i.key)::int AS value FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY i.issue_type ORDER BY value DESC",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(DISTINCT i.key)::int AS \"Bug\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i.issue_type = 'Bug'",
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(DISTINCT i.key)::int AS \"Story\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i.issue_type = 'Story'",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(DISTINCT i.key)::int AS \"Task\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i.issue_type = 'Task'",
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(DISTINCT i.key)::int AS \"Improvement\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i.issue_type = 'Improvement'",
+          "refId": "D"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(DISTINCT i.key)::int AS \"Sub-task\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i.issue_type = 'Sub-task'",
+          "refId": "E"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(DISTINCT i.key)::int AS \"Epic\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i.issue_type = 'Epic'",
+          "refId": "F"
         }
       ],
       "options": {
@@ -3052,19 +3103,8 @@
       },
       "transformations": [
         {
-          "id": "rowsToFields",
-          "options": {
-            "mappings": [
-              {
-                "fieldName": "metric",
-                "handlerKey": "fieldName"
-              },
-              {
-                "fieldName": "value",
-                "handlerKey": "fieldValue"
-              }
-            ]
-          }
+          "id": "merge",
+          "options": {}
         }
       ]
     },
@@ -3090,8 +3130,49 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.priority AS metric, COUNT(DISTINCT i.key)::int AS value FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY i.priority ORDER BY value DESC",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(DISTINCT i.key)::int AS \"Blocker\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i.priority = 'Blocker'",
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(DISTINCT i.key)::int AS \"Critical\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i.priority = 'Critical'",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(DISTINCT i.key)::int AS \"High\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i.priority = 'High'",
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(DISTINCT i.key)::int AS \"Medium\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i.priority = 'Medium'",
+          "refId": "D"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(DISTINCT i.key)::int AS \"Low\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i.priority = 'Low'",
+          "refId": "E"
         }
       ],
       "options": {
@@ -3199,19 +3280,8 @@
       },
       "transformations": [
         {
-          "id": "rowsToFields",
-          "options": {
-            "mappings": [
-              {
-                "fieldName": "metric",
-                "handlerKey": "fieldName"
-              },
-              {
-                "fieldName": "value",
-                "handlerKey": "fieldValue"
-              }
-            ]
-          }
+          "id": "merge",
+          "options": {}
         }
       ]
     },
@@ -3237,8 +3307,49 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.priority AS metric, COUNT(DISTINCT i.key)::int AS value FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i.issue_type = 'Bug' GROUP BY i.priority ORDER BY value DESC",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(DISTINCT i.key)::int AS \"Blocker\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i.issue_type = 'Bug' AND i.priority = 'Blocker'",
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(DISTINCT i.key)::int AS \"Critical\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i.issue_type = 'Bug' AND i.priority = 'Critical'",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(DISTINCT i.key)::int AS \"High\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i.issue_type = 'Bug' AND i.priority = 'High'",
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(DISTINCT i.key)::int AS \"Medium\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i.issue_type = 'Bug' AND i.priority = 'Medium'",
+          "refId": "D"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(DISTINCT i.key)::int AS \"Low\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i.issue_type = 'Bug' AND i.priority = 'Low'",
+          "refId": "E"
         }
       ],
       "options": {
@@ -3346,19 +3457,8 @@
       },
       "transformations": [
         {
-          "id": "rowsToFields",
-          "options": {
-            "mappings": [
-              {
-                "fieldName": "metric",
-                "handlerKey": "fieldName"
-              },
-              {
-                "fieldName": "value",
-                "handlerKey": "fieldValue"
-              }
-            ]
-          }
+          "id": "merge",
+          "options": {}
         }
       ]
     },
