@@ -2964,8 +2964,8 @@
         "showHeader": true,
         "sortBy": [
           {
-            "desc": true,
-            "displayName": "Created"
+            "desc": false,
+            "displayName": "Priority"
           }
         ]
       },
@@ -2977,7 +2977,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.key AS \"Key\", i.summary AS \"Summary\", i.issue_type AS \"Type\", i.project_key AS \"Team\", COALESCE(array_to_string(i.components, ', '), '\u2014') AS \"Component\", i.priority AS \"Priority\", i.status AS \"Status\", COALESCE(i.assignee, 'Unassigned') AS \"Assignee\", TO_CHAR(i.created_at, 'YYYY-MM-DD') AS \"Created\", CASE WHEN i.resolved_at IS NOT NULL THEN TO_CHAR(i.resolved_at, 'YYYY-MM-DD') ELSE '\u2014' END AS \"Resolved\", CASE WHEN i.resolved_at IS NOT NULL THEN EXTRACT(DAY FROM (i.resolved_at - i.created_at))::int ELSE NULL END AS \"Days to Fix\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') ORDER BY i.created_at DESC",
+          "rawSql": "SELECT i.key AS \"Key\", i.summary AS \"Summary\", i.issue_type AS \"Type\", i.project_key AS \"Team\", COALESCE(array_to_string(i.components, ', '), '\u2014') AS \"Component\", i.priority AS \"Priority\", i.status AS \"Status\", COALESCE(i.assignee, 'Unassigned') AS \"Assignee\", TO_CHAR(i.created_at, 'YYYY-MM-DD') AS \"Created\", CASE WHEN i.resolved_at IS NOT NULL THEN TO_CHAR(i.resolved_at, 'YYYY-MM-DD') ELSE '\u2014' END AS \"Resolved\", CASE WHEN i.resolved_at IS NOT NULL THEN EXTRACT(DAY FROM (i.resolved_at - i.created_at))::int ELSE NULL END AS \"Days to Fix\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') ORDER BY CASE i.priority WHEN 'Blocker' THEN 1 WHEN 'Critical' THEN 2 WHEN 'High' THEN 3 WHEN 'Medium' THEN 4 WHEN 'Low' THEN 5 ELSE 6 END, i.created_at DESC",
           "refId": "A"
         }
       ],
