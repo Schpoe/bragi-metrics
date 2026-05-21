@@ -202,7 +202,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT COUNT(DISTINCT i.key) AS value FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL)",
+          "rawSql": "SELECT COUNT(DISTINCT i.key) AS value FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won')",
           "refId": "A"
         }
       ],
@@ -262,7 +262,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT COUNT(DISTINCT i.key) AS value FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL)",
+          "rawSql": "SELECT COUNT(DISTINCT i.key) AS value FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won')",
           "refId": "A"
         }
       ],
@@ -332,7 +332,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT ROUND(AVG(EXTRACT(DAY FROM (i.resolved_at - i.created_at)))::numeric, 1) AS value FROM issues i WHERE i.project_key IN ($project) AND i.resolved_at IS NOT NULL AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL)",
+          "rawSql": "SELECT ROUND(AVG(EXTRACT(DAY FROM (i.resolved_at - i.created_at)))::numeric, 1) AS value FROM issues i WHERE i.project_key IN ($project) AND i.resolved_at IS NOT NULL AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won')",
           "refId": "A"
         }
       ],
@@ -402,7 +402,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT ROUND(100.0 * COUNT(*) FILTER (WHERE i.resolved_at IS NOT NULL) / NULLIF(COUNT(*), 0), 1) AS value FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL)",
+          "rawSql": "SELECT ROUND(100.0 * COUNT(*) FILTER (WHERE i.resolved_at IS NOT NULL) / NULLIF(COUNT(*), 0), 1) AS value FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won')",
           "refId": "A"
         }
       ],
@@ -415,7 +415,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 4
+        "y": 13
       },
       "id": 21,
       "panels": [],
@@ -460,7 +460,7 @@
         "h": 10,
         "w": 12,
         "x": 0,
-        "y": 5
+        "y": 14
       },
       "id": 5,
       "options": {
@@ -492,7 +492,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Bug\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Bug\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY i.project_key ORDER BY i.project_key",
           "refId": "A"
         },
         {
@@ -501,7 +501,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Story\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Story' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Story\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Story' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY i.project_key ORDER BY i.project_key",
           "refId": "B"
         },
         {
@@ -510,7 +510,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Task\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Task' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Task\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Task' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY i.project_key ORDER BY i.project_key",
           "refId": "C"
         },
         {
@@ -519,7 +519,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Improvement\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Improvement' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Improvement\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Improvement' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY i.project_key ORDER BY i.project_key",
           "refId": "D"
         },
         {
@@ -528,7 +528,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Sub-task\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Sub-task' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Sub-task\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Sub-task' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY i.project_key ORDER BY i.project_key",
           "refId": "E"
         }
       ],
@@ -655,7 +655,7 @@
         "h": 10,
         "w": 12,
         "x": 12,
-        "y": 5
+        "y": 14
       },
       "id": 30,
       "options": {
@@ -687,7 +687,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Blocker\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.priority = 'Blocker' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Blocker\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.priority = 'Blocker' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY i.project_key ORDER BY i.project_key",
           "refId": "A"
         },
         {
@@ -696,7 +696,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Critical\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.priority = 'Critical' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Critical\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.priority = 'Critical' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY i.project_key ORDER BY i.project_key",
           "refId": "B"
         },
         {
@@ -705,7 +705,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"High\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.priority = 'High' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"High\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.priority = 'High' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY i.project_key ORDER BY i.project_key",
           "refId": "C"
         },
         {
@@ -714,7 +714,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Medium\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.priority = 'Medium' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Medium\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.priority = 'Medium' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY i.project_key ORDER BY i.project_key",
           "refId": "D"
         },
         {
@@ -723,7 +723,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Low\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.priority = 'Low' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Low\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.priority = 'Low' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY i.project_key ORDER BY i.project_key",
           "refId": "E"
         }
       ],
@@ -785,7 +785,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 15
+        "y": 24
       },
       "id": 27,
       "options": {
@@ -817,7 +817,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.project_key AS metric, ROUND(100.0 * COUNT(*) FILTER (WHERE i.resolved_at IS NOT NULL) / NULLIF(COUNT(*), 0), 1) AS value FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY value DESC",
+          "rawSql": "SELECT i.project_key AS metric, ROUND(100.0 * COUNT(*) FILTER (WHERE i.resolved_at IS NOT NULL) / NULLIF(COUNT(*), 0), 1) AS value FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY i.project_key ORDER BY value DESC",
           "refId": "A"
         }
       ],
@@ -948,7 +948,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 15
+        "y": 24
       },
       "id": 7,
       "options": {
@@ -980,7 +980,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.project_key AS metric, ROUND(AVG(EXTRACT(DAY FROM (i.resolved_at - i.created_at)))::numeric, 1) AS \"Blocker\" FROM issues i WHERE i.project_key IN ($project) AND i.resolved_at IS NOT NULL AND i.priority = 'Blocker' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "rawSql": "SELECT i.project_key AS metric, ROUND(AVG(EXTRACT(DAY FROM (i.resolved_at - i.created_at)))::numeric, 1) AS \"Blocker\" FROM issues i WHERE i.project_key IN ($project) AND i.resolved_at IS NOT NULL AND i.priority = 'Blocker' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY i.project_key ORDER BY i.project_key",
           "refId": "A"
         },
         {
@@ -989,7 +989,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.project_key AS metric, ROUND(AVG(EXTRACT(DAY FROM (i.resolved_at - i.created_at)))::numeric, 1) AS \"Critical\" FROM issues i WHERE i.project_key IN ($project) AND i.resolved_at IS NOT NULL AND i.priority = 'Critical' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "rawSql": "SELECT i.project_key AS metric, ROUND(AVG(EXTRACT(DAY FROM (i.resolved_at - i.created_at)))::numeric, 1) AS \"Critical\" FROM issues i WHERE i.project_key IN ($project) AND i.resolved_at IS NOT NULL AND i.priority = 'Critical' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY i.project_key ORDER BY i.project_key",
           "refId": "B"
         },
         {
@@ -998,7 +998,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.project_key AS metric, ROUND(AVG(EXTRACT(DAY FROM (i.resolved_at - i.created_at)))::numeric, 1) AS \"High\" FROM issues i WHERE i.project_key IN ($project) AND i.resolved_at IS NOT NULL AND i.priority = 'High' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "rawSql": "SELECT i.project_key AS metric, ROUND(AVG(EXTRACT(DAY FROM (i.resolved_at - i.created_at)))::numeric, 1) AS \"High\" FROM issues i WHERE i.project_key IN ($project) AND i.resolved_at IS NOT NULL AND i.priority = 'High' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY i.project_key ORDER BY i.project_key",
           "refId": "C"
         },
         {
@@ -1007,7 +1007,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.project_key AS metric, ROUND(AVG(EXTRACT(DAY FROM (i.resolved_at - i.created_at)))::numeric, 1) AS \"Medium\" FROM issues i WHERE i.project_key IN ($project) AND i.resolved_at IS NOT NULL AND i.priority = 'Medium' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "rawSql": "SELECT i.project_key AS metric, ROUND(AVG(EXTRACT(DAY FROM (i.resolved_at - i.created_at)))::numeric, 1) AS \"Medium\" FROM issues i WHERE i.project_key IN ($project) AND i.resolved_at IS NOT NULL AND i.priority = 'Medium' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY i.project_key ORDER BY i.project_key",
           "refId": "D"
         },
         {
@@ -1016,7 +1016,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.project_key AS metric, ROUND(AVG(EXTRACT(DAY FROM (i.resolved_at - i.created_at)))::numeric, 1) AS \"Low\" FROM issues i WHERE i.project_key IN ($project) AND i.resolved_at IS NOT NULL AND i.priority = 'Low' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "rawSql": "SELECT i.project_key AS metric, ROUND(AVG(EXTRACT(DAY FROM (i.resolved_at - i.created_at)))::numeric, 1) AS \"Low\" FROM issues i WHERE i.project_key IN ($project) AND i.resolved_at IS NOT NULL AND i.priority = 'Low' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY i.project_key ORDER BY i.project_key",
           "refId": "E"
         }
       ],
@@ -1035,7 +1035,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 23
+        "y": 32
       },
       "id": 22,
       "panels": [],
@@ -1080,7 +1080,7 @@
         "h": 8,
         "w": 8,
         "x": 0,
-        "y": 24
+        "y": 33
       },
       "id": 11,
       "options": {
@@ -1113,7 +1113,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Bug\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Bug\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY i.project_key ORDER BY i.project_key",
           "refId": "A"
         },
         {
@@ -1122,7 +1122,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Story\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Story' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Story\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Story' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY i.project_key ORDER BY i.project_key",
           "refId": "B"
         },
         {
@@ -1131,7 +1131,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Task\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Task' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Task\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Task' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY i.project_key ORDER BY i.project_key",
           "refId": "C"
         },
         {
@@ -1140,7 +1140,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Improvement\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Improvement' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Improvement\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Improvement' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY i.project_key ORDER BY i.project_key",
           "refId": "D"
         },
         {
@@ -1149,7 +1149,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Sub-task\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Sub-task' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Sub-task\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Sub-task' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY i.project_key ORDER BY i.project_key",
           "refId": "E"
         }
       ],
@@ -1200,7 +1200,7 @@
         "h": 8,
         "w": 8,
         "x": 8,
-        "y": 24
+        "y": 33
       },
       "id": 12,
       "options": {
@@ -1233,7 +1233,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Bug\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.resolved_at IS NULL AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Bug\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.resolved_at IS NULL AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY i.project_key ORDER BY i.project_key",
           "refId": "A"
         },
         {
@@ -1242,7 +1242,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Story\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Story' AND i.resolved_at IS NULL AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Story\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Story' AND i.resolved_at IS NULL AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY i.project_key ORDER BY i.project_key",
           "refId": "B"
         },
         {
@@ -1251,7 +1251,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Task\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Task' AND i.resolved_at IS NULL AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Task\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Task' AND i.resolved_at IS NULL AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY i.project_key ORDER BY i.project_key",
           "refId": "C"
         },
         {
@@ -1260,7 +1260,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Improvement\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Improvement' AND i.resolved_at IS NULL AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Improvement\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Improvement' AND i.resolved_at IS NULL AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY i.project_key ORDER BY i.project_key",
           "refId": "D"
         },
         {
@@ -1269,7 +1269,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Sub-task\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Sub-task' AND i.resolved_at IS NULL AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Sub-task\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Sub-task' AND i.resolved_at IS NULL AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY i.project_key ORDER BY i.project_key",
           "refId": "E"
         }
       ],
@@ -1330,7 +1330,7 @@
         "h": 8,
         "w": 8,
         "x": 16,
-        "y": 24
+        "y": 33
       },
       "id": 13,
       "options": {
@@ -1362,7 +1362,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.issue_type AS issue_type, i.project_key AS team, ROUND(AVG(EXTRACT(DAY FROM (i.resolved_at - i.created_at)))::numeric, 1) AS value FROM issues i WHERE i.project_key IN ($project) AND i.resolved_at IS NOT NULL AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.issue_type, i.project_key ORDER BY i.issue_type, i.project_key",
+          "rawSql": "SELECT i.issue_type AS issue_type, i.project_key AS team, ROUND(AVG(EXTRACT(DAY FROM (i.resolved_at - i.created_at)))::numeric, 1) AS value FROM issues i WHERE i.project_key IN ($project) AND i.resolved_at IS NOT NULL AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY i.issue_type, i.project_key ORDER BY i.issue_type, i.project_key",
           "refId": "A"
         }
       ],
@@ -1386,7 +1386,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 32
+        "y": 41
       },
       "id": 23,
       "panels": [],
@@ -1507,7 +1507,7 @@
         "h": 8,
         "w": 8,
         "x": 0,
-        "y": 33
+        "y": 42
       },
       "id": 14,
       "options": {
@@ -1540,7 +1540,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Blocker\" FROM issues i WHERE i.project_key IN ($project) AND i.priority = 'Blocker' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Blocker\" FROM issues i WHERE i.project_key IN ($project) AND i.priority = 'Blocker' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY i.project_key ORDER BY i.project_key",
           "refId": "A"
         },
         {
@@ -1549,7 +1549,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Critical\" FROM issues i WHERE i.project_key IN ($project) AND i.priority = 'Critical' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Critical\" FROM issues i WHERE i.project_key IN ($project) AND i.priority = 'Critical' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY i.project_key ORDER BY i.project_key",
           "refId": "B"
         },
         {
@@ -1558,7 +1558,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"High\" FROM issues i WHERE i.project_key IN ($project) AND i.priority = 'High' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"High\" FROM issues i WHERE i.project_key IN ($project) AND i.priority = 'High' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY i.project_key ORDER BY i.project_key",
           "refId": "C"
         },
         {
@@ -1567,7 +1567,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Medium\" FROM issues i WHERE i.project_key IN ($project) AND i.priority = 'Medium' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Medium\" FROM issues i WHERE i.project_key IN ($project) AND i.priority = 'Medium' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY i.project_key ORDER BY i.project_key",
           "refId": "D"
         },
         {
@@ -1576,7 +1576,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Low\" FROM issues i WHERE i.project_key IN ($project) AND i.priority = 'Low' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Low\" FROM issues i WHERE i.project_key IN ($project) AND i.priority = 'Low' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY i.project_key ORDER BY i.project_key",
           "refId": "E"
         }
       ],
@@ -1703,7 +1703,7 @@
         "h": 8,
         "w": 8,
         "x": 8,
-        "y": 33
+        "y": 42
       },
       "id": 15,
       "options": {
@@ -1736,7 +1736,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Blocker\" FROM issues i WHERE i.project_key IN ($project) AND i.priority = 'Blocker' AND i.resolved_at IS NULL AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Blocker\" FROM issues i WHERE i.project_key IN ($project) AND i.priority = 'Blocker' AND i.resolved_at IS NULL AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY i.project_key ORDER BY i.project_key",
           "refId": "A"
         },
         {
@@ -1745,7 +1745,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Critical\" FROM issues i WHERE i.project_key IN ($project) AND i.priority = 'Critical' AND i.resolved_at IS NULL AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Critical\" FROM issues i WHERE i.project_key IN ($project) AND i.priority = 'Critical' AND i.resolved_at IS NULL AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY i.project_key ORDER BY i.project_key",
           "refId": "B"
         },
         {
@@ -1754,7 +1754,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"High\" FROM issues i WHERE i.project_key IN ($project) AND i.priority = 'High' AND i.resolved_at IS NULL AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"High\" FROM issues i WHERE i.project_key IN ($project) AND i.priority = 'High' AND i.resolved_at IS NULL AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY i.project_key ORDER BY i.project_key",
           "refId": "C"
         },
         {
@@ -1763,7 +1763,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Medium\" FROM issues i WHERE i.project_key IN ($project) AND i.priority = 'Medium' AND i.resolved_at IS NULL AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Medium\" FROM issues i WHERE i.project_key IN ($project) AND i.priority = 'Medium' AND i.resolved_at IS NULL AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY i.project_key ORDER BY i.project_key",
           "refId": "D"
         },
         {
@@ -1772,7 +1772,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Low\" FROM issues i WHERE i.project_key IN ($project) AND i.priority = 'Low' AND i.resolved_at IS NULL AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Low\" FROM issues i WHERE i.project_key IN ($project) AND i.priority = 'Low' AND i.resolved_at IS NULL AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY i.project_key ORDER BY i.project_key",
           "refId": "E"
         }
       ],
@@ -1899,7 +1899,7 @@
         "h": 8,
         "w": 8,
         "x": 16,
-        "y": 33
+        "y": 42
       },
       "id": 16,
       "options": {
@@ -1932,7 +1932,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Blocker\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.priority = 'Blocker' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Blocker\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.priority = 'Blocker' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY i.project_key ORDER BY i.project_key",
           "refId": "A"
         },
         {
@@ -1941,7 +1941,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Critical\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.priority = 'Critical' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Critical\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.priority = 'Critical' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY i.project_key ORDER BY i.project_key",
           "refId": "B"
         },
         {
@@ -1950,7 +1950,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"High\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.priority = 'High' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"High\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.priority = 'High' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY i.project_key ORDER BY i.project_key",
           "refId": "C"
         },
         {
@@ -1959,7 +1959,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Medium\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.priority = 'Medium' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Medium\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.priority = 'Medium' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY i.project_key ORDER BY i.project_key",
           "refId": "D"
         },
         {
@@ -1968,7 +1968,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Low\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.priority = 'Low' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.project_key ORDER BY i.project_key",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key) AS \"Low\" FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.priority = 'Low' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY i.project_key ORDER BY i.project_key",
           "refId": "E"
         }
       ],
@@ -1987,7 +1987,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 41
+        "y": 50
       },
       "id": 24,
       "panels": [],
@@ -2032,7 +2032,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 42
+        "y": 51
       },
       "id": 17,
       "options": {
@@ -2064,7 +2064,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.status AS status, i.project_key AS team, COUNT(DISTINCT i.key) AS value FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.status, i.project_key ORDER BY i.status, i.project_key",
+          "rawSql": "SELECT i.status AS status, i.project_key AS team, COUNT(DISTINCT i.key) AS value FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY i.status, i.project_key ORDER BY i.status, i.project_key",
           "refId": "A"
         }
       ],
@@ -2121,7 +2121,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 42
+        "y": 51
       },
       "id": 18,
       "options": {
@@ -2153,7 +2153,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.status AS status, i.project_key AS team, COUNT(DISTINCT i.key) AS value FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.status, i.project_key ORDER BY i.status, i.project_key",
+          "rawSql": "SELECT i.status AS status, i.project_key AS team, COUNT(DISTINCT i.key) AS value FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY i.status, i.project_key ORDER BY i.status, i.project_key",
           "refId": "A"
         }
       ],
@@ -2177,7 +2177,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 50
+        "y": 59
       },
       "id": 25,
       "panels": [],
@@ -2222,7 +2222,7 @@
         "h": 8,
         "w": 8,
         "x": 0,
-        "y": 51
+        "y": 60
       },
       "id": 8,
       "options": {
@@ -2254,7 +2254,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT c.component AS component, i.project_key AS team, COUNT(DISTINCT i.key) AS value FROM issues i, unnest(i.components) AS c(component) WHERE i.project_key IN ($project) AND i.components IS NOT NULL AND array_length(i.components, 1) > 0 AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY c.component, i.project_key ORDER BY SUM(COUNT(DISTINCT i.key)) OVER (PARTITION BY c.component) DESC, c.component, i.project_key",
+          "rawSql": "SELECT c.component AS component, i.project_key AS team, COUNT(DISTINCT i.key) AS value FROM issues i, unnest(i.components) AS c(component) WHERE i.project_key IN ($project) AND i.components IS NOT NULL AND array_length(i.components, 1) > 0 AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY c.component, i.project_key ORDER BY SUM(COUNT(DISTINCT i.key)) OVER (PARTITION BY c.component) DESC, c.component, i.project_key",
           "refId": "A"
         }
       ],
@@ -2311,7 +2311,7 @@
         "h": 8,
         "w": 8,
         "x": 8,
-        "y": 51
+        "y": 60
       },
       "id": 9,
       "options": {
@@ -2343,7 +2343,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT c.component AS component, i.project_key AS team, COUNT(DISTINCT i.key) AS value FROM issues i, unnest(i.components) AS c(component) WHERE i.project_key IN ($project) AND i.resolved_at IS NULL AND i.components IS NOT NULL AND array_length(i.components, 1) > 0 AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY c.component, i.project_key ORDER BY SUM(COUNT(DISTINCT i.key)) OVER (PARTITION BY c.component) DESC, c.component, i.project_key",
+          "rawSql": "SELECT c.component AS component, i.project_key AS team, COUNT(DISTINCT i.key) AS value FROM issues i, unnest(i.components) AS c(component) WHERE i.project_key IN ($project) AND i.resolved_at IS NULL AND i.components IS NOT NULL AND array_length(i.components, 1) > 0 AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY c.component, i.project_key ORDER BY SUM(COUNT(DISTINCT i.key)) OVER (PARTITION BY c.component) DESC, c.component, i.project_key",
           "refId": "A"
         }
       ],
@@ -2400,7 +2400,7 @@
         "h": 8,
         "w": 8,
         "x": 16,
-        "y": 51
+        "y": 60
       },
       "id": 28,
       "options": {
@@ -2432,7 +2432,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT c.component AS component, i.project_key AS team, COUNT(DISTINCT i.key) AS value FROM issues i, unnest(i.components) AS c(component) WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.components IS NOT NULL AND array_length(i.components, 1) > 0 AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY c.component, i.project_key ORDER BY SUM(COUNT(DISTINCT i.key)) OVER (PARTITION BY c.component) DESC, c.component, i.project_key",
+          "rawSql": "SELECT c.component AS component, i.project_key AS team, COUNT(DISTINCT i.key) AS value FROM issues i, unnest(i.components) AS c(component) WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.components IS NOT NULL AND array_length(i.components, 1) > 0 AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY c.component, i.project_key ORDER BY SUM(COUNT(DISTINCT i.key)) OVER (PARTITION BY c.component) DESC, c.component, i.project_key",
           "refId": "A"
         }
       ],
@@ -2456,7 +2456,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 59
+        "y": 68
       },
       "id": 26,
       "panels": [],
@@ -2502,7 +2502,7 @@
         "h": 8,
         "w": 8,
         "x": 0,
-        "y": 60
+        "y": 69
       },
       "id": 19,
       "options": {
@@ -2532,7 +2532,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT COALESCE(i.assignee, 'Unassigned') AS metric, COUNT(DISTINCT i.key) AS value FROM issues i WHERE i.project_key IN ($project) AND i.resolved_at IS NULL AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.assignee ORDER BY value DESC",
+          "rawSql": "SELECT COALESCE(i.assignee, 'Unassigned') AS metric, COUNT(DISTINCT i.key) AS value FROM issues i WHERE i.project_key IN ($project) AND i.resolved_at IS NULL AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY i.assignee ORDER BY value DESC",
           "refId": "A"
         }
       ],
@@ -2577,7 +2577,7 @@
         "h": 8,
         "w": 8,
         "x": 8,
-        "y": 60
+        "y": 69
       },
       "id": 20,
       "options": {
@@ -2607,7 +2607,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT COALESCE(i.assignee, 'Unassigned') AS metric, COUNT(DISTINCT i.key) AS value FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.assignee ORDER BY value DESC",
+          "rawSql": "SELECT COALESCE(i.assignee, 'Unassigned') AS metric, COUNT(DISTINCT i.key) AS value FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY i.assignee ORDER BY value DESC",
           "refId": "A"
         }
       ],
@@ -2653,7 +2653,7 @@
         "h": 8,
         "w": 8,
         "x": 16,
-        "y": 60
+        "y": 69
       },
       "id": 29,
       "options": {
@@ -2683,7 +2683,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT COALESCE(i.assignee, 'Unassigned') AS metric, COUNT(DISTINCT i.key) AS value FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.resolved_at IS NULL AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) GROUP BY i.assignee ORDER BY value DESC",
+          "rawSql": "SELECT COALESCE(i.assignee, 'Unassigned') AS metric, COUNT(DISTINCT i.key) AS value FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.resolved_at IS NULL AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY i.assignee ORDER BY value DESC",
           "refId": "A"
         }
       ],
@@ -2878,7 +2878,7 @@
         "h": 16,
         "w": 24,
         "x": 0,
-        "y": 68
+        "y": 77
       },
       "id": 10,
       "options": {
@@ -2907,7 +2907,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.key AS \"Key\", i.summary AS \"Summary\", i.issue_type AS \"Type\", i.project_key AS \"Team\", COALESCE(array_to_string(i.components, ', '), '\u2014') AS \"Component\", i.priority AS \"Priority\", i.status AS \"Status\", COALESCE(i.assignee, 'Unassigned') AS \"Assignee\", TO_CHAR(i.created_at, 'YYYY-MM-DD') AS \"Created\", CASE WHEN i.resolved_at IS NOT NULL THEN TO_CHAR(i.resolved_at, 'YYYY-MM-DD') ELSE '\u2014' END AS \"Resolved\", CASE WHEN i.resolved_at IS NOT NULL THEN EXTRACT(DAY FROM (i.resolved_at - i.created_at))::int ELSE NULL END AS \"Days to Fix\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) ORDER BY i.created_at DESC",
+          "rawSql": "SELECT i.key AS \"Key\", i.summary AS \"Summary\", i.issue_type AS \"Type\", i.project_key AS \"Team\", COALESCE(array_to_string(i.components, ', '), '\u2014') AS \"Component\", i.priority AS \"Priority\", i.status AS \"Status\", COALESCE(i.assignee, 'Unassigned') AS \"Assignee\", TO_CHAR(i.created_at, 'YYYY-MM-DD') AS \"Created\", CASE WHEN i.resolved_at IS NOT NULL THEN TO_CHAR(i.resolved_at, 'YYYY-MM-DD') ELSE '\u2014' END AS \"Resolved\", CASE WHEN i.resolved_at IS NOT NULL THEN EXTRACT(DAY FROM (i.resolved_at - i.created_at))::int ELSE NULL END AS \"Days to Fix\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') ORDER BY i.created_at DESC",
           "refId": "A"
         }
       ],
@@ -2937,7 +2937,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT EXTRACT(EPOCH FROM (NOW() - MAX(i.updated_at))) / 3600.0 AS value FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL)",
+          "rawSql": "SELECT EXTRACT(EPOCH FROM (NOW() - MAX(i.updated_at))) / 3600.0 AS value FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won')",
           "refId": "A"
         }
       ],
@@ -2982,6 +2982,505 @@
           "mappings": []
         },
         "overrides": []
+      }
+    },
+    {
+      "id": 32,
+      "title": "Overall Release Health",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 4
+      },
+      "panels": []
+    },
+    {
+      "id": 33,
+      "title": "Issues by Type",
+      "type": "piechart",
+      "datasource": {
+        "type": "postgres",
+        "uid": "jira-metrics-pg"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 0,
+        "y": 5
+      },
+      "pluginVersion": "11.1.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawSql": "SELECT i.issue_type AS metric, COUNT(DISTINCT i.key)::int AS value FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY i.issue_type ORDER BY value DESC",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "pieType": "donut",
+        "displayLabels": [
+          "percent"
+        ],
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": [
+            "sum"
+          ],
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": []
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 34,
+      "title": "Issues by Priority",
+      "type": "piechart",
+      "datasource": {
+        "type": "postgres",
+        "uid": "jira-metrics-pg"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 6,
+        "y": 5
+      },
+      "pluginVersion": "11.1.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawSql": "SELECT i.priority AS metric, COUNT(DISTINCT i.key)::int AS value FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY i.priority ORDER BY value DESC",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "pieType": "donut",
+        "displayLabels": [
+          "percent"
+        ],
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": [
+            "sum"
+          ],
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": []
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Blocker"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "dark-red"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Critical"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "red"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "High"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "orange"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Medium"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "yellow"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Low"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "green"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 35,
+      "title": "Bugs by Priority",
+      "type": "piechart",
+      "datasource": {
+        "type": "postgres",
+        "uid": "jira-metrics-pg"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 12,
+        "y": 5
+      },
+      "pluginVersion": "11.1.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawSql": "SELECT i.priority AS metric, COUNT(DISTINCT i.key)::int AS value FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i.issue_type = 'Bug' GROUP BY i.priority ORDER BY value DESC",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "pieType": "donut",
+        "displayLabels": [
+          "percent"
+        ],
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": [
+            "sum"
+          ],
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": []
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Blocker"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "dark-red"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Critical"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "red"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "High"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "orange"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Medium"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "yellow"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Low"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "green"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 36,
+      "title": "Avg Days to Resolution by Priority",
+      "type": "barchart",
+      "datasource": {
+        "type": "postgres",
+        "uid": "jira-metrics-pg"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 18,
+        "y": 5
+      },
+      "pluginVersion": "11.1.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "refId": "A",
+          "rawSql": "SELECT ROUND(AVG(EXTRACT(DAY FROM (i.resolved_at - i.created_at)))::numeric, 1) AS \"Blocker\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i.priority = 'Blocker' AND i.resolved_at IS NOT NULL"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "refId": "B",
+          "rawSql": "SELECT ROUND(AVG(EXTRACT(DAY FROM (i.resolved_at - i.created_at)))::numeric, 1) AS \"Critical\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i.priority = 'Critical' AND i.resolved_at IS NOT NULL"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "refId": "C",
+          "rawSql": "SELECT ROUND(AVG(EXTRACT(DAY FROM (i.resolved_at - i.created_at)))::numeric, 1) AS \"High\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i.priority = 'High' AND i.resolved_at IS NOT NULL"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "refId": "D",
+          "rawSql": "SELECT ROUND(AVG(EXTRACT(DAY FROM (i.resolved_at - i.created_at)))::numeric, 1) AS \"Medium\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i.priority = 'Medium' AND i.resolved_at IS NOT NULL"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "refId": "E",
+          "rawSql": "SELECT ROUND(AVG(EXTRACT(DAY FROM (i.resolved_at - i.created_at)))::numeric, 1) AS \"Low\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i.priority = 'Low' AND i.resolved_at IS NOT NULL"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        }
+      ],
+      "options": {
+        "barRadius": 0.05,
+        "barWidth": 0.8,
+        "groupWidth": 0.7,
+        "orientation": "horizontal",
+        "stacking": "none",
+        "showValue": "always",
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": []
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Blocker"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "dark-red"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Critical"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "red"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "High"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "orange"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Medium"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "yellow"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Low"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "green"
+                }
+              }
+            ]
+          }
+        ]
       }
     }
   ]
