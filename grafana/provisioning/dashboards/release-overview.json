@@ -2096,7 +2096,143 @@
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "To Do"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "gray"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "In Progress"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "blue"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "In Review"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "purple"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Ready for Testing"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "orange"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Testing"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "dark-orange"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Done"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "green"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Blocked"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "red"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "On Hold"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "yellow"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Closed"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "dark-green"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
@@ -2134,19 +2270,95 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.status AS status, i.project_key AS team, COUNT(DISTINCT i.key) AS value FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY i.status, i.project_key ORDER BY i.status, i.project_key",
+          "rawQuery": true,
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key)::int AS \"To Do\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won')  AND i.status ILIKE 'To Do' GROUP BY i.project_key ORDER BY i.project_key",
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key)::int AS \"In Progress\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won')  AND i.status ILIKE 'In Progress' GROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key)::int AS \"In Review\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won')  AND i.status ILIKE 'In Review' GROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key)::int AS \"Ready for Testing\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won')  AND i.status ILIKE 'Ready for Testing' GROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "D"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key)::int AS \"Testing\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won')  AND i.status ILIKE 'Testing' GROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "E"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key)::int AS \"Done\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won')  AND i.status ILIKE 'Done' GROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "F"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key)::int AS \"Blocked\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won')  AND i.status ILIKE 'Blocked' GROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "G"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key)::int AS \"On Hold\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won')  AND i.status ILIKE 'On Hold' GROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "H"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key)::int AS \"Closed\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won')  AND i.status ILIKE 'Closed' GROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "I"
         }
       ],
       "transformations": [
         {
-          "id": "groupingToMatrix",
-          "options": {
-            "columnField": "status",
-            "rowField": "team",
-            "valueField": "value",
-            "emptyValue": "zero"
-          }
+          "id": "merge",
+          "options": {}
         }
       ],
       "title": "Issues by Status (by Team)",
@@ -2185,7 +2397,143 @@
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "To Do"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "gray"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "In Progress"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "blue"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "In Review"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "purple"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Ready for Testing"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "orange"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Testing"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "dark-orange"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Done"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "green"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Blocked"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "red"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "On Hold"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "yellow"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Closed"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "dark-green"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
@@ -2223,21 +2571,97 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT i.status AS status, i.project_key AS team, COUNT(DISTINCT i.key) AS value FROM issues i WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY i.status, i.project_key ORDER BY i.status, i.project_key",
+          "rawQuery": true,
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key)::int AS \"To Do\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i.issue_type = 'Bug' AND i.status ILIKE 'To Do' GROUP BY i.project_key ORDER BY i.project_key",
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key)::int AS \"In Progress\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i.issue_type = 'Bug' AND i.status ILIKE 'In Progress' GROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key)::int AS \"In Review\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i.issue_type = 'Bug' AND i.status ILIKE 'In Review' GROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key)::int AS \"Ready for Testing\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i.issue_type = 'Bug' AND i.status ILIKE 'Ready for Testing' GROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "D"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key)::int AS \"Testing\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i.issue_type = 'Bug' AND i.status ILIKE 'Testing' GROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "E"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key)::int AS \"Done\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i.issue_type = 'Bug' AND i.status ILIKE 'Done' GROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "F"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key)::int AS \"Blocked\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i.issue_type = 'Bug' AND i.status ILIKE 'Blocked' GROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "G"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key)::int AS \"On Hold\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i.issue_type = 'Bug' AND i.status ILIKE 'On Hold' GROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "H"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key)::int AS \"Closed\" FROM issues i WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i.issue_type = 'Bug' AND i.status ILIKE 'Closed' GROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "I"
         }
       ],
       "title": "Bugs by Status (by Team)",
       "type": "barchart",
       "transformations": [
         {
-          "id": "groupingToMatrix",
-          "options": {
-            "columnField": "status",
-            "rowField": "team",
-            "valueField": "value",
-            "emptyValue": "zero"
-          }
+          "id": "merge",
+          "options": {}
         }
       ]
     },
@@ -2761,6 +3185,198 @@
       "type": "barchart"
     },
     {
+      "collapsed": false,
+      "datasource": {
+        "type": "datasource",
+        "uid": "grafana"
+      },
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 77
+      },
+      "id": 38,
+      "panels": [],
+      "title": "Blocked Issues",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "jira-metrics-pg"
+      },
+      "description": "Open issues in this release that are blocked, showing what is blocking them.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": []
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Priority"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 90
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "Blocker": {
+                        "color": "dark-red",
+                        "index": 0
+                      },
+                      "Critical": {
+                        "color": "red",
+                        "index": 1
+                      },
+                      "High": {
+                        "color": "orange",
+                        "index": 2
+                      },
+                      "Medium": {
+                        "color": "yellow",
+                        "index": 3
+                      },
+                      "Low": {
+                        "color": "green",
+                        "index": 4
+                      }
+                    },
+                    "type": "value"
+                  }
+                ]
+              },
+              {
+                "id": "custom.displayMode",
+                "value": "color-text"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Issue"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 90
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Type"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 90
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Status"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 110
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Assignee"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 130
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Blocked By"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 90
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Blocking Assignee"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 130
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 78
+      },
+      "id": 39,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "Priority"
+          }
+        ]
+      },
+      "pluginVersion": "11.1.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT   il.from_key AS \"Issue\",   i1.issue_type AS \"Type\",   i1.priority AS \"Priority\",   i1.status AS \"Status\",   COALESCE(i1.assignee, 'Unassigned') AS \"Assignee\",   i1.summary AS \"Summary\",   il.to_key AS \"Blocked By\",   COALESCE(il.to_summary, '\u2014') AS \"Blocking Issue\",   COALESCE(i2.assignee, 'Unknown') AS \"Blocking Assignee\" FROM issue_links il JOIN issues i1 ON i1.key = il.from_key LEFT JOIN issues i2 ON i2.key = il.to_key WHERE LOWER(il.link_label) IN ('is blocked by', 'blocked by', 'is blocked') AND i1.project_key IN ($project) AND i1.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i1.resolved_at IS NULL ORDER BY CASE i.priority WHEN 'Blocker' THEN 1 WHEN 'Critical' THEN 2 WHEN 'High' THEN 3 WHEN 'Medium' THEN 4 WHEN 'Low' THEN 5 ELSE 6 END, i1.status",
+          "refId": "A"
+        }
+      ],
+      "title": "Blocked Issues in Release",
+      "type": "table"
+    },
+    {
       "datasource": {
         "type": "postgres",
         "uid": "jira-metrics-pg"
@@ -2948,7 +3564,7 @@
         "h": 16,
         "w": 24,
         "x": 0,
-        "y": 77
+        "y": 90
       },
       "id": 10,
       "options": {
