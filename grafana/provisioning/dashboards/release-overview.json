@@ -3708,12 +3708,29 @@
           },
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT   il.from_key AS \"Issue\",   i1.issue_type AS \"Type\",   i1.priority AS \"Priority\",   i1.status AS \"Status\",   COALESCE(i1.assignee, 'Unassigned') AS \"Assignee\",   i1.summary AS \"Summary\",   il.to_key AS \"Blocked By\",   COALESCE(il.to_summary, '\u2014') AS \"Blocking Issue\",   COALESCE(i2.assignee, 'Unknown') AS \"Blocking Assignee\" FROM issue_links il JOIN issues i1 ON i1.key = il.from_key LEFT JOIN issues i2 ON i2.key = il.to_key WHERE LOWER(il.link_label) IN ('is blocked by', 'blocked by', 'is blocked') AND i1.project_key IN ($project) AND i1.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i1.resolved_at IS NULL ORDER BY CASE i.priority WHEN 'Blocker' THEN 1 WHEN 'Critical' THEN 2 WHEN 'High' THEN 3 WHEN 'Medium' THEN 4 WHEN 'Low' THEN 5 ELSE 6 END, i1.status",
+          "rawSql": "SELECT   il.from_key AS \"Issue\",   i1.issue_type AS \"Type\",   i1.priority AS \"Priority\",   i1.status AS \"Status\",   COALESCE(i1.assignee, 'Unassigned') AS \"Assignee\",   i1.summary AS \"Summary\",   il.to_key AS \"Blocked By\",   COALESCE(il.to_summary, '\u2014') AS \"Blocking Issue\",   COALESCE(i2.assignee, 'Unknown') AS \"Blocking Assignee\" FROM issue_links il JOIN issues i1 ON i1.key = il.from_key LEFT JOIN issues i2 ON i2.key = il.to_key WHERE LOWER(il.link_label) LIKE '%block%' AND i1.project_key IN ($project) AND i1.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i1.resolved_at IS NULL ORDER BY CASE i.priority WHEN 'Blocker' THEN 1 WHEN 'Critical' THEN 2 WHEN 'High' THEN 3 WHEN 'Medium' THEN 4 WHEN 'Low' THEN 5 ELSE 6 END, i1.status",
           "refId": "A"
         }
       ],
       "title": "Blocked Issues in Release",
       "type": "table"
+    },
+    {
+      "collapsed": false,
+      "datasource": {
+        "type": "datasource",
+        "uid": "grafana"
+      },
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 90
+      },
+      "id": 40,
+      "panels": [],
+      "title": "All Issues",
+      "type": "row"
     },
     {
       "datasource": {
@@ -3903,7 +3920,7 @@
         "h": 16,
         "w": 24,
         "x": 0,
-        "y": 90
+        "y": 91
       },
       "id": 10,
       "options": {
