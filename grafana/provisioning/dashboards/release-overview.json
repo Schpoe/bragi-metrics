@@ -2710,7 +2710,83 @@
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Android"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "green"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "iOS"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "blue"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Cloud"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "light-blue"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Firmware"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "orange"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Design"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "purple"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
@@ -2738,7 +2814,8 @@
         "tooltip": {
           "mode": "single",
           "sort": "desc"
-        }
+        },
+        "xField": "metric"
       },
       "pluginVersion": "11.1.0",
       "targets": [
@@ -2748,21 +2825,57 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT c.component AS component, i.project_key AS team, COUNT(DISTINCT i.key) AS value FROM issues i, unnest(i.components) AS c(component) WHERE i.project_key IN ($project) AND i.components IS NOT NULL AND array_length(i.components, 1) > 0 AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY c.component, i.project_key ORDER BY SUM(COUNT(DISTINCT i.key)) OVER (PARTITION BY c.component) DESC, c.component, i.project_key",
+          "rawQuery": true,
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key)::int AS \"Android\" FROM issues i, unnest(i.components) AS c(component) WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won')  AND i.components IS NOT NULL AND c.component ILIKE 'Android' GROUP BY i.project_key ORDER BY i.project_key",
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key)::int AS \"iOS\" FROM issues i, unnest(i.components) AS c(component) WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won')  AND i.components IS NOT NULL AND LOWER(c.component) = 'ios' GROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key)::int AS \"Cloud\" FROM issues i, unnest(i.components) AS c(component) WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won')  AND i.components IS NOT NULL AND c.component ILIKE 'Cloud' GROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key)::int AS \"Firmware\" FROM issues i, unnest(i.components) AS c(component) WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won')  AND i.components IS NOT NULL AND LOWER(c.component) IN ('firmware', 'fw', 'embedded') GROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "D"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key)::int AS \"Design\" FROM issues i, unnest(i.components) AS c(component) WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won')  AND i.components IS NOT NULL AND c.component ILIKE 'Design' GROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "E"
         }
       ],
       "title": "Issues by Component (by Team)",
       "type": "barchart",
       "transformations": [
         {
-          "id": "groupingToMatrix",
-          "options": {
-            "columnField": "component",
-            "rowField": "team",
-            "valueField": "value",
-            "emptyValue": "zero"
-          }
+          "id": "merge",
+          "options": {}
         }
       ]
     },
@@ -2799,7 +2912,83 @@
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Android"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "green"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "iOS"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "blue"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Cloud"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "light-blue"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Firmware"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "orange"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Design"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "purple"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
@@ -2827,7 +3016,8 @@
         "tooltip": {
           "mode": "single",
           "sort": "desc"
-        }
+        },
+        "xField": "metric"
       },
       "pluginVersion": "11.1.0",
       "targets": [
@@ -2837,21 +3027,57 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT c.component AS component, i.project_key AS team, COUNT(DISTINCT i.key) AS value FROM issues i, unnest(i.components) AS c(component) WHERE i.project_key IN ($project) AND i.resolved_at IS NULL AND i.components IS NOT NULL AND array_length(i.components, 1) > 0 AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY c.component, i.project_key ORDER BY SUM(COUNT(DISTINCT i.key)) OVER (PARTITION BY c.component) DESC, c.component, i.project_key",
+          "rawQuery": true,
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key)::int AS \"Android\" FROM issues i, unnest(i.components) AS c(component) WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i.resolved_at IS NULL AND i.components IS NOT NULL AND c.component ILIKE 'Android' GROUP BY i.project_key ORDER BY i.project_key",
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key)::int AS \"iOS\" FROM issues i, unnest(i.components) AS c(component) WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i.resolved_at IS NULL AND i.components IS NOT NULL AND LOWER(c.component) = 'ios' GROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key)::int AS \"Cloud\" FROM issues i, unnest(i.components) AS c(component) WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i.resolved_at IS NULL AND i.components IS NOT NULL AND c.component ILIKE 'Cloud' GROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key)::int AS \"Firmware\" FROM issues i, unnest(i.components) AS c(component) WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i.resolved_at IS NULL AND i.components IS NOT NULL AND LOWER(c.component) IN ('firmware', 'fw', 'embedded') GROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "D"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key)::int AS \"Design\" FROM issues i, unnest(i.components) AS c(component) WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i.resolved_at IS NULL AND i.components IS NOT NULL AND c.component ILIKE 'Design' GROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "E"
         }
       ],
       "title": "Open Issues by Component (by Team)",
       "type": "barchart",
       "transformations": [
         {
-          "id": "groupingToMatrix",
-          "options": {
-            "columnField": "component",
-            "rowField": "team",
-            "valueField": "value",
-            "emptyValue": "zero"
-          }
+          "id": "merge",
+          "options": {}
         }
       ]
     },
@@ -2888,7 +3114,83 @@
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Android"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "green"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "iOS"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "blue"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Cloud"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "light-blue"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Firmware"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "orange"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Design"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "purple"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
@@ -2916,7 +3218,8 @@
         "tooltip": {
           "mode": "single",
           "sort": "desc"
-        }
+        },
+        "xField": "metric"
       },
       "pluginVersion": "11.1.0",
       "targets": [
@@ -2926,21 +3229,57 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT c.component AS component, i.project_key AS team, COUNT(DISTINCT i.key) AS value FROM issues i, unnest(i.components) AS c(component) WHERE i.project_key IN ($project) AND i.issue_type = 'Bug' AND i.components IS NOT NULL AND array_length(i.components, 1) > 0 AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') GROUP BY c.component, i.project_key ORDER BY SUM(COUNT(DISTINCT i.key)) OVER (PARTITION BY c.component) DESC, c.component, i.project_key",
+          "rawQuery": true,
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key)::int AS \"Android\" FROM issues i, unnest(i.components) AS c(component) WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i.issue_type = 'Bug' AND i.components IS NOT NULL AND c.component ILIKE 'Android' GROUP BY i.project_key ORDER BY i.project_key",
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key)::int AS \"iOS\" FROM issues i, unnest(i.components) AS c(component) WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i.issue_type = 'Bug' AND i.components IS NOT NULL AND LOWER(c.component) = 'ios' GROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key)::int AS \"Cloud\" FROM issues i, unnest(i.components) AS c(component) WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i.issue_type = 'Bug' AND i.components IS NOT NULL AND c.component ILIKE 'Cloud' GROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key)::int AS \"Firmware\" FROM issues i, unnest(i.components) AS c(component) WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i.issue_type = 'Bug' AND i.components IS NOT NULL AND LOWER(c.component) IN ('firmware', 'fw', 'embedded') GROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "D"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT i.project_key AS metric, COUNT(DISTINCT i.key)::int AS \"Design\" FROM issues i, unnest(i.components) AS c(component) WHERE i.project_key IN ($project) AND i.key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL) AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND i.issue_type = 'Bug' AND i.components IS NOT NULL AND c.component ILIKE 'Design' GROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "E"
         }
       ],
       "title": "Bugs by Component (by Team)",
       "type": "barchart",
       "transformations": [
         {
-          "id": "groupingToMatrix",
-          "options": {
-            "columnField": "component",
-            "rowField": "team",
-            "valueField": "value",
-            "emptyValue": "zero"
-          }
+          "id": "merge",
+          "options": {}
         }
       ]
     },
