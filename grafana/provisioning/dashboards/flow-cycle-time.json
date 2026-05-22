@@ -2291,6 +2291,16 @@
       "url": "/d/jira-release-overview"
     },
     {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": false,
+      "targetBlank": false,
+      "title": "Department Overview",
+      "type": "link",
+      "url": "/d/jira-dept-overview"
+    },
+    {
       "type": "link",
       "icon": "external link",
       "targetBlank": false,

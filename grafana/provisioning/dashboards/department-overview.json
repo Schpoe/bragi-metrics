@@ -1,0 +1,1948 @@
+{
+  "id": null,
+  "uid": "jira-dept-overview",
+  "title": "Department Overview",
+  "description": "Quarterly performance across STORE, AAONE, AATWO, CONNECT \u2014 efficiency, quality, transparency.",
+  "tags": [
+    "department",
+    "quarterly",
+    "performance"
+  ],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "",
+  "time": {
+    "from": "now-1y",
+    "to": "now"
+  },
+  "timepicker": {},
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "links": [
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": false,
+      "targetBlank": false,
+      "title": "Sprint Detail",
+      "type": "link",
+      "url": "/d/cfih5an4hj7y8e"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": false,
+      "targetBlank": false,
+      "title": "Sprint Overview",
+      "type": "link",
+      "url": "/d/jira-sprint-health"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": false,
+      "targetBlank": false,
+      "title": "Release Overview",
+      "type": "link",
+      "url": "/d/jira-release-overview"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": false,
+      "targetBlank": false,
+      "title": "Department Overview",
+      "type": "link",
+      "url": "/d/jira-dept-overview"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": false,
+      "targetBlank": false,
+      "title": "Quality & Bugs",
+      "type": "link",
+      "url": "/d/jira-quality-bugs"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": false,
+      "targetBlank": false,
+      "title": "PO KPIs",
+      "type": "link",
+      "url": "/d/jira-po-kpis"
+    }
+  ],
+  "panels": [
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "jira-metrics-pg"
+      },
+      "id": 1,
+      "title": "Data Age",
+      "type": "stat",
+      "description": "Hours since last Jira sync. Green \u2264 12 h \u00b7 Yellow 12\u201324 h \u00b7 Red > 24 h.",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 2
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "min": 0,
+          "unit": "h",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 12
+              },
+              {
+                "color": "red",
+                "value": 24
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value_and_name",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.1.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT ROUND(EXTRACT(EPOCH FROM (NOW()-finished_at))/3600.0,1) AS \"Age (h)\", UPPER(status) AS \"Status\" FROM sync_log WHERE finished_at IS NOT NULL ORDER BY finished_at DESC LIMIT 1",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "datasource": {
+        "type": "datasource",
+        "uid": "grafana"
+      },
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 2
+      },
+      "id": 2,
+      "panels": [],
+      "title": "Department Overview \u2014 $quarter",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "jira-metrics-pg"
+      },
+      "description": "Total story points delivered by department this quarter.",
+      "id": 3,
+      "title": "SP Delivered",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 3,
+        "w": 4,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "unit": "",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.1.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "WITH sprint_proj AS (\n  SELECT si.sprint_id, i.project_key, COUNT(*) AS cnt\n  FROM sprint_issues si JOIN issues i ON i.key = si.issue_key\n  WHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT')\n  GROUP BY si.sprint_id, i.project_key\n),\nprimary_proj AS (\n  SELECT DISTINCT ON (sprint_id) sprint_id, project_key\n  FROM sprint_proj ORDER BY sprint_id, cnt DESC\n),\nsprint_delivered AS (\n  SELECT sprint_id, SUM(COALESCE(story_points,0)) AS sp\n  FROM sprint_scope_final WHERE was_completed = TRUE GROUP BY sprint_id\n)\nSELECT COALESCE(SUM(sd.sp),0) AS value\nFROM sprints s JOIN primary_proj pp ON pp.sprint_id = s.id\nLEFT JOIN sprint_delivered sd ON sd.sprint_id = s.id\nWHERE s.state='closed'\n  AND (EXTRACT(YEAR FROM s.start_date)::int = SPLIT_PART('$quarter','-Q',1)::int AND EXTRACT(QUARTER FROM s.start_date)::int = SPLIT_PART('$quarter','-Q',2)::int)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "jira-metrics-pg"
+      },
+      "description": "% of committed SP delivered across all teams.",
+      "id": 4,
+      "title": "Delivery %",
+      "type": "stat",
+      "gridPos": {
+        "x": 4,
+        "y": 3,
+        "w": 4,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "unit": "percent",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 60
+              },
+              {
+                "color": "green",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.1.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "WITH sprint_proj AS (\n  SELECT si.sprint_id, i.project_key, COUNT(*) AS cnt\n  FROM sprint_issues si JOIN issues i ON i.key = si.issue_key\n  WHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT')\n  GROUP BY si.sprint_id, i.project_key\n),\nprimary_proj AS (\n  SELECT DISTINCT ON (sprint_id) sprint_id, project_key\n  FROM sprint_proj ORDER BY sprint_id, cnt DESC\n),\nsprint_committed AS (\n  SELECT sprint_id, SUM(COALESCE(story_points,0)) AS sp\n  FROM sprint_scope_final WHERE was_punted = FALSE GROUP BY sprint_id\n),\nsprint_delivered AS (\n  SELECT sprint_id, SUM(COALESCE(story_points,0)) AS sp\n  FROM sprint_scope_final WHERE was_completed = TRUE GROUP BY sprint_id\n)\nSELECT ROUND(100.0*SUM(COALESCE(sd.sp,0))/NULLIF(SUM(COALESCE(sc.sp,0)),0),1) AS value\nFROM sprints s JOIN primary_proj pp ON pp.sprint_id = s.id\nLEFT JOIN sprint_committed sc ON sc.sprint_id = s.id\nLEFT JOIN sprint_delivered sd ON sd.sprint_id = s.id\nWHERE s.state='closed' AND (EXTRACT(YEAR FROM s.start_date)::int = SPLIT_PART('$quarter','-Q',1)::int AND EXTRACT(QUARTER FROM s.start_date)::int = SPLIT_PART('$quarter','-Q',2)::int)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "jira-metrics-pg"
+      },
+      "description": "New bugs logged across all teams this quarter.",
+      "id": 5,
+      "title": "Bugs Created",
+      "type": "stat",
+      "gridPos": {
+        "x": 8,
+        "y": 3,
+        "w": 4,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "unit": "",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 10
+              },
+              {
+                "color": "red",
+                "value": 25
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.1.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(*)::int AS value FROM issues i\nWHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT') AND i.issue_type='Bug'\n  AND (EXTRACT(YEAR FROM i.created_at)::int = SPLIT_PART('$quarter','-Q',1)::int AND EXTRACT(QUARTER FROM i.created_at)::int = SPLIT_PART('$quarter','-Q',2)::int)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "jira-metrics-pg"
+      },
+      "description": "% of bugs from this quarter that are resolved.",
+      "id": 6,
+      "title": "Bug Resolution %",
+      "type": "stat",
+      "gridPos": {
+        "x": 12,
+        "y": 3,
+        "w": 4,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "unit": "percent",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 60
+              },
+              {
+                "color": "green",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.1.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT ROUND(100.0*COUNT(*) FILTER(WHERE i.resolved_at IS NOT NULL)/NULLIF(COUNT(*),0),1) AS value\nFROM issues i WHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT') AND i.issue_type='Bug'\n  AND (EXTRACT(YEAR FROM i.created_at)::int = SPLIT_PART('$quarter','-Q',1)::int AND EXTRACT(QUARTER FROM i.created_at)::int = SPLIT_PART('$quarter','-Q',2)::int)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "jira-metrics-pg"
+      },
+      "description": "% of Stories/Tasks/Improvements with SP + AC + assignee.",
+      "id": 7,
+      "title": "Story Readiness %",
+      "type": "stat",
+      "gridPos": {
+        "x": 16,
+        "y": 3,
+        "w": 4,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "unit": "percent",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 60
+              },
+              {
+                "color": "green",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.1.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT ROUND(100.0*COUNT(*) FILTER(WHERE i.story_points IS NOT NULL\n  AND COALESCE(i.has_acceptance_criteria,FALSE)=TRUE AND i.assignee IS NOT NULL)/NULLIF(COUNT(*),0),1) AS value\nFROM issues i WHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT')\n  AND i.issue_type IN ('Story','Task','Improvement') AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won')\n  AND (EXTRACT(YEAR FROM i.created_at)::int = SPLIT_PART('$quarter','-Q',1)::int AND EXTRACT(QUARTER FROM i.created_at)::int = SPLIT_PART('$quarter','-Q',2)::int)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "jira-metrics-pg"
+      },
+      "description": "% of resolved issues with a QASE test link.",
+      "id": 8,
+      "title": "QASE Coverage %",
+      "type": "stat",
+      "gridPos": {
+        "x": 20,
+        "y": 3,
+        "w": 4,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "unit": "percent",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 60
+              },
+              {
+                "color": "green",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.1.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT ROUND(100.0*COUNT(*) FILTER(WHERE i.has_qase_link=TRUE)\n  /NULLIF(COUNT(*) FILTER(WHERE i.has_qase_link IS NOT NULL),0),1) AS value\nFROM issues i WHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT') AND i.issue_type NOT IN ('Epic','Sub-task')\n  AND i.has_qase_link IS NOT NULL AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won')\n  AND (EXTRACT(YEAR FROM i.resolved_at)::int = SPLIT_PART('$quarter','-Q',1)::int AND EXTRACT(QUARTER FROM i.resolved_at)::int = SPLIT_PART('$quarter','-Q',2)::int)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "datasource": {
+        "type": "datasource",
+        "uid": "grafana"
+      },
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 7
+      },
+      "id": 10,
+      "panels": [],
+      "title": "Efficiency",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "jira-metrics-pg"
+      },
+      "description": "Avg story points delivered per sprint per team. Blue = selected quarter, gray = previous quarter.",
+      "id": 11,
+      "title": "Avg Velocity (SP/sprint)",
+      "type": "barchart",
+      "gridPos": {
+        "x": 0,
+        "y": 8,
+        "w": 8,
+        "h": 9
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": []
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "This Q"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "blue"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Prev Q"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "gray"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "barWidth": 0.6,
+        "groupWidth": 0.7,
+        "orientation": "auto",
+        "stacking": "none",
+        "showValue": "auto",
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "sum"
+          ],
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "xField": "metric"
+      },
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        }
+      ],
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "WITH sprint_proj AS (\n  SELECT si.sprint_id, i.project_key, COUNT(*) AS cnt\n  FROM sprint_issues si JOIN issues i ON i.key = si.issue_key\n  WHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT')\n  GROUP BY si.sprint_id, i.project_key\n),\nprimary_proj AS (\n  SELECT DISTINCT ON (sprint_id) sprint_id, project_key\n  FROM sprint_proj ORDER BY sprint_id, cnt DESC\n),\nsprint_delivered AS (\n  SELECT sprint_id, SUM(COALESCE(story_points,0)) AS sp\n  FROM sprint_scope_final WHERE was_completed = TRUE GROUP BY sprint_id\n)\nSELECT pp.project_key AS metric, ROUND(AVG(COALESCE(sd.sp,0)),0) AS \"This Q\"\nFROM sprints s JOIN primary_proj pp ON pp.sprint_id = s.id\nLEFT JOIN sprint_delivered sd ON sd.sprint_id = s.id\nWHERE s.state = 'closed' AND (EXTRACT(YEAR FROM s.start_date)::int = SPLIT_PART('$quarter','-Q',1)::int AND EXTRACT(QUARTER FROM s.start_date)::int = SPLIT_PART('$quarter','-Q',2)::int)\nGROUP BY pp.project_key ORDER BY pp.project_key",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "WITH sprint_proj AS (\n  SELECT si.sprint_id, i.project_key, COUNT(*) AS cnt\n  FROM sprint_issues si JOIN issues i ON i.key = si.issue_key\n  WHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT')\n  GROUP BY si.sprint_id, i.project_key\n),\nprimary_proj AS (\n  SELECT DISTINCT ON (sprint_id) sprint_id, project_key\n  FROM sprint_proj ORDER BY sprint_id, cnt DESC\n),\nsprint_delivered AS (\n  SELECT sprint_id, SUM(COALESCE(story_points,0)) AS sp\n  FROM sprint_scope_final WHERE was_completed = TRUE GROUP BY sprint_id\n)\nSELECT pp.project_key AS metric, ROUND(AVG(COALESCE(sd.sp,0)),0) AS \"Prev Q\"\nFROM sprints s JOIN primary_proj pp ON pp.sprint_id = s.id\nLEFT JOIN sprint_delivered sd ON sd.sprint_id = s.id\nWHERE s.state = 'closed' AND (EXTRACT(YEAR FROM s.start_date)::int = EXTRACT(YEAR FROM (MAKE_DATE(SPLIT_PART('$quarter','-Q',1)::int,(SPLIT_PART('$quarter','-Q',2)::int-1)*3+1,1) - INTERVAL '3 months'))::int AND EXTRACT(QUARTER FROM s.start_date)::int = EXTRACT(QUARTER FROM (MAKE_DATE(SPLIT_PART('$quarter','-Q',1)::int,(SPLIT_PART('$quarter','-Q',2)::int-1)*3+1,1) - INTERVAL '3 months'))::int)\nGROUP BY pp.project_key ORDER BY pp.project_key",
+          "refId": "B"
+        }
+      ],
+      "pluginVersion": "11.1.0"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "jira-metrics-pg"
+      },
+      "description": "% of committed SP delivered per team.",
+      "id": 12,
+      "title": "Delivery % (Committed \u2192 Delivered)",
+      "type": "barchart",
+      "gridPos": {
+        "x": 8,
+        "y": 8,
+        "w": 8,
+        "h": 9
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": []
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "This Q"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "blue"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Prev Q"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "gray"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "barWidth": 0.6,
+        "groupWidth": 0.7,
+        "orientation": "auto",
+        "stacking": "none",
+        "showValue": "auto",
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "sum"
+          ],
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "xField": "metric"
+      },
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        }
+      ],
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "WITH sprint_proj AS (\n  SELECT si.sprint_id, i.project_key, COUNT(*) AS cnt\n  FROM sprint_issues si JOIN issues i ON i.key = si.issue_key\n  WHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT')\n  GROUP BY si.sprint_id, i.project_key\n),\nprimary_proj AS (\n  SELECT DISTINCT ON (sprint_id) sprint_id, project_key\n  FROM sprint_proj ORDER BY sprint_id, cnt DESC\n),\nsprint_committed AS (\n  SELECT sprint_id, SUM(COALESCE(story_points,0)) AS sp\n  FROM sprint_scope_final WHERE was_punted = FALSE GROUP BY sprint_id\n),\nsprint_delivered AS (\n  SELECT sprint_id, SUM(COALESCE(story_points,0)) AS sp\n  FROM sprint_scope_final WHERE was_completed = TRUE GROUP BY sprint_id\n)\nSELECT pp.project_key AS metric,\n  ROUND(100.0*SUM(COALESCE(sd.sp,0))/NULLIF(SUM(COALESCE(sc.sp,0)),0),1) AS \"This Q\"\nFROM sprints s JOIN primary_proj pp ON pp.sprint_id = s.id\nLEFT JOIN sprint_committed sc ON sc.sprint_id = s.id\nLEFT JOIN sprint_delivered sd ON sd.sprint_id = s.id\nWHERE s.state='closed' AND (EXTRACT(YEAR FROM s.start_date)::int = SPLIT_PART('$quarter','-Q',1)::int AND EXTRACT(QUARTER FROM s.start_date)::int = SPLIT_PART('$quarter','-Q',2)::int)\nGROUP BY pp.project_key ORDER BY pp.project_key",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "WITH sprint_proj AS (\n  SELECT si.sprint_id, i.project_key, COUNT(*) AS cnt\n  FROM sprint_issues si JOIN issues i ON i.key = si.issue_key\n  WHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT')\n  GROUP BY si.sprint_id, i.project_key\n),\nprimary_proj AS (\n  SELECT DISTINCT ON (sprint_id) sprint_id, project_key\n  FROM sprint_proj ORDER BY sprint_id, cnt DESC\n),\nsprint_committed AS (\n  SELECT sprint_id, SUM(COALESCE(story_points,0)) AS sp\n  FROM sprint_scope_final WHERE was_punted = FALSE GROUP BY sprint_id\n),\nsprint_delivered AS (\n  SELECT sprint_id, SUM(COALESCE(story_points,0)) AS sp\n  FROM sprint_scope_final WHERE was_completed = TRUE GROUP BY sprint_id\n)\nSELECT pp.project_key AS metric,\n  ROUND(100.0*SUM(COALESCE(sd.sp,0))/NULLIF(SUM(COALESCE(sc.sp,0)),0),1) AS \"Prev Q\"\nFROM sprints s JOIN primary_proj pp ON pp.sprint_id = s.id\nLEFT JOIN sprint_committed sc ON sc.sprint_id = s.id\nLEFT JOIN sprint_delivered sd ON sd.sprint_id = s.id\nWHERE s.state='closed' AND (EXTRACT(YEAR FROM s.start_date)::int = EXTRACT(YEAR FROM (MAKE_DATE(SPLIT_PART('$quarter','-Q',1)::int,(SPLIT_PART('$quarter','-Q',2)::int-1)*3+1,1) - INTERVAL '3 months'))::int AND EXTRACT(QUARTER FROM s.start_date)::int = EXTRACT(QUARTER FROM (MAKE_DATE(SPLIT_PART('$quarter','-Q',1)::int,(SPLIT_PART('$quarter','-Q',2)::int-1)*3+1,1) - INTERVAL '3 months'))::int)\nGROUP BY pp.project_key ORDER BY pp.project_key",
+          "refId": "B"
+        }
+      ],
+      "pluginVersion": "11.1.0"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "jira-metrics-pg"
+      },
+      "description": "Average days from issue creation to resolution.",
+      "id": 13,
+      "title": "Avg Lead Time (days)",
+      "type": "barchart",
+      "gridPos": {
+        "x": 16,
+        "y": 8,
+        "w": 8,
+        "h": 9
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": []
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "This Q"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "blue"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Prev Q"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "gray"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "barWidth": 0.6,
+        "groupWidth": 0.7,
+        "orientation": "auto",
+        "stacking": "none",
+        "showValue": "auto",
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "sum"
+          ],
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "xField": "metric"
+      },
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        }
+      ],
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT i.project_key AS metric,\n  ROUND(AVG(EXTRACT(EPOCH FROM (i.resolved_at-i.created_at))/86400.0),1) AS \"This Q\"\nFROM issues i\nWHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT') AND i.issue_type NOT IN ('Epic','Sub-task')\n  AND i.resolved_at IS NOT NULL AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND (EXTRACT(YEAR FROM i.resolved_at)::int = SPLIT_PART('$quarter','-Q',1)::int AND EXTRACT(QUARTER FROM i.resolved_at)::int = SPLIT_PART('$quarter','-Q',2)::int)\nGROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT i.project_key AS metric,\n  ROUND(AVG(EXTRACT(EPOCH FROM (i.resolved_at-i.created_at))/86400.0),1) AS \"Prev Q\"\nFROM issues i\nWHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT') AND i.issue_type NOT IN ('Epic','Sub-task')\n  AND i.resolved_at IS NOT NULL AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND (EXTRACT(YEAR FROM i.resolved_at)::int = EXTRACT(YEAR FROM (MAKE_DATE(SPLIT_PART('$quarter','-Q',1)::int,(SPLIT_PART('$quarter','-Q',2)::int-1)*3+1,1) - INTERVAL '3 months'))::int AND EXTRACT(QUARTER FROM i.resolved_at)::int = EXTRACT(QUARTER FROM (MAKE_DATE(SPLIT_PART('$quarter','-Q',1)::int,(SPLIT_PART('$quarter','-Q',2)::int-1)*3+1,1) - INTERVAL '3 months'))::int)\nGROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "B"
+        }
+      ],
+      "pluginVersion": "11.1.0"
+    },
+    {
+      "collapsed": false,
+      "datasource": {
+        "type": "datasource",
+        "uid": "grafana"
+      },
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 17
+      },
+      "id": 20,
+      "panels": [],
+      "title": "Quality",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "jira-metrics-pg"
+      },
+      "description": "New bugs per team this quarter, stacked by priority.",
+      "id": 21,
+      "title": "Bugs Created by Priority",
+      "type": "barchart",
+      "gridPos": {
+        "x": 0,
+        "y": 18,
+        "w": 8,
+        "h": 9
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": []
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Blocker"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "dark-red"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Critical"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "red"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "High"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "orange"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Medium"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "yellow"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Low"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "green"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "barWidth": 0.6,
+        "groupWidth": 0.7,
+        "orientation": "auto",
+        "stacking": "normal",
+        "showValue": "auto",
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "sum"
+          ],
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "xField": "metric"
+      },
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        }
+      ],
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT i.project_key AS metric, COUNT(*)::int AS \"Blocker\"\nFROM issues i\nWHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT') AND i.issue_type='Bug'\n  AND i.priority='Blocker' AND (EXTRACT(YEAR FROM i.created_at)::int = SPLIT_PART('$quarter','-Q',1)::int AND EXTRACT(QUARTER FROM i.created_at)::int = SPLIT_PART('$quarter','-Q',2)::int)\nGROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT i.project_key AS metric, COUNT(*)::int AS \"Critical\"\nFROM issues i\nWHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT') AND i.issue_type='Bug'\n  AND i.priority='Critical' AND (EXTRACT(YEAR FROM i.created_at)::int = SPLIT_PART('$quarter','-Q',1)::int AND EXTRACT(QUARTER FROM i.created_at)::int = SPLIT_PART('$quarter','-Q',2)::int)\nGROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT i.project_key AS metric, COUNT(*)::int AS \"High\"\nFROM issues i\nWHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT') AND i.issue_type='Bug'\n  AND i.priority='High' AND (EXTRACT(YEAR FROM i.created_at)::int = SPLIT_PART('$quarter','-Q',1)::int AND EXTRACT(QUARTER FROM i.created_at)::int = SPLIT_PART('$quarter','-Q',2)::int)\nGROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT i.project_key AS metric, COUNT(*)::int AS \"Medium\"\nFROM issues i\nWHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT') AND i.issue_type='Bug'\n  AND i.priority='Medium' AND (EXTRACT(YEAR FROM i.created_at)::int = SPLIT_PART('$quarter','-Q',1)::int AND EXTRACT(QUARTER FROM i.created_at)::int = SPLIT_PART('$quarter','-Q',2)::int)\nGROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "D"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT i.project_key AS metric, COUNT(*)::int AS \"Low\"\nFROM issues i\nWHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT') AND i.issue_type='Bug'\n  AND i.priority='Low' AND (EXTRACT(YEAR FROM i.created_at)::int = SPLIT_PART('$quarter','-Q',1)::int AND EXTRACT(QUARTER FROM i.created_at)::int = SPLIT_PART('$quarter','-Q',2)::int)\nGROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "E"
+        }
+      ],
+      "pluginVersion": "11.1.0"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "jira-metrics-pg"
+      },
+      "description": "% of bugs from this quarter resolved, per team.",
+      "id": 22,
+      "title": "Bug Resolution %",
+      "type": "barchart",
+      "gridPos": {
+        "x": 8,
+        "y": 18,
+        "w": 8,
+        "h": 9
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": []
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "This Q"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "blue"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Prev Q"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "gray"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "barWidth": 0.6,
+        "groupWidth": 0.7,
+        "orientation": "auto",
+        "stacking": "none",
+        "showValue": "auto",
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "sum"
+          ],
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "xField": "metric"
+      },
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        }
+      ],
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT i.project_key AS metric,\n  ROUND(100.0*COUNT(*) FILTER(WHERE i.resolved_at IS NOT NULL)/NULLIF(COUNT(*),0),1) AS \"This Q\"\nFROM issues i\nWHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT') AND i.issue_type='Bug' AND (EXTRACT(YEAR FROM i.created_at)::int = SPLIT_PART('$quarter','-Q',1)::int AND EXTRACT(QUARTER FROM i.created_at)::int = SPLIT_PART('$quarter','-Q',2)::int)\nGROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT i.project_key AS metric,\n  ROUND(100.0*COUNT(*) FILTER(WHERE i.resolved_at IS NOT NULL)/NULLIF(COUNT(*),0),1) AS \"Prev Q\"\nFROM issues i\nWHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT') AND i.issue_type='Bug' AND (EXTRACT(YEAR FROM i.created_at)::int = EXTRACT(YEAR FROM (MAKE_DATE(SPLIT_PART('$quarter','-Q',1)::int,(SPLIT_PART('$quarter','-Q',2)::int-1)*3+1,1) - INTERVAL '3 months'))::int AND EXTRACT(QUARTER FROM i.created_at)::int = EXTRACT(QUARTER FROM (MAKE_DATE(SPLIT_PART('$quarter','-Q',1)::int,(SPLIT_PART('$quarter','-Q',2)::int-1)*3+1,1) - INTERVAL '3 months'))::int)\nGROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "B"
+        }
+      ],
+      "pluginVersion": "11.1.0"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "jira-metrics-pg"
+      },
+      "description": "% of resolved issues with QASE test link, per team.",
+      "id": 23,
+      "title": "QASE Coverage %",
+      "type": "barchart",
+      "gridPos": {
+        "x": 16,
+        "y": 18,
+        "w": 8,
+        "h": 9
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": []
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "This Q"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "blue"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Prev Q"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "gray"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "barWidth": 0.6,
+        "groupWidth": 0.7,
+        "orientation": "auto",
+        "stacking": "none",
+        "showValue": "auto",
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "sum"
+          ],
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "xField": "metric"
+      },
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        }
+      ],
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT i.project_key AS metric,\n  ROUND(100.0*COUNT(*) FILTER(WHERE i.has_qase_link=TRUE)/NULLIF(COUNT(*) FILTER(WHERE i.has_qase_link IS NOT NULL),0),1) AS \"This Q\"\nFROM issues i\nWHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT') AND i.issue_type NOT IN ('Epic','Sub-task')\n  AND i.has_qase_link IS NOT NULL AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND (EXTRACT(YEAR FROM i.resolved_at)::int = SPLIT_PART('$quarter','-Q',1)::int AND EXTRACT(QUARTER FROM i.resolved_at)::int = SPLIT_PART('$quarter','-Q',2)::int)\nGROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT i.project_key AS metric,\n  ROUND(100.0*COUNT(*) FILTER(WHERE i.has_qase_link=TRUE)/NULLIF(COUNT(*) FILTER(WHERE i.has_qase_link IS NOT NULL),0),1) AS \"Prev Q\"\nFROM issues i\nWHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT') AND i.issue_type NOT IN ('Epic','Sub-task')\n  AND i.has_qase_link IS NOT NULL AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND (EXTRACT(YEAR FROM i.resolved_at)::int = EXTRACT(YEAR FROM (MAKE_DATE(SPLIT_PART('$quarter','-Q',1)::int,(SPLIT_PART('$quarter','-Q',2)::int-1)*3+1,1) - INTERVAL '3 months'))::int AND EXTRACT(QUARTER FROM i.resolved_at)::int = EXTRACT(QUARTER FROM (MAKE_DATE(SPLIT_PART('$quarter','-Q',1)::int,(SPLIT_PART('$quarter','-Q',2)::int-1)*3+1,1) - INTERVAL '3 months'))::int)\nGROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "B"
+        }
+      ],
+      "pluginVersion": "11.1.0"
+    },
+    {
+      "collapsed": false,
+      "datasource": {
+        "type": "datasource",
+        "uid": "grafana"
+      },
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 27
+      },
+      "id": 30,
+      "panels": [],
+      "title": "Transparency",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "jira-metrics-pg"
+      },
+      "description": "% of Stories/Tasks/Improvements with SP + AC + assignee at creation.",
+      "id": 31,
+      "title": "Story Readiness %",
+      "type": "barchart",
+      "gridPos": {
+        "x": 0,
+        "y": 28,
+        "w": 8,
+        "h": 9
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": []
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "This Q"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "blue"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Prev Q"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "gray"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "barWidth": 0.6,
+        "groupWidth": 0.7,
+        "orientation": "auto",
+        "stacking": "none",
+        "showValue": "auto",
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "sum"
+          ],
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "xField": "metric"
+      },
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        }
+      ],
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT i.project_key AS metric,\n  ROUND(100.0*COUNT(*) FILTER(WHERE i.story_points IS NOT NULL\n    AND COALESCE(i.has_acceptance_criteria,FALSE)=TRUE AND i.assignee IS NOT NULL)\n  /NULLIF(COUNT(*),0),1) AS \"This Q\"\nFROM issues i\nWHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT') AND i.issue_type IN ('Story','Task','Improvement')\n  AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND (EXTRACT(YEAR FROM i.created_at)::int = SPLIT_PART('$quarter','-Q',1)::int AND EXTRACT(QUARTER FROM i.created_at)::int = SPLIT_PART('$quarter','-Q',2)::int)\nGROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT i.project_key AS metric,\n  ROUND(100.0*COUNT(*) FILTER(WHERE i.story_points IS NOT NULL\n    AND COALESCE(i.has_acceptance_criteria,FALSE)=TRUE AND i.assignee IS NOT NULL)\n  /NULLIF(COUNT(*),0),1) AS \"Prev Q\"\nFROM issues i\nWHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT') AND i.issue_type IN ('Story','Task','Improvement')\n  AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND (EXTRACT(YEAR FROM i.created_at)::int = EXTRACT(YEAR FROM (MAKE_DATE(SPLIT_PART('$quarter','-Q',1)::int,(SPLIT_PART('$quarter','-Q',2)::int-1)*3+1,1) - INTERVAL '3 months'))::int AND EXTRACT(QUARTER FROM i.created_at)::int = EXTRACT(QUARTER FROM (MAKE_DATE(SPLIT_PART('$quarter','-Q',1)::int,(SPLIT_PART('$quarter','-Q',2)::int-1)*3+1,1) - INTERVAL '3 months'))::int)\nGROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "B"
+        }
+      ],
+      "pluginVersion": "11.1.0"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "jira-metrics-pg"
+      },
+      "description": "Mid-sprint additions as % of initial sprint scope.",
+      "id": 32,
+      "title": "Scope Change Rate %",
+      "type": "barchart",
+      "gridPos": {
+        "x": 8,
+        "y": 28,
+        "w": 8,
+        "h": 9
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": []
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "This Q"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "blue"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Prev Q"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "gray"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "barWidth": 0.6,
+        "groupWidth": 0.7,
+        "orientation": "auto",
+        "stacking": "none",
+        "showValue": "auto",
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "sum"
+          ],
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "xField": "metric"
+      },
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        }
+      ],
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "WITH sprint_proj AS (\n  SELECT si.sprint_id, i.project_key, COUNT(*) AS cnt\n  FROM sprint_issues si JOIN issues i ON i.key = si.issue_key\n  WHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT')\n  GROUP BY si.sprint_id, i.project_key\n),\nprimary_proj AS (\n  SELECT DISTINCT ON (sprint_id) sprint_id, project_key\n  FROM sprint_proj ORDER BY sprint_id, cnt DESC\n),\nsprint_scope AS (\n  SELECT sprint_id,\n    COUNT(*) FILTER(WHERE was_in_initial_scope=TRUE) AS initial,\n    COUNT(*) FILTER(WHERE was_in_initial_scope=FALSE AND removed_at IS NULL) AS added\n  FROM sprint_issues GROUP BY sprint_id\n)\nSELECT pp.project_key AS metric,\n  ROUND(100.0*SUM(ss.added)/NULLIF(SUM(ss.initial),0),1) AS \"This Q\"\nFROM sprints s JOIN primary_proj pp ON pp.sprint_id = s.id\nJOIN sprint_scope ss ON ss.sprint_id = s.id\nWHERE s.state='closed' AND (EXTRACT(YEAR FROM s.start_date)::int = SPLIT_PART('$quarter','-Q',1)::int AND EXTRACT(QUARTER FROM s.start_date)::int = SPLIT_PART('$quarter','-Q',2)::int)\nGROUP BY pp.project_key ORDER BY pp.project_key",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "WITH sprint_proj AS (\n  SELECT si.sprint_id, i.project_key, COUNT(*) AS cnt\n  FROM sprint_issues si JOIN issues i ON i.key = si.issue_key\n  WHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT')\n  GROUP BY si.sprint_id, i.project_key\n),\nprimary_proj AS (\n  SELECT DISTINCT ON (sprint_id) sprint_id, project_key\n  FROM sprint_proj ORDER BY sprint_id, cnt DESC\n),\nsprint_scope AS (\n  SELECT sprint_id,\n    COUNT(*) FILTER(WHERE was_in_initial_scope=TRUE) AS initial,\n    COUNT(*) FILTER(WHERE was_in_initial_scope=FALSE AND removed_at IS NULL) AS added\n  FROM sprint_issues GROUP BY sprint_id\n)\nSELECT pp.project_key AS metric,\n  ROUND(100.0*SUM(ss.added)/NULLIF(SUM(ss.initial),0),1) AS \"Prev Q\"\nFROM sprints s JOIN primary_proj pp ON pp.sprint_id = s.id\nJOIN sprint_scope ss ON ss.sprint_id = s.id\nWHERE s.state='closed' AND (EXTRACT(YEAR FROM s.start_date)::int = EXTRACT(YEAR FROM (MAKE_DATE(SPLIT_PART('$quarter','-Q',1)::int,(SPLIT_PART('$quarter','-Q',2)::int-1)*3+1,1) - INTERVAL '3 months'))::int AND EXTRACT(QUARTER FROM s.start_date)::int = EXTRACT(QUARTER FROM (MAKE_DATE(SPLIT_PART('$quarter','-Q',1)::int,(SPLIT_PART('$quarter','-Q',2)::int-1)*3+1,1) - INTERVAL '3 months'))::int)\nGROUP BY pp.project_key ORDER BY pp.project_key",
+          "refId": "B"
+        }
+      ],
+      "pluginVersion": "11.1.0"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "jira-metrics-pg"
+      },
+      "description": "Count of non-epic/sub-task issues resolved per team.",
+      "id": 33,
+      "title": "Issues Resolved (Throughput)",
+      "type": "barchart",
+      "gridPos": {
+        "x": 16,
+        "y": 28,
+        "w": 8,
+        "h": 9
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": []
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "This Q"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "blue"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Prev Q"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "gray"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "barWidth": 0.6,
+        "groupWidth": 0.7,
+        "orientation": "auto",
+        "stacking": "none",
+        "showValue": "auto",
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "sum"
+          ],
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "xField": "metric"
+      },
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        }
+      ],
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT i.project_key AS metric, COUNT(*)::int AS \"This Q\"\nFROM issues i\nWHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT') AND i.issue_type NOT IN ('Epic','Sub-task')\n  AND i.resolved_at IS NOT NULL AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND (EXTRACT(YEAR FROM i.resolved_at)::int = SPLIT_PART('$quarter','-Q',1)::int AND EXTRACT(QUARTER FROM i.resolved_at)::int = SPLIT_PART('$quarter','-Q',2)::int)\nGROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT i.project_key AS metric, COUNT(*)::int AS \"Prev Q\"\nFROM issues i\nWHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT') AND i.issue_type NOT IN ('Epic','Sub-task')\n  AND i.resolved_at IS NOT NULL AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND (EXTRACT(YEAR FROM i.resolved_at)::int = EXTRACT(YEAR FROM (MAKE_DATE(SPLIT_PART('$quarter','-Q',1)::int,(SPLIT_PART('$quarter','-Q',2)::int-1)*3+1,1) - INTERVAL '3 months'))::int AND EXTRACT(QUARTER FROM i.resolved_at)::int = EXTRACT(QUARTER FROM (MAKE_DATE(SPLIT_PART('$quarter','-Q',1)::int,(SPLIT_PART('$quarter','-Q',2)::int-1)*3+1,1) - INTERVAL '3 months'))::int)\nGROUP BY i.project_key ORDER BY i.project_key",
+          "refId": "B"
+        }
+      ],
+      "pluginVersion": "11.1.0"
+    },
+    {
+      "collapsed": false,
+      "datasource": {
+        "type": "datasource",
+        "uid": "grafana"
+      },
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 37
+      },
+      "id": 40,
+      "panels": [],
+      "title": "Team Scorecard",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "jira-metrics-pg"
+      },
+      "id": 41,
+      "title": "Team Scorecard \u2014 $quarter",
+      "description": "All key metrics per team for selected quarter. Dept Total = aggregate across all 4 teams.",
+      "type": "table",
+      "gridPos": {
+        "x": 0,
+        "y": 38,
+        "w": 24,
+        "h": 10
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "left",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": []
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Team"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 110
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Resolved"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 80
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Bugs"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 70
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Bug Res %"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 90
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "red",
+                      "value": null
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 60
+                    },
+                    {
+                      "color": "green",
+                      "value": 80
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Readiness %"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 100
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "red",
+                      "value": null
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 60
+                    },
+                    {
+                      "color": "green",
+                      "value": 80
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "QASE %"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 80
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "red",
+                      "value": null
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 60
+                    },
+                    {
+                      "color": "green",
+                      "value": 80
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Lead Time (d)"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 110
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": false,
+            "displayName": "Team"
+          }
+        ]
+      },
+      "pluginVersion": "11.1.0",
+      "transformations": [],
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  i.project_key AS \"Team\",\n  COUNT(*) FILTER(WHERE i.issue_type NOT IN ('Epic','Sub-task') AND i.resolved_at IS NOT NULL) AS \"Resolved\",\n  COUNT(*) FILTER(WHERE i.issue_type='Bug') AS \"Bugs\",\n  ROUND(100.0*COUNT(*) FILTER(WHERE i.issue_type='Bug' AND i.resolved_at IS NOT NULL)\n    /NULLIF(COUNT(*) FILTER(WHERE i.issue_type='Bug'),0),1) AS \"Bug Res %\",\n  ROUND(100.0*COUNT(*) FILTER(WHERE i.issue_type IN ('Story','Task','Improvement')\n    AND i.story_points IS NOT NULL AND COALESCE(i.has_acceptance_criteria,FALSE)=TRUE AND i.assignee IS NOT NULL)\n    /NULLIF(COUNT(*) FILTER(WHERE i.issue_type IN ('Story','Task','Improvement')),0),1) AS \"Readiness %\",\n  ROUND(100.0*COUNT(*) FILTER(WHERE i.has_qase_link=TRUE)\n    /NULLIF(COUNT(*) FILTER(WHERE i.has_qase_link IS NOT NULL),0),1) AS \"QASE %\",\n  ROUND(AVG(EXTRACT(EPOCH FROM (i.resolved_at-i.created_at))/86400.0) FILTER(WHERE i.resolved_at IS NOT NULL AND i.issue_type NOT IN ('Epic','Sub-task')),1) AS \"Lead Time (d)\"\nFROM issues i\nWHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT') AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND (EXTRACT(YEAR FROM i.created_at)::int = SPLIT_PART('$quarter','-Q',1)::int AND EXTRACT(QUARTER FROM i.created_at)::int = SPLIT_PART('$quarter','-Q',2)::int)\nGROUP BY i.project_key\nUNION ALL\nSELECT 'DEPT TOTAL',\n  COUNT(*) FILTER(WHERE i.issue_type NOT IN ('Epic','Sub-task') AND i.resolved_at IS NOT NULL),\n  COUNT(*) FILTER(WHERE i.issue_type='Bug'),\n  ROUND(100.0*COUNT(*) FILTER(WHERE i.issue_type='Bug' AND i.resolved_at IS NOT NULL)\n    /NULLIF(COUNT(*) FILTER(WHERE i.issue_type='Bug'),0),1),\n  ROUND(100.0*COUNT(*) FILTER(WHERE i.issue_type IN ('Story','Task','Improvement')\n    AND i.story_points IS NOT NULL AND COALESCE(i.has_acceptance_criteria,FALSE)=TRUE AND i.assignee IS NOT NULL)\n    /NULLIF(COUNT(*) FILTER(WHERE i.issue_type IN ('Story','Task','Improvement')),0),1),\n  ROUND(100.0*COUNT(*) FILTER(WHERE i.has_qase_link=TRUE)\n    /NULLIF(COUNT(*) FILTER(WHERE i.has_qase_link IS NOT NULL),0),1),\n  ROUND(AVG(EXTRACT(EPOCH FROM (i.resolved_at-i.created_at))/86400.0) FILTER(WHERE i.resolved_at IS NOT NULL AND i.issue_type NOT IN ('Epic','Sub-task')),1)\nFROM issues i\nWHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT') AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND (EXTRACT(YEAR FROM i.created_at)::int = SPLIT_PART('$quarter','-Q',1)::int AND EXTRACT(QUARTER FROM i.created_at)::int = SPLIT_PART('$quarter','-Q',2)::int)\nORDER BY \"Team\" ",
+          "refId": "A"
+        }
+      ]
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "",
+          "value": ""
+        },
+        "datasource": {
+          "type": "postgres",
+          "uid": "jira-metrics-pg"
+        },
+        "definition": "",
+        "hide": 2,
+        "includeAll": false,
+        "label": "Jira URL",
+        "multi": false,
+        "name": "jira_url",
+        "options": [],
+        "query": "SELECT value FROM app_settings WHERE key = 'jira_url'",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {},
+        "datasource": {
+          "type": "postgres",
+          "uid": "jira-metrics-pg"
+        },
+        "definition": "SELECT DISTINCT EXTRACT(YEAR FROM start_date)::int || '-Q' || EXTRACT(QUARTER FROM start_date)::int AS quarter FROM sprints WHERE start_date IS NOT NULL AND state != 'future' ORDER BY quarter DESC",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Quarter",
+        "multi": false,
+        "name": "quarter",
+        "options": [],
+        "query": "SELECT DISTINCT EXTRACT(YEAR FROM start_date)::int || '-Q' || EXTRACT(QUARTER FROM start_date)::int AS quarter FROM sprints WHERE start_date IS NOT NULL AND state != 'future' ORDER BY quarter DESC",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      }
+    ]
+  }
+}
