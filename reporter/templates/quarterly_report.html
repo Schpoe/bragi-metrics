@@ -21,6 +21,18 @@
     </div>
   </div>
 
+  <div class="framework-box">
+    <strong>Operational Improvement Framework</strong> — tracking progress across three dimensions:
+    <strong>Efficiency</strong> (velocity, delivery rate, lead time) ·
+    <strong>Quality</strong> (bug inflow/resolution, release readiness) ·
+    <strong>Transparency</strong> (scope discipline, story readiness, throughput).
+    <div class="issue-list">Active improvement initiatives:
+      {% for code, desc in active_issues %}
+      <span class="issue-tag">{{ code }}</span>{{ desc }}{% if not loop.last %} &nbsp;·&nbsp; {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+
   <div class="highlight-row">
     <div class="highlight-box hl-eff">
       <div class="hl-number">{{ fmt(dept.velocity, ' SP') }}</div>
@@ -48,7 +60,7 @@
   <div class="section-title section-efficiency">Efficiency</div>
   <table class="kpi-table">
     <thead>
-      <tr><th>Team</th><th>SP Delivered</th><th>Avg Velocity</th><th>Delivery %</th><th>Avg Lead Time</th></tr>
+      <tr><th>Team</th><th>SP Delivered</th><th>Avg Velocity</th><th>Delivery %<span class="target-ref">target ≥80%</span></th><th>Avg Lead Time<span class="target-ref">↓ trend</span></th></tr>
     </thead>
     <tbody>
       {% for t in teams %}
@@ -60,7 +72,7 @@
           <span class="{{ trend_class(t.velocity, t.prev_velocity) }}"> {{ trend_arrow(t.velocity, t.prev_velocity) }}</span>
           <span class="prev-val">({{ fmt(t.prev_velocity, ' SP') }})</span>
         </td>
-        <td>
+        <td class="{{ target_status(t.delivery_pct, 'delivery_pct') }}">
           <span class="val">{{ fmt(t.delivery_pct, '%') }}</span>
           <span class="{{ trend_class(t.delivery_pct, t.prev_delivery_pct) }}"> {{ trend_arrow(t.delivery_pct, t.prev_delivery_pct) }}</span>
           <span class="prev-val">({{ fmt(t.prev_delivery_pct, '%') }})</span>
@@ -80,7 +92,7 @@
           <span class="{{ trend_class(dept.velocity, dept.prev_velocity) }}"> {{ trend_arrow(dept.velocity, dept.prev_velocity) }}</span>
           <span class="prev-val">({{ fmt(dept.prev_velocity, ' SP') }})</span>
         </td>
-        <td>
+        <td class="{{ target_status(dept.delivery_pct, 'delivery_pct') }}">
           <span class="val">{{ fmt(dept.delivery_pct, '%') }}</span>
           <span class="{{ trend_class(dept.delivery_pct, dept.prev_delivery_pct) }}"> {{ trend_arrow(dept.delivery_pct, dept.prev_delivery_pct) }}</span>
           <span class="prev-val">({{ fmt(dept.prev_delivery_pct, '%') }})</span>
@@ -134,7 +146,7 @@
   <div class="section-title section-transparency">Transparency</div>
   <table class="kpi-table">
     <thead>
-      <tr><th>Team</th><th>Issues Resolved</th><th>Scope Change %</th><th>Story Readiness %</th></tr>
+      <tr><th>Team</th><th>Issues Resolved<span class="target-ref">↑ trend</span></th><th>Scope Change %<span class="target-ref">target &lt;10%</span></th><th>Story Readiness %<span class="target-ref">target ≥90%</span></th></tr>
     </thead>
     <tbody>
       {% for t in teams %}
@@ -145,12 +157,12 @@
           <span class="{{ trend_class(t.issues_resolved, t.prev_issues_resolved) }}"> {{ trend_arrow(t.issues_resolved, t.prev_issues_resolved) }}</span>
           <span class="prev-val">({{ t.prev_issues_resolved|default('—') }})</span>
         </td>
-        <td>
+        <td class="{{ target_status(t.scope_change_pct, 'scope_change_pct') }}">
           <span class="val">{{ fmt(t.scope_change_pct, '%') }}</span>
           <span class="{{ trend_class(t.scope_change_pct, t.prev_scope_change_pct, False) }}"> {{ trend_arrow(t.scope_change_pct, t.prev_scope_change_pct, False) }}</span>
           <span class="prev-val">({{ fmt(t.prev_scope_change_pct, '%') }})</span>
         </td>
-        <td>
+        <td class="{% if readiness_valid %}{{ target_status(t.readiness_pct, 'readiness_pct') }}{% endif %}">
           {% if readiness_valid %}
           <span class="val">{{ fmt(t.readiness_pct, '%') }}</span>
           <span class="{{ trend_class(t.readiness_pct, t.prev_readiness_pct) }}"> {{ trend_arrow(t.readiness_pct, t.prev_readiness_pct) }}</span>
@@ -166,12 +178,12 @@
           <span class="{{ trend_class(dept.issues_resolved, dept.prev_issues_resolved) }}"> {{ trend_arrow(dept.issues_resolved, dept.prev_issues_resolved) }}</span>
           <span class="prev-val">({{ dept.prev_issues_resolved|default('—') }})</span>
         </td>
-        <td>
+        <td class="{{ target_status(dept.scope_change_pct, 'scope_change_pct') }}">
           <span class="val">{{ fmt(dept.scope_change_pct, '%') }}</span>
           <span class="{{ trend_class(dept.scope_change_pct, dept.prev_scope_change_pct, False) }}"> {{ trend_arrow(dept.scope_change_pct, dept.prev_scope_change_pct, False) }}</span>
           <span class="prev-val">({{ fmt(dept.prev_scope_change_pct, '%') }})</span>
         </td>
-        <td>
+        <td class="{% if readiness_valid %}{{ target_status(dept.readiness_pct, 'readiness_pct') }}{% endif %}">
           {% if readiness_valid %}<span class="val">{{ fmt(dept.readiness_pct, '%') }}</span>
           {% else %}<span class="neutral">N/A</span>{% endif %}
         </td>
@@ -179,7 +191,9 @@
     </tbody>
   </table>
 
-  <p class="note">Values in parentheses = {{ prev_period_label }}. Green ↑↓ = improvement · Red ↑↓ = decline.</p>
+  <p class="note">Values in parentheses = {{ prev_period_label }}. Green ↑↓ = improvement · Red ↑↓ = decline.
+  Colored cells = vs framework target (green = on target, red = off target).
+  Targets: Delivery % ≥80% (ISS-003/004) · Scope Change % &lt;10% (ISS-001/004) · Story Readiness % ≥90% (ISS-002).</p>
   <div class="report-footer">
     <span>Bragi Metrics · Jira data · Auto-generated</span>
     <span>{{ generated_at }}</span>
@@ -235,9 +249,11 @@
         <td class="{{ trend_class(t.sp_delivered, t.prev_sp_delivered) }}">{{ trend_arrow(t.sp_delivered, t.prev_sp_delivered) }}</td></tr>
       <tr><td>Avg Velocity (SP/sprint)</td><td class="val">{{ fmt(t.velocity, ' SP') }}</td><td class="prev-val">{{ fmt(t.prev_velocity, ' SP') }}</td>
         <td class="{{ trend_class(t.velocity, t.prev_velocity) }}">{{ trend_arrow(t.velocity, t.prev_velocity) }}</td></tr>
-      <tr><td>Delivery %</td><td class="val">{{ fmt(t.delivery_pct, '%') }}</td><td class="prev-val">{{ fmt(t.prev_delivery_pct, '%') }}</td>
+      <tr><td>Delivery % <span class="target-ref">target ≥80%</span></td>
+        <td class="{{ target_status(t.delivery_pct, 'delivery_pct') }}"><span class="val">{{ fmt(t.delivery_pct, '%') }}</span></td>
+        <td class="prev-val">{{ fmt(t.prev_delivery_pct, '%') }}</td>
         <td class="{{ trend_class(t.delivery_pct, t.prev_delivery_pct) }}">{{ trend_arrow(t.delivery_pct, t.prev_delivery_pct) }}</td></tr>
-      <tr><td>Avg Lead Time</td><td class="val">{{ fmt(t.lead_time, 'd') }}</td><td class="prev-val">{{ fmt(t.prev_lead_time, 'd') }}</td>
+      <tr><td>Avg Lead Time <span class="target-ref">↓ trend</span></td><td class="val">{{ fmt(t.lead_time, 'd') }}</td><td class="prev-val">{{ fmt(t.prev_lead_time, 'd') }}</td>
         <td class="{{ trend_class(t.lead_time, t.prev_lead_time, False) }}">{{ trend_arrow(t.lead_time, t.prev_lead_time, False) }}</td></tr>
     </tbody>
   </table>
@@ -257,14 +273,16 @@
   <table class="kpi-table">
     <thead><tr><th>Metric</th><th>{{ period_label }}</th><th>{{ prev_period_label }}</th><th>Change</th></tr></thead>
     <tbody>
-      <tr><td>Issues Resolved</td><td class="val">{{ t.issues_resolved|default('—') }}</td><td class="prev-val">{{ t.prev_issues_resolved|default('—') }}</td>
+      <tr><td>Issues Resolved <span class="target-ref">↑ trend</span></td><td class="val">{{ t.issues_resolved|default('—') }}</td><td class="prev-val">{{ t.prev_issues_resolved|default('—') }}</td>
         <td class="{{ trend_class(t.issues_resolved, t.prev_issues_resolved) }}">{{ trend_arrow(t.issues_resolved, t.prev_issues_resolved) }}</td></tr>
-      <tr><td>Scope Change %</td><td class="val">{{ fmt(t.scope_change_pct, '%') }}</td><td class="prev-val">{{ fmt(t.prev_scope_change_pct, '%') }}</td>
+      <tr><td>Scope Change % <span class="target-ref">target &lt;10%</span></td>
+        <td class="{{ target_status(t.scope_change_pct, 'scope_change_pct') }}"><span class="val">{{ fmt(t.scope_change_pct, '%') }}</span></td>
+        <td class="prev-val">{{ fmt(t.prev_scope_change_pct, '%') }}</td>
         <td class="{{ trend_class(t.scope_change_pct, t.prev_scope_change_pct, False) }}">{{ trend_arrow(t.scope_change_pct, t.prev_scope_change_pct, False) }}</td></tr>
       <tr>
-        <td>Story Readiness %</td>
+        <td>Story Readiness % <span class="target-ref">target ≥90%</span></td>
         {% if readiness_valid %}
-        <td class="val">{{ fmt(t.readiness_pct, '%') }}</td>
+        <td class="{{ target_status(t.readiness_pct, 'readiness_pct') }}"><span class="val">{{ fmt(t.readiness_pct, '%') }}</span></td>
         <td class="prev-val">{{ fmt(t.prev_readiness_pct, '%') }}</td>
         <td class="{{ trend_class(t.readiness_pct, t.prev_readiness_pct) }}">{{ trend_arrow(t.readiness_pct, t.prev_readiness_pct) }}</td>
         {% else %}<td colspan="3" class="neutral">N/A — tracking started Q2 2026</td>{% endif %}

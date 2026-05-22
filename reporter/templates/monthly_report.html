@@ -21,6 +21,13 @@
     </div>
   </div>
 
+  <div class="framework-box">
+    <strong>Operational Improvement Framework</strong> — monthly pulse on <strong>Quality</strong> (bug inflow &amp; resolution) and
+    <strong>Transparency</strong> (throughput, lead time). Velocity &amp; Delivery % are sprint-aligned quarterly metrics.
+    Key focus: <span class="issue-tag">ISS-003</span>QA bottleneck &nbsp;·&nbsp;
+    <span class="issue-tag">ISS-005</span>Release quality
+  </div>
+
   <div class="highlight-row">
     <div class="highlight-box hl-qual">
       <div class="hl-number">{{ dept.bugs_created|default('—') }}</div>
@@ -89,7 +96,7 @@
 
   <div class="section-title section-transparency">Throughput &amp; Flow</div>
   <table class="kpi-table">
-    <thead><tr><th>Team</th><th>Issues Resolved</th><th>Avg Lead Time (days)</th></tr></thead>
+    <thead><tr><th>Team</th><th>Issues Resolved</th><th>Avg Lead Time (days)<span class="target-ref">↓ trend</span></th></tr></thead>
     <tbody>
       {% for t in teams %}
       <tr>

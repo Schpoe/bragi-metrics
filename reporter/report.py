@@ -29,6 +29,22 @@ TEAMS = q.TEAMS
 TEAM_COLORS = {"STORE": "#4e79a7", "AAONE": "#f28e2b", "AATWO": "#59a14f", "CONNECT": "#e15759"}
 MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
 
+# KPI targets from the Operational Improvement Framework
+KPI_TARGETS = {
+    "delivery_pct":     {"target": 80,  "op": "gte", "label": "≥80%"},
+    "scope_change_pct": {"target": 10,  "op": "lt",  "label": "<10%"},
+    "readiness_pct":    {"target": 90,  "op": "gte", "label": "≥90%"},
+}
+
+# Active improvement initiatives (ISS register) shown in exec reports
+ACTIVE_ISSUES = [
+    ("ISS-001", "Unreliable sprint planning"),
+    ("ISS-002", "A-Gate items entering sprints incomplete"),
+    ("ISS-003", "QA bottleneck inflating lead time & bug count"),
+    ("ISS-004", "Mid-sprint scope creep"),
+    ("ISS-005", "Release quality & incomplete test evidence"),
+]
+
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -59,6 +75,19 @@ def fmt(val, suffix="", decimals=1):
     if val is None:
         return "—"
     return f"{float(val):.{decimals}f}{suffix}"
+
+
+def target_status(val, metric_key):
+    """Returns 'good', 'bad', or 'neutral' relative to the KPI target."""
+    t = KPI_TARGETS.get(metric_key)
+    if t is None or val is None:
+        return "neutral"
+    v = float(val)
+    if t["op"] == "gte":
+        return "good" if v >= t["target"] else "bad"
+    if t["op"] == "lt":
+        return "good" if v < t["target"] else "bad"
+    return "neutral"
 
 
 def dept_sum(rows, field):
@@ -252,7 +281,10 @@ def build_monthly_data(conn, yr, m):
 def render_pdf(data, report_type, out_path):
     tpl_dir = Path(__file__).parent / "templates"
     env = Environment(loader=FileSystemLoader(str(tpl_dir)))
-    env.globals.update(trend_arrow=trend_arrow, trend_class=trend_class, fmt=fmt)
+    env.globals.update(
+        trend_arrow=trend_arrow, trend_class=trend_class, fmt=fmt,
+        target_status=target_status, kpi_targets=KPI_TARGETS, active_issues=ACTIVE_ISSUES,
+    )
     tpl_name = "quarterly_report.html" if report_type == "quarterly" else "monthly_report.html"
     html_str = env.get_template(tpl_name).render(**data)
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
