@@ -2,7 +2,7 @@
   "id": null,
   "uid": "jira-dept-overview",
   "title": "Department Overview",
-  "description": "Quarterly performance across STORE, AAONE, AATWO, CONNECT \u2014 efficiency, quality, transparency.",
+  "description": "Quarterly performance across STORE, AAONE, AATWO, CONNECT — efficiency, quality, transparency.",
   "tags": [
     "department",
     "quarterly",
@@ -90,7 +90,7 @@
       "id": 1,
       "title": "Data Age",
       "type": "stat",
-      "description": "Hours since last Jira sync. Green \u2264 12 h \u00b7 Yellow 12\u201324 h \u00b7 Red > 24 h.",
+      "description": "Hours since last Jira sync. Green ≤ 12 h · Yellow 12–24 h · Red > 24 h.",
       "gridPos": {
         "x": 0,
         "y": 0,
@@ -168,7 +168,7 @@
       },
       "id": 2,
       "panels": [],
-      "title": "Department Overview \u2014 $quarter",
+      "title": "Department Overview — $quarter",
       "type": "row"
     },
     {
@@ -176,7 +176,7 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "Total story points delivered by department this quarter.",
+      "description": "Total story points delivered by all 4 teams combined in this quarter. Counts SP from sprint_scope_final where was_completed=TRUE, for closed sprints starting in the selected quarter. Sprint-to-team mapping uses the project key that appears most in that sprint's issues.",
       "id": 3,
       "title": "SP Delivered",
       "type": "stat",
@@ -239,7 +239,7 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "% of committed SP delivered across all teams.",
+      "description": "Percentage of committed story points delivered this quarter across all teams. Committed = issues not punted (was_punted=FALSE). Delivered = issues completed (was_completed=TRUE). Lower values mean more scope was dropped mid-sprint.",
       "id": 4,
       "title": "Delivery %",
       "type": "stat",
@@ -310,7 +310,7 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "New bugs logged across all teams this quarter.",
+      "description": "Total bug issues created by all 4 teams in the selected quarter, by creation date. Counts all bugs regardless of current resolution status. Use this as a leading quality signal.",
       "id": 5,
       "title": "Bugs Created",
       "type": "stat",
@@ -381,9 +381,9 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "% of bugs created this quarter also resolved within the same quarter.",
+      "description": "Total bugs resolved (closed/done) in the selected quarter across all teams, based on resolved_at date. Counts bugs regardless of when they were originally created — reflects the team's bug-fixing throughput in the quarter.",
       "id": 6,
-      "title": "Bug Resolution %",
+      "title": "Bugs Resolved",
       "type": "stat",
       "gridPos": {
         "x": 12,
@@ -397,21 +397,13 @@
             "mode": "thresholds"
           },
           "mappings": [],
-          "unit": "percent",
+          "unit": "",
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "red",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 60
-              },
-              {
                 "color": "green",
-                "value": 80
+                "value": null
               }
             ]
           }
@@ -442,7 +434,7 @@
           },
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT ROUND(100.0*COUNT(*) FILTER(WHERE i.resolved_at IS NOT NULL AND EXTRACT(YEAR FROM i.resolved_at)::int = EXTRACT(YEAR FROM i.created_at)::int AND EXTRACT(QUARTER FROM i.resolved_at)::int = EXTRACT(QUARTER FROM i.created_at)::int)/NULLIF(COUNT(*),0),1) AS value\nFROM issues i WHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT') AND i.issue_type='Bug'\n  AND (EXTRACT(YEAR FROM i.created_at)::int = SPLIT_PART('$quarter','-Q',1)::int AND EXTRACT(QUARTER FROM i.created_at)::int = SPLIT_PART('$quarter','-Q',2)::int)",
+          "rawSql": "SELECT COUNT(*)::int AS value\nFROM issues i\nWHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT')\n  AND i.issue_type = 'Bug'\n  AND i.resolved_at IS NOT NULL\n  AND (EXTRACT(YEAR FROM i.resolved_at)::int = SPLIT_PART('$quarter','-Q',1)::int AND EXTRACT(QUARTER FROM i.resolved_at)::int = SPLIT_PART('$quarter','-Q',2)::int)",
           "refId": "A"
         }
       ]
@@ -452,7 +444,7 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "% of Stories/Tasks/Improvements with SP + AC + assignee. Only shown for quarters >= $readiness_valid_from (when tracking was introduced).",
+      "description": "Percentage of Stories, Tasks and Improvements created this quarter that had story points, acceptance criteria AND an assignee set. Measures how well-defined work items were before starting.\n\n⚠ Only shown for quarters ≥ $readiness_valid_from. Before that, the acceptance_criteria field was backfilled from current state and does not reflect historical values.",
       "id": 7,
       "title": "Story Readiness %",
       "type": "stat",
@@ -523,7 +515,7 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "% of resolved issues with a QASE test link. Only shown for quarters >= $readiness_valid_from (when tracking was introduced).",
+      "description": "Percentage of resolved issues (non-Epic, non-Sub-task) with a linked QASE test case.\n\n⚠ Only shown for quarters ≥ $readiness_valid_from. Before that, the QASE link field was not synced and reflects current state rather than the state at resolution time.",
       "id": 8,
       "title": "QASE Coverage %",
       "type": "stat",
@@ -611,7 +603,7 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "Avg story points delivered per sprint per team. Blue = selected quarter, gray = previous quarter.",
+      "description": "Average story points delivered per closed sprint, per team. Only sprints starting in the selected quarter are included. Sprint-to-team mapping uses the project key that appears most in that sprint's issues.\n\nBlue = selected quarter · Gray = previous quarter.",
       "id": 11,
       "title": "Avg Velocity (SP/sprint)",
       "type": "barchart",
@@ -716,9 +708,9 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "% of committed SP delivered per team.",
+      "description": "Percentage of committed story points delivered per team. Committed SP = issues not punted; Delivered SP = issues marked completed. Shows per-team predictability and sprint reliability.\n\nBlue = selected quarter · Gray = previous quarter.",
       "id": 12,
-      "title": "Delivery % (Committed \u2192 Delivered)",
+      "title": "Delivery % (Committed → Delivered)",
       "type": "barchart",
       "gridPos": {
         "x": 8,
@@ -821,7 +813,7 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "Average days from issue creation to resolution.",
+      "description": "Average calendar days from issue creation to resolution, per team. Excludes Epics, Sub-tasks, and Obsolete/Won't Do issues. Lower lead time = faster flow. Issues resolved in the selected quarter are included.\n\nBlue = selected quarter · Gray = previous quarter.",
       "id": 13,
       "title": "Avg Lead Time (days)",
       "type": "barchart",
@@ -943,7 +935,7 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "New bugs per team this quarter, stacked by priority.",
+      "description": "Bugs created per team this quarter, stacked by priority (Blocker/Critical/High/Medium/Low). Based on creation date.\n\n⚠ Priority reflects the current value on the issue. Historical priority changes are not tracked, so older quarters may show minor drift if priorities were changed after creation.",
       "id": 21,
       "title": "Bugs Created by Priority",
       "type": "barchart",
@@ -1123,9 +1115,9 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "% of bugs created this quarter also resolved within the same quarter.",
+      "description": "Number of bugs resolved (closed) per team in the selected quarter, by resolved_at date. Counts all bugs resolved in the period regardless of when they were originally created. Measures bug-fixing throughput.\n\nBlue = selected quarter · Gray = previous quarter.",
       "id": 22,
-      "title": "Bug Resolution %",
+      "title": "Bugs Resolved",
       "type": "barchart",
       "gridPos": {
         "x": 8,
@@ -1207,7 +1199,7 @@
           },
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT i.project_key AS metric,\n  ROUND(100.0*COUNT(*) FILTER(WHERE i.resolved_at IS NOT NULL AND EXTRACT(YEAR FROM i.resolved_at)::int = EXTRACT(YEAR FROM i.created_at)::int AND EXTRACT(QUARTER FROM i.resolved_at)::int = EXTRACT(QUARTER FROM i.created_at)::int)/NULLIF(COUNT(*),0),1) AS \"This Q\"\nFROM issues i\nWHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT') AND i.issue_type='Bug' AND (EXTRACT(YEAR FROM i.created_at)::int = SPLIT_PART('$quarter','-Q',1)::int AND EXTRACT(QUARTER FROM i.created_at)::int = SPLIT_PART('$quarter','-Q',2)::int)\nGROUP BY i.project_key ORDER BY i.project_key",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(*)::int AS \"This Q\"\nFROM issues i\nWHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT')\n  AND i.issue_type = 'Bug' AND i.resolved_at IS NOT NULL\n  AND (EXTRACT(YEAR FROM i.resolved_at)::int = SPLIT_PART('$quarter','-Q',1)::int AND EXTRACT(QUARTER FROM i.resolved_at)::int = SPLIT_PART('$quarter','-Q',2)::int)\nGROUP BY i.project_key ORDER BY i.project_key",
           "refId": "A"
         },
         {
@@ -1217,7 +1209,7 @@
           },
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT i.project_key AS metric,\n  ROUND(100.0*COUNT(*) FILTER(WHERE i.resolved_at IS NOT NULL AND EXTRACT(YEAR FROM i.resolved_at)::int = EXTRACT(YEAR FROM i.created_at)::int AND EXTRACT(QUARTER FROM i.resolved_at)::int = EXTRACT(QUARTER FROM i.created_at)::int)/NULLIF(COUNT(*),0),1) AS \"Prev Q\"\nFROM issues i\nWHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT') AND i.issue_type='Bug' AND (EXTRACT(YEAR FROM i.created_at)::int = EXTRACT(YEAR FROM (MAKE_DATE(SPLIT_PART('$quarter','-Q',1)::int,(SPLIT_PART('$quarter','-Q',2)::int-1)*3+1,1) - INTERVAL '3 months'))::int AND EXTRACT(QUARTER FROM i.created_at)::int = EXTRACT(QUARTER FROM (MAKE_DATE(SPLIT_PART('$quarter','-Q',1)::int,(SPLIT_PART('$quarter','-Q',2)::int-1)*3+1,1) - INTERVAL '3 months'))::int)\nGROUP BY i.project_key ORDER BY i.project_key",
+          "rawSql": "SELECT i.project_key AS metric, COUNT(*)::int AS \"Prev Q\"\nFROM issues i\nWHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT')\n  AND i.issue_type = 'Bug' AND i.resolved_at IS NOT NULL\n  AND (EXTRACT(YEAR FROM i.resolved_at)::int = EXTRACT(YEAR FROM (MAKE_DATE(SPLIT_PART('$quarter','-Q',1)::int,(SPLIT_PART('$quarter','-Q',2)::int-1)*3+1,1) - INTERVAL '3 months'))::int AND EXTRACT(QUARTER FROM i.resolved_at)::int = EXTRACT(QUARTER FROM (MAKE_DATE(SPLIT_PART('$quarter','-Q',1)::int,(SPLIT_PART('$quarter','-Q',2)::int-1)*3+1,1) - INTERVAL '3 months'))::int)\nGROUP BY i.project_key ORDER BY i.project_key",
           "refId": "B"
         }
       ],
@@ -1228,7 +1220,7 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "% of resolved issues with QASE test link, per team. Only shown for quarters >= $readiness_valid_from (when tracking was introduced).",
+      "description": "Percentage of resolved issues with a linked QASE test case, per team.\n\n⚠ Only shown for quarters ≥ $readiness_valid_from. The has_qase_link field was not synced before Q2 2026.\n\nBlue = selected quarter · Gray = previous quarter.",
       "id": 23,
       "title": "QASE Coverage %",
       "type": "barchart",
@@ -1350,7 +1342,7 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "% of Stories/Tasks/Improvements with SP + AC + assignee at creation. Only shown for quarters >= $readiness_valid_from (when tracking was introduced).",
+      "description": "Percentage of Stories/Tasks/Improvements with story points + acceptance criteria + assignee, per team. Measures process discipline at work-item creation.\n\n⚠ Only shown for quarters ≥ $readiness_valid_from. The has_acceptance_criteria field was backfilled and does not reflect historical state before that quarter.\n\nBlue = selected quarter · Gray = previous quarter.",
       "id": 31,
       "title": "Story Readiness %",
       "type": "barchart",
@@ -1455,7 +1447,7 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "Mid-sprint additions as % of initial sprint scope.",
+      "description": "Percentage of mid-sprint scope additions relative to initial sprint commitment, per team. Formula: issues added after sprint start / issues in initial scope × 100. Higher rate = more unplanned work pulled in.\n\nBlue = selected quarter · Gray = previous quarter.",
       "id": 32,
       "title": "Scope Change Rate %",
       "type": "barchart",
@@ -1560,7 +1552,7 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "Count of non-epic/sub-task issues resolved per team.",
+      "description": "Total non-Epic/Sub-task issues resolved per team in the selected quarter, by resolved_at date. Excludes Obsolete/Won't Do. Measures delivery throughput as item count (not SP). Use alongside Velocity for a fuller picture.\n\nBlue = selected quarter · Gray = previous quarter.",
       "id": 33,
       "title": "Issues Resolved (Throughput)",
       "type": "barchart",
@@ -1683,8 +1675,8 @@
         "uid": "jira-metrics-pg"
       },
       "id": 41,
-      "title": "Team Scorecard \u2014 $quarter",
-      "description": "All key metrics per team for selected quarter. Dept Total = aggregate across all 4 teams.",
+      "title": "Team Scorecard — $quarter",
+      "description": "Summary of all key metrics per team for the selected quarter.\n\n• Resolved = non-Epic/Sub-task issues resolved in the quarter\n• Bugs = bugs created in the quarter\n• Bugs Resolved = bugs resolved in the quarter (by resolved_at)\n• Readiness % = % of Stories/Tasks/Improvements with SP + AC + assignee (only valid from $readiness_valid_from)\n• QASE % = % resolved issues with QASE link (only valid from $readiness_valid_from)\n• Lead Time = avg days from creation to resolution\n\nDept Total = aggregate across all 4 teams.",
       "type": "table",
       "gridPos": {
         "x": 0,
@@ -1743,7 +1735,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "Bug Res %"
+              "options": "Bugs Resolved"
             },
             "properties": [
               {
@@ -1891,7 +1883,378 @@
           },
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT\n  i.project_key AS \"Team\",\n  COUNT(*) FILTER(WHERE i.issue_type NOT IN ('Epic','Sub-task') AND i.resolved_at IS NOT NULL) AS \"Resolved\",\n  COUNT(*) FILTER(WHERE i.issue_type='Bug') AS \"Bugs\",\n  ROUND(100.0*COUNT(*) FILTER(WHERE i.issue_type='Bug' AND i.resolved_at IS NOT NULL AND EXTRACT(YEAR FROM i.resolved_at)::int = EXTRACT(YEAR FROM i.created_at)::int AND EXTRACT(QUARTER FROM i.resolved_at)::int = EXTRACT(QUARTER FROM i.created_at)::int)\n    /NULLIF(COUNT(*) FILTER(WHERE i.issue_type='Bug'),0),1) AS \"Bug Res %\",\n  CASE WHEN (SPLIT_PART('$quarter','-Q',1)::int > SPLIT_PART('$readiness_valid_from','-Q',1)::int OR (SPLIT_PART('$quarter','-Q',1)::int = SPLIT_PART('$readiness_valid_from','-Q',1)::int AND SPLIT_PART('$quarter','-Q',2)::int >= SPLIT_PART('$readiness_valid_from','-Q',2)::int)) THEN\n  ROUND(100.0*COUNT(*) FILTER(WHERE i.issue_type IN ('Story','Task','Improvement')\n    AND i.story_points IS NOT NULL AND COALESCE(i.has_acceptance_criteria,FALSE)=TRUE AND i.assignee IS NOT NULL)\n    /NULLIF(COUNT(*) FILTER(WHERE i.issue_type IN ('Story','Task','Improvement')),0),1)\n  ELSE NULL END AS \"Readiness %\",\n  CASE WHEN (SPLIT_PART('$quarter','-Q',1)::int > SPLIT_PART('$readiness_valid_from','-Q',1)::int OR (SPLIT_PART('$quarter','-Q',1)::int = SPLIT_PART('$readiness_valid_from','-Q',1)::int AND SPLIT_PART('$quarter','-Q',2)::int >= SPLIT_PART('$readiness_valid_from','-Q',2)::int)) THEN\n  ROUND(100.0*COUNT(*) FILTER(WHERE i.has_qase_link=TRUE)\n    /NULLIF(COUNT(*) FILTER(WHERE i.has_qase_link IS NOT NULL),0),1)\n  ELSE NULL END AS \"QASE %\",\n  ROUND(AVG(EXTRACT(EPOCH FROM (i.resolved_at-i.created_at))/86400.0) FILTER(WHERE i.resolved_at IS NOT NULL AND i.issue_type NOT IN ('Epic','Sub-task')),1) AS \"Lead Time (d)\"\nFROM issues i\nWHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT') AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND (EXTRACT(YEAR FROM i.created_at)::int = SPLIT_PART('$quarter','-Q',1)::int AND EXTRACT(QUARTER FROM i.created_at)::int = SPLIT_PART('$quarter','-Q',2)::int)\nGROUP BY i.project_key\nUNION ALL\nSELECT 'DEPT TOTAL',\n  COUNT(*) FILTER(WHERE i.issue_type NOT IN ('Epic','Sub-task') AND i.resolved_at IS NOT NULL),\n  COUNT(*) FILTER(WHERE i.issue_type='Bug'),\n  ROUND(100.0*COUNT(*) FILTER(WHERE i.issue_type='Bug' AND i.resolved_at IS NOT NULL AND EXTRACT(YEAR FROM i.resolved_at)::int = EXTRACT(YEAR FROM i.created_at)::int AND EXTRACT(QUARTER FROM i.resolved_at)::int = EXTRACT(QUARTER FROM i.created_at)::int)\n    /NULLIF(COUNT(*) FILTER(WHERE i.issue_type='Bug'),0),1),\n  ROUND(100.0*COUNT(*) FILTER(WHERE i.issue_type IN ('Story','Task','Improvement')\n    AND i.story_points IS NOT NULL AND COALESCE(i.has_acceptance_criteria,FALSE)=TRUE AND i.assignee IS NOT NULL)\n    /NULLIF(COUNT(*) FILTER(WHERE i.issue_type IN ('Story','Task','Improvement')),0),1),\n  ROUND(100.0*COUNT(*) FILTER(WHERE i.has_qase_link=TRUE)\n    /NULLIF(COUNT(*) FILTER(WHERE i.has_qase_link IS NOT NULL),0),1),\n  ROUND(AVG(EXTRACT(EPOCH FROM (i.resolved_at-i.created_at))/86400.0) FILTER(WHERE i.resolved_at IS NOT NULL AND i.issue_type NOT IN ('Epic','Sub-task')),1)\nFROM issues i\nWHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT') AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND (EXTRACT(YEAR FROM i.created_at)::int = SPLIT_PART('$quarter','-Q',1)::int AND EXTRACT(QUARTER FROM i.created_at)::int = SPLIT_PART('$quarter','-Q',2)::int)\nORDER BY \"Team\" ",
+          "rawSql": "SELECT\n  i.project_key AS \"Team\",\n  COUNT(*) FILTER(WHERE i.issue_type NOT IN ('Epic','Sub-task') AND i.resolved_at IS NOT NULL) AS \"Resolved\",\n  COUNT(*) FILTER(WHERE i.issue_type='Bug') AS \"Bugs\",\n  COUNT(*) FILTER(WHERE i.issue_type='Bug' AND i.resolved_at IS NOT NULL) AS \"Bugs Resolved\",\n  CASE WHEN (SPLIT_PART('$quarter','-Q',1)::int > SPLIT_PART('$readiness_valid_from','-Q',1)::int OR (SPLIT_PART('$quarter','-Q',1)::int = SPLIT_PART('$readiness_valid_from','-Q',1)::int AND SPLIT_PART('$quarter','-Q',2)::int >= SPLIT_PART('$readiness_valid_from','-Q',2)::int)) THEN\n  ROUND(100.0*COUNT(*) FILTER(WHERE i.issue_type IN ('Story','Task','Improvement')\n    AND i.story_points IS NOT NULL AND COALESCE(i.has_acceptance_criteria,FALSE)=TRUE AND i.assignee IS NOT NULL)\n    /NULLIF(COUNT(*) FILTER(WHERE i.issue_type IN ('Story','Task','Improvement')),0),1)\n  ELSE NULL END AS \"Readiness %\",\n  CASE WHEN (SPLIT_PART('$quarter','-Q',1)::int > SPLIT_PART('$readiness_valid_from','-Q',1)::int OR (SPLIT_PART('$quarter','-Q',1)::int = SPLIT_PART('$readiness_valid_from','-Q',1)::int AND SPLIT_PART('$quarter','-Q',2)::int >= SPLIT_PART('$readiness_valid_from','-Q',2)::int)) THEN\n  ROUND(100.0*COUNT(*) FILTER(WHERE i.has_qase_link=TRUE)\n    /NULLIF(COUNT(*) FILTER(WHERE i.has_qase_link IS NOT NULL),0),1)\n  ELSE NULL END AS \"QASE %\",\n  ROUND(AVG(EXTRACT(EPOCH FROM (i.resolved_at-i.created_at))/86400.0) FILTER(WHERE i.resolved_at IS NOT NULL AND i.issue_type NOT IN ('Epic','Sub-task')),1) AS \"Lead Time (d)\"\nFROM issues i\nWHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT') AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND (EXTRACT(YEAR FROM i.created_at)::int = SPLIT_PART('$quarter','-Q',1)::int AND EXTRACT(QUARTER FROM i.created_at)::int = SPLIT_PART('$quarter','-Q',2)::int)\nGROUP BY i.project_key\nUNION ALL\nSELECT 'DEPT TOTAL',\n  COUNT(*) FILTER(WHERE i.issue_type NOT IN ('Epic','Sub-task') AND i.resolved_at IS NOT NULL),\n  COUNT(*) FILTER(WHERE i.issue_type='Bug'),\n  ROUND(100.0*COUNT(*) FILTER(WHERE i.issue_type='Bug' AND i.resolved_at IS NOT NULL)\n    /NULLIF(COUNT(*) FILTER(WHERE i.issue_type='Bug'),0),1),\n  ROUND(100.0*COUNT(*) FILTER(WHERE i.issue_type IN ('Story','Task','Improvement')\n    AND i.story_points IS NOT NULL AND COALESCE(i.has_acceptance_criteria,FALSE)=TRUE AND i.assignee IS NOT NULL)\n    /NULLIF(COUNT(*) FILTER(WHERE i.issue_type IN ('Story','Task','Improvement')),0),1),\n  ROUND(100.0*COUNT(*) FILTER(WHERE i.has_qase_link=TRUE)\n    /NULLIF(COUNT(*) FILTER(WHERE i.has_qase_link IS NOT NULL),0),1),\n  ROUND(AVG(EXTRACT(EPOCH FROM (i.resolved_at-i.created_at))/86400.0) FILTER(WHERE i.resolved_at IS NOT NULL AND i.issue_type NOT IN ('Epic','Sub-task')),1)\nFROM issues i\nWHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT') AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND (EXTRACT(YEAR FROM i.created_at)::int = SPLIT_PART('$quarter','-Q',1)::int AND EXTRACT(QUARTER FROM i.created_at)::int = SPLIT_PART('$quarter','-Q',2)::int)\nORDER BY \"Team\" ",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "datasource": {
+        "type": "datasource",
+        "uid": "grafana"
+      },
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 48
+      },
+      "id": 50,
+      "panels": [],
+      "title": "Trends — All Quarters",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "jira-metrics-pg"
+      },
+      "id": 51,
+      "title": "Velocity Trend (avg SP/sprint)",
+      "description": "Average story points delivered per closed sprint over time, per team. Computed from closed sprints, grouped by start-date quarter.",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 49,
+        "w": 8,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 0,
+            "showPoints": "always",
+            "pointSize": 6,
+            "spanNulls": false
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": [
+            "last"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "11.1.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "WITH sprint_proj AS (\n  SELECT si.sprint_id, i.project_key, COUNT(*) AS cnt\n  FROM sprint_issues si JOIN issues i ON i.key = si.issue_key\n  WHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT')\n  GROUP BY si.sprint_id, i.project_key\n),\nprimary_proj AS (\n  SELECT DISTINCT ON (sprint_id) sprint_id, project_key\n  FROM sprint_proj ORDER BY sprint_id, cnt DESC\n),\nsprint_delivered AS (\n  SELECT sprint_id, SUM(COALESCE(story_points,0)) AS sp\n  FROM sprint_scope_final WHERE was_completed = TRUE GROUP BY sprint_id\n),\nbase AS (\n  SELECT pp.project_key,\n    EXTRACT(YEAR FROM s.start_date)::int AS yr,\n    EXTRACT(QUARTER FROM s.start_date)::int AS q,\n    ROUND(AVG(COALESCE(sd.sp,0)),0) AS val\n  FROM sprints s JOIN primary_proj pp ON pp.sprint_id = s.id\n  LEFT JOIN sprint_delivered sd ON sd.sprint_id = s.id\n  WHERE s.state = 'closed'\n  GROUP BY pp.project_key, yr, q\n)\nSELECT MAKE_DATE(yr,(q-1)*3+1,1)::timestamp AS \"time\",\n  SUM(CASE WHEN project_key='STORE' THEN val END) AS \"STORE\",\n  SUM(CASE WHEN project_key='AAONE' THEN val END) AS \"AAONE\",\n  SUM(CASE WHEN project_key='AATWO' THEN val END) AS \"AATWO\",\n  SUM(CASE WHEN project_key='CONNECT' THEN val END) AS \"CONNECT\"\nFROM base GROUP BY yr, q ORDER BY 1",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "jira-metrics-pg"
+      },
+      "id": 52,
+      "title": "Delivery % Trend",
+      "description": "Percentage of committed story points delivered per quarter, per team. Committed = not punted; Delivered = completed.",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 8,
+        "y": 49,
+        "w": 8,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 0,
+            "showPoints": "always",
+            "pointSize": 6,
+            "spanNulls": false
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": [
+            "last"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "11.1.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "WITH sprint_proj AS (\n  SELECT si.sprint_id, i.project_key, COUNT(*) AS cnt\n  FROM sprint_issues si JOIN issues i ON i.key = si.issue_key\n  WHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT')\n  GROUP BY si.sprint_id, i.project_key\n),\nprimary_proj AS (\n  SELECT DISTINCT ON (sprint_id) sprint_id, project_key\n  FROM sprint_proj ORDER BY sprint_id, cnt DESC\n),\nsprint_committed AS (\n  SELECT sprint_id, SUM(COALESCE(story_points,0)) AS sp\n  FROM sprint_scope_final WHERE was_punted = FALSE GROUP BY sprint_id\n),\nsprint_delivered AS (\n  SELECT sprint_id, SUM(COALESCE(story_points,0)) AS sp\n  FROM sprint_scope_final WHERE was_completed = TRUE GROUP BY sprint_id\n),\nbase AS (\n  SELECT pp.project_key,\n    EXTRACT(YEAR FROM s.start_date)::int AS yr,\n    EXTRACT(QUARTER FROM s.start_date)::int AS q,\n    ROUND(100.0*SUM(COALESCE(sd.sp,0))/NULLIF(SUM(COALESCE(sc.sp,0)),0),1) AS val\n  FROM sprints s JOIN primary_proj pp ON pp.sprint_id = s.id\n  LEFT JOIN sprint_committed sc ON sc.sprint_id = s.id\n  LEFT JOIN sprint_delivered sd ON sd.sprint_id = s.id\n  WHERE s.state = 'closed'\n  GROUP BY pp.project_key, yr, q\n)\nSELECT MAKE_DATE(yr,(q-1)*3+1,1)::timestamp AS \"time\",\n  SUM(CASE WHEN project_key='STORE' THEN val END) AS \"STORE\",\n  SUM(CASE WHEN project_key='AAONE' THEN val END) AS \"AAONE\",\n  SUM(CASE WHEN project_key='AATWO' THEN val END) AS \"AATWO\",\n  SUM(CASE WHEN project_key='CONNECT' THEN val END) AS \"CONNECT\"\nFROM base GROUP BY yr, q ORDER BY 1",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "jira-metrics-pg"
+      },
+      "id": 53,
+      "title": "Lead Time Trend (avg days)",
+      "description": "Average calendar days from issue creation to resolution per quarter, per team. Excludes Epics, Sub-tasks, and Obsolete/Won't Do.",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 16,
+        "y": 49,
+        "w": 8,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 0,
+            "showPoints": "always",
+            "pointSize": 6,
+            "spanNulls": false
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": [
+            "last"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "11.1.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "WITH base AS (\n  SELECT i.project_key,\n    EXTRACT(YEAR FROM i.resolved_at)::int AS yr,\n    EXTRACT(QUARTER FROM i.resolved_at)::int AS q,\n    ROUND(AVG(EXTRACT(EPOCH FROM (i.resolved_at-i.created_at))/86400.0),1) AS val\n  FROM issues i\n  WHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT')\n    AND i.issue_type NOT IN ('Epic','Sub-task')\n    AND i.resolved_at IS NOT NULL\n    AND LOWER(i.status) NOT IN ('obsolete','won''t do','obsolete / won''t do','obsolete / won')\n  GROUP BY i.project_key, yr, q\n)\nSELECT MAKE_DATE(yr,(q-1)*3+1,1)::timestamp AS \"time\",\n  SUM(CASE WHEN project_key='STORE' THEN val END) AS \"STORE\",\n  SUM(CASE WHEN project_key='AAONE' THEN val END) AS \"AAONE\",\n  SUM(CASE WHEN project_key='AATWO' THEN val END) AS \"AATWO\",\n  SUM(CASE WHEN project_key='CONNECT' THEN val END) AS \"CONNECT\"\nFROM base GROUP BY yr, q ORDER BY 1",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "jira-metrics-pg"
+      },
+      "id": 54,
+      "title": "Bugs Created Trend",
+      "description": "Number of bugs created per quarter, per team. Based on issue creation date.",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 58,
+        "w": 8,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 0,
+            "showPoints": "always",
+            "pointSize": 6,
+            "spanNulls": false
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": [
+            "last"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "11.1.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "WITH base AS (\n  SELECT i.project_key,\n    EXTRACT(YEAR FROM i.created_at)::int AS yr,\n    EXTRACT(QUARTER FROM i.created_at)::int AS q,\n    COUNT(*)::float AS val\n  FROM issues i\n  WHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT')\n    AND i.issue_type = 'Bug'\n  GROUP BY i.project_key, yr, q\n)\nSELECT MAKE_DATE(yr,(q-1)*3+1,1)::timestamp AS \"time\",\n  SUM(CASE WHEN project_key='STORE' THEN val END) AS \"STORE\",\n  SUM(CASE WHEN project_key='AAONE' THEN val END) AS \"AAONE\",\n  SUM(CASE WHEN project_key='AATWO' THEN val END) AS \"AATWO\",\n  SUM(CASE WHEN project_key='CONNECT' THEN val END) AS \"CONNECT\"\nFROM base GROUP BY yr, q ORDER BY 1",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "jira-metrics-pg"
+      },
+      "id": 55,
+      "title": "Bugs Resolved Trend",
+      "description": "Number of bugs resolved per quarter, per team. Based on resolved_at date. Counts all bugs resolved in the period regardless of when created.",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 8,
+        "y": 58,
+        "w": 8,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 0,
+            "showPoints": "always",
+            "pointSize": 6,
+            "spanNulls": false
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": [
+            "last"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "11.1.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "WITH base AS (\n  SELECT i.project_key,\n    EXTRACT(YEAR FROM i.resolved_at)::int AS yr,\n    EXTRACT(QUARTER FROM i.resolved_at)::int AS q,\n    COUNT(*)::float AS val\n  FROM issues i\n  WHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT')\n    AND i.issue_type = 'Bug'\n    AND i.resolved_at IS NOT NULL\n  GROUP BY i.project_key, yr, q\n)\nSELECT MAKE_DATE(yr,(q-1)*3+1,1)::timestamp AS \"time\",\n  SUM(CASE WHEN project_key='STORE' THEN val END) AS \"STORE\",\n  SUM(CASE WHEN project_key='AAONE' THEN val END) AS \"AAONE\",\n  SUM(CASE WHEN project_key='AATWO' THEN val END) AS \"AATWO\",\n  SUM(CASE WHEN project_key='CONNECT' THEN val END) AS \"CONNECT\"\nFROM base GROUP BY yr, q ORDER BY 1",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "jira-metrics-pg"
+      },
+      "id": 56,
+      "title": "Issues Resolved Trend (Throughput)",
+      "description": "Total non-Epic/Sub-task issues resolved per quarter, per team. Based on resolved_at date. Measures delivery throughput as item count.",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 16,
+        "y": 58,
+        "w": 8,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 0,
+            "showPoints": "always",
+            "pointSize": 6,
+            "spanNulls": false
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": [
+            "last"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "11.1.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "WITH base AS (\n  SELECT i.project_key,\n    EXTRACT(YEAR FROM i.resolved_at)::int AS yr,\n    EXTRACT(QUARTER FROM i.resolved_at)::int AS q,\n    COUNT(*)::float AS val\n  FROM issues i\n  WHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT')\n    AND i.issue_type NOT IN ('Epic','Sub-task')\n    AND i.resolved_at IS NOT NULL\n    AND LOWER(i.status) NOT IN ('obsolete','won''t do','obsolete / won''t do','obsolete / won')\n  GROUP BY i.project_key, yr, q\n)\nSELECT MAKE_DATE(yr,(q-1)*3+1,1)::timestamp AS \"time\",\n  SUM(CASE WHEN project_key='STORE' THEN val END) AS \"STORE\",\n  SUM(CASE WHEN project_key='AAONE' THEN val END) AS \"AAONE\",\n  SUM(CASE WHEN project_key='AATWO' THEN val END) AS \"AATWO\",\n  SUM(CASE WHEN project_key='CONNECT' THEN val END) AS \"CONNECT\"\nFROM base GROUP BY yr, q ORDER BY 1",
           "refId": "A"
         }
       ]
