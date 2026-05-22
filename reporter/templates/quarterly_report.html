@@ -22,11 +22,11 @@
   </div>
 
   <div class="framework-box">
-    <strong>Operational Improvement Framework</strong> — tracking progress across three dimensions:
+    <strong>Operational Improvement Roadmap</strong> — metrics track progress across three dimensions:
     <strong>Efficiency</strong> (velocity, delivery rate, lead time) ·
     <strong>Quality</strong> (bug inflow/resolution, release readiness) ·
     <strong>Transparency</strong> (scope discipline, story readiness, throughput).
-    <div class="issue-list">Active improvement initiatives:
+    <div class="issue-list">Active OPEX initiatives:
       {% for code, desc in active_issues %}
       <span class="issue-tag">{{ code }}</span>{{ desc }}{% if not loop.last %} &nbsp;·&nbsp; {% endif %}
       {% endfor %}
@@ -193,7 +193,7 @@
 
   <p class="note">Values in parentheses = {{ prev_period_label }}. Green ↑↓ = improvement · Red ↑↓ = decline.
   Colored cells = vs framework target (green = on target, red = off target).
-  Targets: Delivery % ≥80% (ISS-003/004) · Scope Change % &lt;10% (ISS-001/004) · Story Readiness % ≥90% (ISS-002).</p>
+  Targets: Delivery % ≥80% (R1/R2) · Scope Change % &lt;10% (R2) · Story Readiness % ≥90% (R1).</p>
   <div class="report-footer">
     <span>Bragi Metrics · Jira data · Auto-generated</span>
     <span>{{ generated_at }}</span>

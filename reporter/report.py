@@ -36,13 +36,13 @@ KPI_TARGETS = {
     "readiness_pct":    {"target": 90,  "op": "gte", "label": "≥90%"},
 }
 
-# Active improvement initiatives (ISS register) shown in exec reports
+# Active OPEX improvement initiatives shown in exec reports
 ACTIVE_ISSUES = [
-    ("ISS-001", "Unreliable sprint planning"),
-    ("ISS-002", "A-Gate items entering sprints incomplete"),
-    ("ISS-003", "QA bottleneck inflating lead time & bug count"),
-    ("ISS-004", "Mid-sprint scope creep"),
-    ("ISS-005", "Release quality & incomplete test evidence"),
+    ("R1", "Requirements & Gate Quality"),
+    ("R2", "Planning Predictability & Change Control"),
+    ("R3b", "Release Quality & QA"),
+    ("R4", "Accountability, Culture & Handover"),
+    ("R5", "Config-as-Code & CMS Automation"),
 ]
 
 
