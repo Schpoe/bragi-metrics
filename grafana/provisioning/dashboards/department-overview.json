@@ -452,7 +452,7 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "% of Stories/Tasks/Improvements with SP + AC + assignee.",
+      "description": "% of Stories/Tasks/Improvements with SP + AC + assignee. Only shown for quarters >= $readiness_valid_from (when tracking was introduced).",
       "id": 7,
       "title": "Story Readiness %",
       "type": "stat",
@@ -513,7 +513,7 @@
           },
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT ROUND(100.0*COUNT(*) FILTER(WHERE i.story_points IS NOT NULL\n  AND COALESCE(i.has_acceptance_criteria,FALSE)=TRUE AND i.assignee IS NOT NULL)/NULLIF(COUNT(*),0),1) AS value\nFROM issues i WHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT')\n  AND i.issue_type IN ('Story','Task','Improvement') AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won')\n  AND (EXTRACT(YEAR FROM i.created_at)::int = SPLIT_PART('$quarter','-Q',1)::int AND EXTRACT(QUARTER FROM i.created_at)::int = SPLIT_PART('$quarter','-Q',2)::int)",
+          "rawSql": "SELECT * FROM (SELECT ROUND(100.0*COUNT(*) FILTER(WHERE i.story_points IS NOT NULL\n  AND COALESCE(i.has_acceptance_criteria,FALSE)=TRUE AND i.assignee IS NOT NULL)/NULLIF(COUNT(*),0),1) AS value\nFROM issues i WHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT')\n  AND i.issue_type IN ('Story','Task','Improvement') AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won')\n  AND (EXTRACT(YEAR FROM i.created_at)::int = SPLIT_PART('$quarter','-Q',1)::int AND EXTRACT(QUARTER FROM i.created_at)::int = SPLIT_PART('$quarter','-Q',2)::int)) _q WHERE (SPLIT_PART('$quarter','-Q',1)::int > SPLIT_PART('$readiness_valid_from','-Q',1)::int OR (SPLIT_PART('$quarter','-Q',1)::int = SPLIT_PART('$readiness_valid_from','-Q',1)::int AND SPLIT_PART('$quarter','-Q',2)::int >= SPLIT_PART('$readiness_valid_from','-Q',2)::int))",
           "refId": "A"
         }
       ]
@@ -523,7 +523,7 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "% of resolved issues with a QASE test link.",
+      "description": "% of resolved issues with a QASE test link. Only shown for quarters >= $readiness_valid_from (when tracking was introduced).",
       "id": 8,
       "title": "QASE Coverage %",
       "type": "stat",
@@ -584,7 +584,7 @@
           },
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT ROUND(100.0*COUNT(*) FILTER(WHERE i.has_qase_link=TRUE)\n  /NULLIF(COUNT(*) FILTER(WHERE i.has_qase_link IS NOT NULL),0),1) AS value\nFROM issues i WHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT') AND i.issue_type NOT IN ('Epic','Sub-task')\n  AND i.has_qase_link IS NOT NULL AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won')\n  AND (EXTRACT(YEAR FROM i.resolved_at)::int = SPLIT_PART('$quarter','-Q',1)::int AND EXTRACT(QUARTER FROM i.resolved_at)::int = SPLIT_PART('$quarter','-Q',2)::int)",
+          "rawSql": "SELECT * FROM (SELECT ROUND(100.0*COUNT(*) FILTER(WHERE i.has_qase_link=TRUE)\n  /NULLIF(COUNT(*) FILTER(WHERE i.has_qase_link IS NOT NULL),0),1) AS value\nFROM issues i WHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT') AND i.issue_type NOT IN ('Epic','Sub-task')\n  AND i.has_qase_link IS NOT NULL AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won')\n  AND (EXTRACT(YEAR FROM i.resolved_at)::int = SPLIT_PART('$quarter','-Q',1)::int AND EXTRACT(QUARTER FROM i.resolved_at)::int = SPLIT_PART('$quarter','-Q',2)::int)) _q WHERE (SPLIT_PART('$quarter','-Q',1)::int > SPLIT_PART('$readiness_valid_from','-Q',1)::int OR (SPLIT_PART('$quarter','-Q',1)::int = SPLIT_PART('$readiness_valid_from','-Q',1)::int AND SPLIT_PART('$quarter','-Q',2)::int >= SPLIT_PART('$readiness_valid_from','-Q',2)::int))",
           "refId": "A"
         }
       ]
@@ -1228,7 +1228,7 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "% of resolved issues with QASE test link, per team.",
+      "description": "% of resolved issues with QASE test link, per team. Only shown for quarters >= $readiness_valid_from (when tracking was introduced).",
       "id": 23,
       "title": "QASE Coverage %",
       "type": "barchart",
@@ -1312,7 +1312,7 @@
           },
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT i.project_key AS metric,\n  ROUND(100.0*COUNT(*) FILTER(WHERE i.has_qase_link=TRUE)/NULLIF(COUNT(*) FILTER(WHERE i.has_qase_link IS NOT NULL),0),1) AS \"This Q\"\nFROM issues i\nWHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT') AND i.issue_type NOT IN ('Epic','Sub-task')\n  AND i.has_qase_link IS NOT NULL AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND (EXTRACT(YEAR FROM i.resolved_at)::int = SPLIT_PART('$quarter','-Q',1)::int AND EXTRACT(QUARTER FROM i.resolved_at)::int = SPLIT_PART('$quarter','-Q',2)::int)\nGROUP BY i.project_key ORDER BY i.project_key",
+          "rawSql": "SELECT * FROM (SELECT i.project_key AS metric,\n  ROUND(100.0*COUNT(*) FILTER(WHERE i.has_qase_link=TRUE)/NULLIF(COUNT(*) FILTER(WHERE i.has_qase_link IS NOT NULL),0),1) AS \"This Q\"\nFROM issues i\nWHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT') AND i.issue_type NOT IN ('Epic','Sub-task')\n  AND i.has_qase_link IS NOT NULL AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND (EXTRACT(YEAR FROM i.resolved_at)::int = SPLIT_PART('$quarter','-Q',1)::int AND EXTRACT(QUARTER FROM i.resolved_at)::int = SPLIT_PART('$quarter','-Q',2)::int)\nGROUP BY i.project_key ORDER BY i.project_key) _q WHERE (SPLIT_PART('$quarter','-Q',1)::int > SPLIT_PART('$readiness_valid_from','-Q',1)::int OR (SPLIT_PART('$quarter','-Q',1)::int = SPLIT_PART('$readiness_valid_from','-Q',1)::int AND SPLIT_PART('$quarter','-Q',2)::int >= SPLIT_PART('$readiness_valid_from','-Q',2)::int))",
           "refId": "A"
         },
         {
@@ -1322,7 +1322,7 @@
           },
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT i.project_key AS metric,\n  ROUND(100.0*COUNT(*) FILTER(WHERE i.has_qase_link=TRUE)/NULLIF(COUNT(*) FILTER(WHERE i.has_qase_link IS NOT NULL),0),1) AS \"Prev Q\"\nFROM issues i\nWHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT') AND i.issue_type NOT IN ('Epic','Sub-task')\n  AND i.has_qase_link IS NOT NULL AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND (EXTRACT(YEAR FROM i.resolved_at)::int = EXTRACT(YEAR FROM (MAKE_DATE(SPLIT_PART('$quarter','-Q',1)::int,(SPLIT_PART('$quarter','-Q',2)::int-1)*3+1,1) - INTERVAL '3 months'))::int AND EXTRACT(QUARTER FROM i.resolved_at)::int = EXTRACT(QUARTER FROM (MAKE_DATE(SPLIT_PART('$quarter','-Q',1)::int,(SPLIT_PART('$quarter','-Q',2)::int-1)*3+1,1) - INTERVAL '3 months'))::int)\nGROUP BY i.project_key ORDER BY i.project_key",
+          "rawSql": "SELECT * FROM (SELECT i.project_key AS metric,\n  ROUND(100.0*COUNT(*) FILTER(WHERE i.has_qase_link=TRUE)/NULLIF(COUNT(*) FILTER(WHERE i.has_qase_link IS NOT NULL),0),1) AS \"Prev Q\"\nFROM issues i\nWHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT') AND i.issue_type NOT IN ('Epic','Sub-task')\n  AND i.has_qase_link IS NOT NULL AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND (EXTRACT(YEAR FROM i.resolved_at)::int = EXTRACT(YEAR FROM (MAKE_DATE(SPLIT_PART('$quarter','-Q',1)::int,(SPLIT_PART('$quarter','-Q',2)::int-1)*3+1,1) - INTERVAL '3 months'))::int AND EXTRACT(QUARTER FROM i.resolved_at)::int = EXTRACT(QUARTER FROM (MAKE_DATE(SPLIT_PART('$quarter','-Q',1)::int,(SPLIT_PART('$quarter','-Q',2)::int-1)*3+1,1) - INTERVAL '3 months'))::int)\nGROUP BY i.project_key ORDER BY i.project_key) _q WHERE (SPLIT_PART('$quarter','-Q',1)::int > SPLIT_PART('$readiness_valid_from','-Q',1)::int OR (SPLIT_PART('$quarter','-Q',1)::int = SPLIT_PART('$readiness_valid_from','-Q',1)::int AND SPLIT_PART('$quarter','-Q',2)::int >= SPLIT_PART('$readiness_valid_from','-Q',2)::int))",
           "refId": "B"
         }
       ],
@@ -1350,7 +1350,7 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "% of Stories/Tasks/Improvements with SP + AC + assignee at creation.",
+      "description": "% of Stories/Tasks/Improvements with SP + AC + assignee at creation. Only shown for quarters >= $readiness_valid_from (when tracking was introduced).",
       "id": 31,
       "title": "Story Readiness %",
       "type": "barchart",
@@ -1434,7 +1434,7 @@
           },
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT i.project_key AS metric,\n  ROUND(100.0*COUNT(*) FILTER(WHERE i.story_points IS NOT NULL\n    AND COALESCE(i.has_acceptance_criteria,FALSE)=TRUE AND i.assignee IS NOT NULL)\n  /NULLIF(COUNT(*),0),1) AS \"This Q\"\nFROM issues i\nWHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT') AND i.issue_type IN ('Story','Task','Improvement')\n  AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND (EXTRACT(YEAR FROM i.created_at)::int = SPLIT_PART('$quarter','-Q',1)::int AND EXTRACT(QUARTER FROM i.created_at)::int = SPLIT_PART('$quarter','-Q',2)::int)\nGROUP BY i.project_key ORDER BY i.project_key",
+          "rawSql": "SELECT * FROM (SELECT i.project_key AS metric,\n  ROUND(100.0*COUNT(*) FILTER(WHERE i.story_points IS NOT NULL\n    AND COALESCE(i.has_acceptance_criteria,FALSE)=TRUE AND i.assignee IS NOT NULL)\n  /NULLIF(COUNT(*),0),1) AS \"This Q\"\nFROM issues i\nWHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT') AND i.issue_type IN ('Story','Task','Improvement')\n  AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND (EXTRACT(YEAR FROM i.created_at)::int = SPLIT_PART('$quarter','-Q',1)::int AND EXTRACT(QUARTER FROM i.created_at)::int = SPLIT_PART('$quarter','-Q',2)::int)\nGROUP BY i.project_key ORDER BY i.project_key) _q WHERE (SPLIT_PART('$quarter','-Q',1)::int > SPLIT_PART('$readiness_valid_from','-Q',1)::int OR (SPLIT_PART('$quarter','-Q',1)::int = SPLIT_PART('$readiness_valid_from','-Q',1)::int AND SPLIT_PART('$quarter','-Q',2)::int >= SPLIT_PART('$readiness_valid_from','-Q',2)::int))",
           "refId": "A"
         },
         {
@@ -1444,7 +1444,7 @@
           },
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT i.project_key AS metric,\n  ROUND(100.0*COUNT(*) FILTER(WHERE i.story_points IS NOT NULL\n    AND COALESCE(i.has_acceptance_criteria,FALSE)=TRUE AND i.assignee IS NOT NULL)\n  /NULLIF(COUNT(*),0),1) AS \"Prev Q\"\nFROM issues i\nWHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT') AND i.issue_type IN ('Story','Task','Improvement')\n  AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND (EXTRACT(YEAR FROM i.created_at)::int = EXTRACT(YEAR FROM (MAKE_DATE(SPLIT_PART('$quarter','-Q',1)::int,(SPLIT_PART('$quarter','-Q',2)::int-1)*3+1,1) - INTERVAL '3 months'))::int AND EXTRACT(QUARTER FROM i.created_at)::int = EXTRACT(QUARTER FROM (MAKE_DATE(SPLIT_PART('$quarter','-Q',1)::int,(SPLIT_PART('$quarter','-Q',2)::int-1)*3+1,1) - INTERVAL '3 months'))::int)\nGROUP BY i.project_key ORDER BY i.project_key",
+          "rawSql": "SELECT * FROM (SELECT i.project_key AS metric,\n  ROUND(100.0*COUNT(*) FILTER(WHERE i.story_points IS NOT NULL\n    AND COALESCE(i.has_acceptance_criteria,FALSE)=TRUE AND i.assignee IS NOT NULL)\n  /NULLIF(COUNT(*),0),1) AS \"Prev Q\"\nFROM issues i\nWHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT') AND i.issue_type IN ('Story','Task','Improvement')\n  AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND (EXTRACT(YEAR FROM i.created_at)::int = EXTRACT(YEAR FROM (MAKE_DATE(SPLIT_PART('$quarter','-Q',1)::int,(SPLIT_PART('$quarter','-Q',2)::int-1)*3+1,1) - INTERVAL '3 months'))::int AND EXTRACT(QUARTER FROM i.created_at)::int = EXTRACT(QUARTER FROM (MAKE_DATE(SPLIT_PART('$quarter','-Q',1)::int,(SPLIT_PART('$quarter','-Q',2)::int-1)*3+1,1) - INTERVAL '3 months'))::int)\nGROUP BY i.project_key ORDER BY i.project_key) _q WHERE (SPLIT_PART('$quarter','-Q',1)::int > SPLIT_PART('$readiness_valid_from','-Q',1)::int OR (SPLIT_PART('$quarter','-Q',1)::int = SPLIT_PART('$readiness_valid_from','-Q',1)::int AND SPLIT_PART('$quarter','-Q',2)::int >= SPLIT_PART('$readiness_valid_from','-Q',2)::int))",
           "refId": "B"
         }
       ],
@@ -1891,7 +1891,7 @@
           },
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT\n  i.project_key AS \"Team\",\n  COUNT(*) FILTER(WHERE i.issue_type NOT IN ('Epic','Sub-task') AND i.resolved_at IS NOT NULL) AS \"Resolved\",\n  COUNT(*) FILTER(WHERE i.issue_type='Bug') AS \"Bugs\",\n  ROUND(100.0*COUNT(*) FILTER(WHERE i.issue_type='Bug' AND i.resolved_at IS NOT NULL)\n    /NULLIF(COUNT(*) FILTER(WHERE i.issue_type='Bug'),0),1) AS \"Bug Res %\",\n  ROUND(100.0*COUNT(*) FILTER(WHERE i.issue_type IN ('Story','Task','Improvement')\n    AND i.story_points IS NOT NULL AND COALESCE(i.has_acceptance_criteria,FALSE)=TRUE AND i.assignee IS NOT NULL)\n    /NULLIF(COUNT(*) FILTER(WHERE i.issue_type IN ('Story','Task','Improvement')),0),1) AS \"Readiness %\",\n  ROUND(100.0*COUNT(*) FILTER(WHERE i.has_qase_link=TRUE)\n    /NULLIF(COUNT(*) FILTER(WHERE i.has_qase_link IS NOT NULL),0),1) AS \"QASE %\",\n  ROUND(AVG(EXTRACT(EPOCH FROM (i.resolved_at-i.created_at))/86400.0) FILTER(WHERE i.resolved_at IS NOT NULL AND i.issue_type NOT IN ('Epic','Sub-task')),1) AS \"Lead Time (d)\"\nFROM issues i\nWHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT') AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND (EXTRACT(YEAR FROM i.created_at)::int = SPLIT_PART('$quarter','-Q',1)::int AND EXTRACT(QUARTER FROM i.created_at)::int = SPLIT_PART('$quarter','-Q',2)::int)\nGROUP BY i.project_key\nUNION ALL\nSELECT 'DEPT TOTAL',\n  COUNT(*) FILTER(WHERE i.issue_type NOT IN ('Epic','Sub-task') AND i.resolved_at IS NOT NULL),\n  COUNT(*) FILTER(WHERE i.issue_type='Bug'),\n  ROUND(100.0*COUNT(*) FILTER(WHERE i.issue_type='Bug' AND i.resolved_at IS NOT NULL)\n    /NULLIF(COUNT(*) FILTER(WHERE i.issue_type='Bug'),0),1),\n  ROUND(100.0*COUNT(*) FILTER(WHERE i.issue_type IN ('Story','Task','Improvement')\n    AND i.story_points IS NOT NULL AND COALESCE(i.has_acceptance_criteria,FALSE)=TRUE AND i.assignee IS NOT NULL)\n    /NULLIF(COUNT(*) FILTER(WHERE i.issue_type IN ('Story','Task','Improvement')),0),1),\n  ROUND(100.0*COUNT(*) FILTER(WHERE i.has_qase_link=TRUE)\n    /NULLIF(COUNT(*) FILTER(WHERE i.has_qase_link IS NOT NULL),0),1),\n  ROUND(AVG(EXTRACT(EPOCH FROM (i.resolved_at-i.created_at))/86400.0) FILTER(WHERE i.resolved_at IS NOT NULL AND i.issue_type NOT IN ('Epic','Sub-task')),1)\nFROM issues i\nWHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT') AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND (EXTRACT(YEAR FROM i.created_at)::int = SPLIT_PART('$quarter','-Q',1)::int AND EXTRACT(QUARTER FROM i.created_at)::int = SPLIT_PART('$quarter','-Q',2)::int)\nORDER BY \"Team\" ",
+          "rawSql": "SELECT\n  i.project_key AS \"Team\",\n  COUNT(*) FILTER(WHERE i.issue_type NOT IN ('Epic','Sub-task') AND i.resolved_at IS NOT NULL) AS \"Resolved\",\n  COUNT(*) FILTER(WHERE i.issue_type='Bug') AS \"Bugs\",\n  ROUND(100.0*COUNT(*) FILTER(WHERE i.issue_type='Bug' AND i.resolved_at IS NOT NULL)\n    /NULLIF(COUNT(*) FILTER(WHERE i.issue_type='Bug'),0),1) AS \"Bug Res %\",\n  CASE WHEN (SPLIT_PART('$quarter','-Q',1)::int > SPLIT_PART('$readiness_valid_from','-Q',1)::int OR (SPLIT_PART('$quarter','-Q',1)::int = SPLIT_PART('$readiness_valid_from','-Q',1)::int AND SPLIT_PART('$quarter','-Q',2)::int >= SPLIT_PART('$readiness_valid_from','-Q',2)::int)) THEN\n  ROUND(100.0*COUNT(*) FILTER(WHERE i.issue_type IN ('Story','Task','Improvement')\n    AND i.story_points IS NOT NULL AND COALESCE(i.has_acceptance_criteria,FALSE)=TRUE AND i.assignee IS NOT NULL)\n    /NULLIF(COUNT(*) FILTER(WHERE i.issue_type IN ('Story','Task','Improvement')),0),1)\n  ELSE NULL END AS \"Readiness %\",\n  CASE WHEN (SPLIT_PART('$quarter','-Q',1)::int > SPLIT_PART('$readiness_valid_from','-Q',1)::int OR (SPLIT_PART('$quarter','-Q',1)::int = SPLIT_PART('$readiness_valid_from','-Q',1)::int AND SPLIT_PART('$quarter','-Q',2)::int >= SPLIT_PART('$readiness_valid_from','-Q',2)::int)) THEN\n  ROUND(100.0*COUNT(*) FILTER(WHERE i.has_qase_link=TRUE)\n    /NULLIF(COUNT(*) FILTER(WHERE i.has_qase_link IS NOT NULL),0),1)\n  ELSE NULL END AS \"QASE %\",\n  ROUND(AVG(EXTRACT(EPOCH FROM (i.resolved_at-i.created_at))/86400.0) FILTER(WHERE i.resolved_at IS NOT NULL AND i.issue_type NOT IN ('Epic','Sub-task')),1) AS \"Lead Time (d)\"\nFROM issues i\nWHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT') AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND (EXTRACT(YEAR FROM i.created_at)::int = SPLIT_PART('$quarter','-Q',1)::int AND EXTRACT(QUARTER FROM i.created_at)::int = SPLIT_PART('$quarter','-Q',2)::int)\nGROUP BY i.project_key\nUNION ALL\nSELECT 'DEPT TOTAL',\n  COUNT(*) FILTER(WHERE i.issue_type NOT IN ('Epic','Sub-task') AND i.resolved_at IS NOT NULL),\n  COUNT(*) FILTER(WHERE i.issue_type='Bug'),\n  ROUND(100.0*COUNT(*) FILTER(WHERE i.issue_type='Bug' AND i.resolved_at IS NOT NULL)\n    /NULLIF(COUNT(*) FILTER(WHERE i.issue_type='Bug'),0),1),\n  ROUND(100.0*COUNT(*) FILTER(WHERE i.issue_type IN ('Story','Task','Improvement')\n    AND i.story_points IS NOT NULL AND COALESCE(i.has_acceptance_criteria,FALSE)=TRUE AND i.assignee IS NOT NULL)\n    /NULLIF(COUNT(*) FILTER(WHERE i.issue_type IN ('Story','Task','Improvement')),0),1),\n  ROUND(100.0*COUNT(*) FILTER(WHERE i.has_qase_link=TRUE)\n    /NULLIF(COUNT(*) FILTER(WHERE i.has_qase_link IS NOT NULL),0),1),\n  ROUND(AVG(EXTRACT(EPOCH FROM (i.resolved_at-i.created_at))/86400.0) FILTER(WHERE i.resolved_at IS NOT NULL AND i.issue_type NOT IN ('Epic','Sub-task')),1)\nFROM issues i\nWHERE i.project_key IN ('STORE','AAONE','AATWO','CONNECT') AND LOWER(i.status) NOT IN ('obsolete', 'won''t do', 'obsolete / won''t do', 'obsolete / won') AND (EXTRACT(YEAR FROM i.created_at)::int = SPLIT_PART('$quarter','-Q',1)::int AND EXTRACT(QUARTER FROM i.created_at)::int = SPLIT_PART('$quarter','-Q',2)::int)\nORDER BY \"Team\" ",
           "refId": "A"
         }
       ]
@@ -1942,6 +1942,28 @@
         "skipUrlSync": false,
         "sort": 0,
         "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "2026-Q2",
+          "value": "2026-Q2"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "label": "Metrics valid from",
+        "multi": false,
+        "name": "readiness_valid_from",
+        "options": [
+          {
+            "selected": true,
+            "text": "2026-Q2",
+            "value": "2026-Q2"
+          }
+        ],
+        "query": "2026-Q2",
+        "skipUrlSync": false,
+        "type": "textbox"
       }
     ]
   }
