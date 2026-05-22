@@ -28,10 +28,12 @@
   .bad   { color: #d62728; font-weight: 700; }
   .neutral { color: #888; }
 
-  .chart-grid { display: flex; gap: 12px; flex-wrap: nowrap; margin: 8px 0 4px; }
-  .chart-grid img { border: 1px solid #e8e8e8; border-radius: 4px; }
-  .chart-half  { width: calc(50% - 6px); }
-  .chart-third { width: calc(33.3% - 8px); }
+  .chart-grid { width: 100%; margin: 8px 0 4px; font-size: 0; }
+  .chart-grid img { border: 1px solid #e8e8e8; border-radius: 4px; width: 100%; height: auto; display: block; }
+  .chart-half  { display: inline-block; width: 49%; vertical-align: top; margin-right: 1%; font-size: 10px; }
+  .chart-half:last-child { margin-right: 0; }
+  .chart-third { display: inline-block; width: 32%; vertical-align: top; margin-right: 1%; font-size: 10px; }
+  .chart-third:last-child { margin-right: 0; }
 
   .team-card { border: 1px solid #e0e0e0; border-radius: 5px; padding: 12px 14px; margin-bottom: 12px; page-break-inside: avoid; }
   .team-card h2 { font-size: 13px; font-weight: 700; margin-bottom: 8px; border-bottom: 1px solid #eee; padding-bottom: 5px; }

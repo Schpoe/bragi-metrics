@@ -110,7 +110,7 @@ def chart_to_b64(fig):
 
 
 def sparkline(trend_data, title, unit=""):
-    fig, ax = plt.subplots(figsize=(5.2, 2.0))
+    fig, ax = plt.subplots(figsize=(5.5, 2.4))
     labels = [d["label"] for d in trend_data]
     for team in TEAMS:
         vals = [d["vals"].get(team) for d in trend_data]
@@ -127,7 +127,7 @@ def sparkline(trend_data, title, unit=""):
 
 
 def bar_grouped(rows, cur_field, prev_field, title, unit=""):
-    fig, ax = plt.subplots(figsize=(4.8, 2.2))
+    fig, ax = plt.subplots(figsize=(5.5, 2.4))
     teams = [r["team"] for r in rows]
     cur_v = [float(r.get(cur_field) or 0) for r in rows]
     prev_v = [float(r.get(prev_field) or 0) for r in rows]
