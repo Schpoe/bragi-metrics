@@ -253,6 +253,50 @@ If `issue_sprint_history` has no entries for a sprint (history not yet backfille
 - **sprint_history backfill**: on first deployment, `backfill_sprint_history` fetches changelogs for all issues in tracked sprints. Expect 5–30 minutes depending on issue count. Subsequent runs are incremental.
 - **fix_version history backfill**: same incremental pattern. First run can take 60–90 minutes for large instances.
 
+## PDF Reports
+
+The `reporter` service generates monthly and quarterly executive summary PDFs covering Quality, Efficiency, and Transparency dimensions. Reports are written to `./reports/` on the host.
+
+### Generate manually
+
+```bash
+# Previous month (auto-detect)
+docker compose exec reporter python report.py --month auto
+
+# Previous quarter (auto-detect)
+docker compose exec reporter python report.py --quarter auto
+
+# Specific period
+docker compose exec reporter python report.py --month 2026-05
+docker compose exec reporter python report.py --quarter 2026-Q1
+
+# Custom output path
+docker compose exec reporter python report.py --quarter 2026-Q2 --out /reports/my-report.pdf
+```
+
+Output filenames: `dept-monthly-YYYY-MM.pdf` / `dept-quarterly-YYYY-QN.pdf`
+
+### Scheduled generation
+
+Reports are generated automatically inside the container by cron:
+
+| Schedule | Command |
+| --- | --- |
+| 1st of each month, 07:30 UTC | `report.py --month auto` |
+| 1st of Jan/Apr/Jul/Oct, 08:00 UTC | `report.py --quarter auto` |
+
+### Report contents
+
+**Monthly** (2 pages): executive highlight boxes (bugs, throughput, lead time) + per-team KPI tables + bar charts comparing current vs previous month.
+
+**Quarterly** (6 pages): executive highlight boxes + KPI tables for all 3 dimensions (Efficiency / Quality / Transparency) + 6-quarter trend sparklines + per-team appendix pages.
+
+Both reports include:
+
+- KPI targets from the Operational Improvement Framework (Delivery ≥80%, Scope Change <10%, Story Readiness ≥90%)
+- Green/red cell highlighting vs target thresholds
+- Active improvement initiative tags (ISS-001 through ISS-005)
+
 ## Applying schema changes
 
 After a `git pull` that includes `init.sql` changes, apply new columns and views (all statements are idempotent):

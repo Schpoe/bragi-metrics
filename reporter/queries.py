@@ -182,7 +182,9 @@ def quarterly_transparency(conn, yr, q, readiness_valid_yr=2026, readiness_valid
     GROUP BY i.project_key, sa.added, sa.initial, sa.prev_added, sa.prev_initial
     ORDER BY i.project_key
     """
-    rows = fetchall(conn, sql, (yr, q, pyr, pq, yr, q, pyr, pq, yr, q, pyr, pq))
+    # param order: FILTER(added), FILTER(initial), FILTER(prev_added), FILTER(prev_initial),
+    # WHERE OR(cur), WHERE OR(prev), issues_resolved FILTER, prev_issues_resolved FILTER
+    rows = fetchall(conn, sql, (yr, q, yr, q, pyr, pq, pyr, pq, yr, q, pyr, pq, yr, q, pyr, pq))
 
     if valid:
         rsql = f"""
