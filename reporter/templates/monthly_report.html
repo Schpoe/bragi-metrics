@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Department Monthly Report — {{ period_label }}</title>
+  {% include 'base_styles.html' %}
+</head>
+<body>
+
+{# PAGE 1: EXECUTIVE SUMMARY #}
+<div class="page">
+  <div class="report-header">
+    <div>
+      <h1>Department Performance Report</h1>
+      <div class="period">{{ period_label }} &nbsp;·&nbsp; Monthly</div>
+    </div>
+    <div class="meta">
+      Teams: STORE · AAONE · AATWO · CONNECT<br>
+      Compared to: {{ prev_period_label }}<br>
+      Generated: {{ generated_at }}
+    </div>
+  </div>
+
+  <div class="highlight-row">
+    <div class="highlight-box hl-qual">
+      <div class="hl-number">{{ dept.bugs_created|default('—') }}</div>
+      <div class="hl-label">Bugs Created</div>
+      <div class="hl-change {{ trend_class(dept.bugs_created, dept.prev_bugs_created, False) }}">
+        {{ trend_arrow(dept.bugs_created, dept.prev_bugs_created, False) }} vs {{ dept.prev_bugs_created|default('—') }} prev
+      </div>
+    </div>
+    <div class="highlight-box hl-qual">
+      <div class="hl-number">{{ dept.bugs_resolved|default('—') }}</div>
+      <div class="hl-label">Bugs Resolved</div>
+      <div class="hl-change {{ trend_class(dept.bugs_resolved, dept.prev_bugs_resolved) }}">
+        {{ trend_arrow(dept.bugs_resolved, dept.prev_bugs_resolved) }} vs {{ dept.prev_bugs_resolved|default('—') }} prev
+      </div>
+    </div>
+    <div class="highlight-box hl-trans">
+      <div class="hl-number">{{ dept.issues_resolved|default('—') }}</div>
+      <div class="hl-label">Issues Resolved</div>
+      <div class="hl-change {{ trend_class(dept.issues_resolved, dept.prev_issues_resolved) }}">
+        {{ trend_arrow(dept.issues_resolved, dept.prev_issues_resolved) }} vs {{ dept.prev_issues_resolved|default('—') }} prev
+      </div>
+    </div>
+    <div class="highlight-box hl-eff">
+      <div class="hl-number">{{ fmt(dept.lead_time, 'd') }}</div>
+      <div class="hl-label">Avg Lead Time</div>
+      <div class="hl-change {{ trend_class(dept.lead_time, dept.prev_lead_time, False) }}">
+        {{ trend_arrow(dept.lead_time, dept.prev_lead_time, False) }} vs {{ fmt(dept.prev_lead_time, 'd') }} prev
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title section-quality">Quality — Bugs</div>
+  <table class="kpi-table">
+    <thead><tr><th>Team</th><th>Bugs Created</th><th>Bugs Resolved</th></tr></thead>
+    <tbody>
+      {% for t in teams %}
+      <tr>
+        <td><strong>{{ t.team }}</strong></td>
+        <td>
+          <span class="val">{{ t.bugs_created|default('—') }}</span>
+          <span class="{{ trend_class(t.bugs_created, t.prev_bugs_created, False) }}"> {{ trend_arrow(t.bugs_created, t.prev_bugs_created, False) }}</span>
+          <span class="prev-val">({{ t.prev_bugs_created|default('—') }})</span>
+        </td>
+        <td>
+          <span class="val">{{ t.bugs_resolved|default('—') }}</span>
+          <span class="{{ trend_class(t.bugs_resolved, t.prev_bugs_resolved) }}"> {{ trend_arrow(t.bugs_resolved, t.prev_bugs_resolved) }}</span>
+          <span class="prev-val">({{ t.prev_bugs_resolved|default('—') }})</span>
+        </td>
+      </tr>
+      {% endfor %}
+      <tr class="dept-row">
+        <td>DEPT TOTAL</td>
+        <td>
+          <span class="val">{{ dept.bugs_created|default('—') }}</span>
+          <span class="{{ trend_class(dept.bugs_created, dept.prev_bugs_created, False) }}"> {{ trend_arrow(dept.bugs_created, dept.prev_bugs_created, False) }}</span>
+          <span class="prev-val">({{ dept.prev_bugs_created|default('—') }})</span>
+        </td>
+        <td>
+          <span class="val">{{ dept.bugs_resolved|default('—') }}</span>
+          <span class="{{ trend_class(dept.bugs_resolved, dept.prev_bugs_resolved) }}"> {{ trend_arrow(dept.bugs_resolved, dept.prev_bugs_resolved) }}</span>
+          <span class="prev-val">({{ dept.prev_bugs_resolved|default('—') }})</span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="section-title section-transparency">Throughput &amp; Flow</div>
+  <table class="kpi-table">
+    <thead><tr><th>Team</th><th>Issues Resolved</th><th>Avg Lead Time (days)</th></tr></thead>
+    <tbody>
+      {% for t in teams %}
+      <tr>
+        <td><strong>{{ t.team }}</strong></td>
+        <td>
+          <span class="val">{{ t.issues_resolved|default('—') }}</span>
+          <span class="{{ trend_class(t.issues_resolved, t.prev_issues_resolved) }}"> {{ trend_arrow(t.issues_resolved, t.prev_issues_resolved) }}</span>
+          <span class="prev-val">({{ t.prev_issues_resolved|default('—') }})</span>
+        </td>
+        <td>
+          <span class="val">{{ fmt(t.lead_time, 'd') }}</span>
+          <span class="{{ trend_class(t.lead_time, t.prev_lead_time, False) }}"> {{ trend_arrow(t.lead_time, t.prev_lead_time, False) }}</span>
+          <span class="prev-val">({{ fmt(t.prev_lead_time, 'd') }})</span>
+        </td>
+      </tr>
+      {% endfor %}
+      <tr class="dept-row">
+        <td>DEPT TOTAL / AVG</td>
+        <td>
+          <span class="val">{{ dept.issues_resolved|default('—') }}</span>
+          <span class="{{ trend_class(dept.issues_resolved, dept.prev_issues_resolved) }}"> {{ trend_arrow(dept.issues_resolved, dept.prev_issues_resolved) }}</span>
+          <span class="prev-val">({{ dept.prev_issues_resolved|default('—') }})</span>
+        </td>
+        <td>
+          <span class="val">{{ fmt(dept.lead_time, 'd') }}</span>
+          <span class="{{ trend_class(dept.lead_time, dept.prev_lead_time, False) }}"> {{ trend_arrow(dept.lead_time, dept.prev_lead_time, False) }}</span>
+          <span class="prev-val">({{ fmt(dept.prev_lead_time, 'd') }})</span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p class="note">Values in parentheses = {{ prev_period_label }}. Green = improvement · Red = decline.<br>
+  Velocity and Delivery % are quarterly metrics and are not included in monthly reports.</p>
+
+  <div class="report-footer">
+    <span>Bragi Metrics · Jira data · Auto-generated</span>
+    <span>{{ generated_at }}</span>
+  </div>
+</div>
+
+{# PAGE 2: CHARTS #}
+<div class="page">
+  <div class="report-header">
+    <div><h1>Team Comparison Charts</h1><div class="period">{{ period_label }}</div></div>
+    <div class="meta">This period vs previous period · Blue = current · Gray = previous</div>
+  </div>
+
+  <div class="section-title section-quality">Quality</div>
+  <div class="chart-grid">
+    <div class="chart-half"><img src="data:image/png;base64,{{ charts.bugs_bar }}" width="100%"></div>
+    <div class="chart-half"><img src="data:image/png;base64,{{ charts.bugs_resolved_bar }}" width="100%"></div>
+  </div>
+
+  <div class="section-title section-transparency">Throughput &amp; Flow</div>
+  <div class="chart-grid">
+    <div class="chart-half"><img src="data:image/png;base64,{{ charts.throughput_bar }}" width="100%"></div>
+    <div class="chart-half"><img src="data:image/png;base64,{{ charts.lead_time_bar }}" width="100%"></div>
+  </div>
+
+  <div class="report-footer">
+    <span>Bragi Metrics · Jira data · Auto-generated</span>
+    <span>{{ generated_at }}</span>
+  </div>
+</div>
+
+</body>
+</html>

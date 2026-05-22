@@ -76,6 +76,26 @@ services:
     networks:
       - default
 
+  reporter:
+    build: ./reporter
+    restart: unless-stopped
+    volumes:
+      - ./reports:/reports
+      - ./reporter/report.py:/app/report.py:ro
+      - ./reporter/queries.py:/app/queries.py:ro
+      - ./reporter/templates:/app/templates:ro
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_DB: jira_metrics
+      POSTGRES_USER: metrics
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      REPORTS_DIR: /reports
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - default
+
 networks:
   default:
     driver: bridge
