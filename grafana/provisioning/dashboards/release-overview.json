@@ -5031,7 +5031,7 @@
         "overrides": [
           {
             "matcher": {
-              "id": "byNamePattern",
+              "id": "byRegexp",
               "options": "^Created.*"
             },
             "properties": [
@@ -5050,7 +5050,7 @@
           },
           {
             "matcher": {
-              "id": "byNamePattern",
+              "id": "byRegexp",
               "options": "^Resolved.*"
             },
             "properties": [
@@ -5282,7 +5282,7 @@
         "overrides": [
           {
             "matcher": {
-              "id": "byNamePattern",
+              "id": "byRegexp",
               "options": "^Created.*"
             },
             "properties": [
@@ -5301,7 +5301,7 @@
           },
           {
             "matcher": {
-              "id": "byNamePattern",
+              "id": "byRegexp",
               "options": "^Resolved.*"
             },
             "properties": [
