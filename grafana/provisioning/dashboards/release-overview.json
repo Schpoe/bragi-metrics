@@ -3919,7 +3919,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 90
+        "y": 112
       },
       "id": 40,
       "panels": [],
@@ -4114,7 +4114,7 @@
         "h": 16,
         "w": 24,
         "x": 0,
-        "y": 91
+        "y": 113
       },
       "id": 10,
       "options": {
@@ -4960,6 +4960,490 @@
                 "value": {
                   "mode": "fixed",
                   "fixedColor": "green"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 41,
+      "title": "Activity Timeline",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 90
+      }
+    },
+    {
+      "id": 42,
+      "title": "Bug Activity \u2014 Created & Resolved by Severity / Day",
+      "type": "timeseries",
+      "datasource": {
+        "type": "postgres",
+        "uid": "jira-metrics-pg"
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 91
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "time_series",
+          "rawSql": "SELECT\n  day AS \"time\",\n  SUM(CASE WHEN event='created' AND priority='Blocker'  THEN 1 ELSE 0 END) AS \"Created: Blocker\",\n  SUM(CASE WHEN event='created' AND priority='Critical' THEN 1 ELSE 0 END) AS \"Created: Critical\",\n  SUM(CASE WHEN event='created' AND priority='Major'    THEN 1 ELSE 0 END) AS \"Created: Major\",\n  SUM(CASE WHEN event='created' AND priority='Minor'    THEN 1 ELSE 0 END) AS \"Created: Minor\",\n  SUM(CASE WHEN event='created' AND priority='Trivial'  THEN 1 ELSE 0 END) AS \"Created: Trivial\",\n  SUM(CASE WHEN event='resolved' AND priority='Blocker'  THEN 1 ELSE 0 END) AS \"Resolved: Blocker\",\n  SUM(CASE WHEN event='resolved' AND priority='Critical' THEN 1 ELSE 0 END) AS \"Resolved: Critical\",\n  SUM(CASE WHEN event='resolved' AND priority='Major'    THEN 1 ELSE 0 END) AS \"Resolved: Major\",\n  SUM(CASE WHEN event='resolved' AND priority='Minor'    THEN 1 ELSE 0 END) AS \"Resolved: Minor\",\n  SUM(CASE WHEN event='resolved' AND priority='Trivial'  THEN 1 ELSE 0 END) AS \"Resolved: Trivial\"\nFROM (\n  SELECT created_at::date AS day, 'created' AS event, COALESCE(priority,'Unknown') AS priority\n  FROM issues\n  WHERE issue_type = 'Bug' AND project_key IN ($project) AND key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL)\n    AND created_at IS NOT NULL\n  UNION ALL\n  SELECT resolved_at::date AS day, 'resolved' AS event, COALESCE(priority,'Unknown') AS priority\n  FROM issues\n  WHERE issue_type = 'Bug' AND project_key IN ($project) AND key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL)\n    AND resolved_at IS NOT NULL\n) sub\nGROUP BY day ORDER BY day",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": [
+            "sum"
+          ]
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "bars",
+            "lineWidth": 1,
+            "fillOpacity": 70,
+            "spanNulls": false,
+            "barAlignment": 0,
+            "barWidthFactor": 0.6
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byNamePattern",
+              "options": "^Created.*"
+            },
+            "properties": [
+              {
+                "id": "custom.stacking",
+                "value": {
+                  "mode": "normal",
+                  "group": "created"
+                }
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 70
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byNamePattern",
+              "options": "^Resolved.*"
+            },
+            "properties": [
+              {
+                "id": "custom.stacking",
+                "value": {
+                  "mode": "normal",
+                  "group": "resolved"
+                }
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 45
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "dash",
+                  "dash": [
+                    6,
+                    3
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Created: Blocker"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#8b0000",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Created: Critical"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#d62728",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Created: Major"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#ff7f0e",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Created: Minor"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#f5c518",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Created: Trivial"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#59a14f",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Resolved: Blocker"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#c87070",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Resolved: Critical"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#e89090",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Resolved: Major"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#f5b97a",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Resolved: Minor"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#f7e08a",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Resolved: Trivial"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#a0d4a0",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 43,
+      "title": "Issue Activity \u2014 Created & Resolved by Type / Day (excl. Bugs)",
+      "type": "timeseries",
+      "datasource": {
+        "type": "postgres",
+        "uid": "jira-metrics-pg"
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 101
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "time_series",
+          "rawSql": "SELECT\n  day AS \"time\",\n  SUM(CASE WHEN event='created' AND issue_type='Story'       THEN 1 ELSE 0 END) AS \"Created: Story\",\n  SUM(CASE WHEN event='created' AND issue_type='Task'        THEN 1 ELSE 0 END) AS \"Created: Task\",\n  SUM(CASE WHEN event='created' AND issue_type='Improvement' THEN 1 ELSE 0 END) AS \"Created: Improvement\",\n  SUM(CASE WHEN event='created' AND issue_type='Sub-task'    THEN 1 ELSE 0 END) AS \"Created: Sub-task\",\n  SUM(CASE WHEN event='resolved' AND issue_type='Story'       THEN 1 ELSE 0 END) AS \"Resolved: Story\",\n  SUM(CASE WHEN event='resolved' AND issue_type='Task'        THEN 1 ELSE 0 END) AS \"Resolved: Task\",\n  SUM(CASE WHEN event='resolved' AND issue_type='Improvement' THEN 1 ELSE 0 END) AS \"Resolved: Improvement\",\n  SUM(CASE WHEN event='resolved' AND issue_type='Sub-task'    THEN 1 ELSE 0 END) AS \"Resolved: Sub-task\"\nFROM (\n  SELECT created_at::date AS day, 'created' AS event, issue_type\n  FROM issues\n  WHERE issue_type != 'Bug' AND project_key IN ($project) AND key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL)\n    AND created_at IS NOT NULL\n  UNION ALL\n  SELECT resolved_at::date AS day, 'resolved' AS event, issue_type\n  FROM issues\n  WHERE issue_type != 'Bug' AND project_key IN ($project) AND key IN (SELECT issue_key FROM issue_fix_version_history WHERE fix_version = '$release' AND removed_at IS NULL)\n    AND resolved_at IS NOT NULL\n) sub\nGROUP BY day ORDER BY day",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": [
+            "sum"
+          ]
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "bars",
+            "lineWidth": 1,
+            "fillOpacity": 70,
+            "spanNulls": false,
+            "barAlignment": 0,
+            "barWidthFactor": 0.6
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byNamePattern",
+              "options": "^Created.*"
+            },
+            "properties": [
+              {
+                "id": "custom.stacking",
+                "value": {
+                  "mode": "normal",
+                  "group": "created"
+                }
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 70
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byNamePattern",
+              "options": "^Resolved.*"
+            },
+            "properties": [
+              {
+                "id": "custom.stacking",
+                "value": {
+                  "mode": "normal",
+                  "group": "resolved"
+                }
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 45
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "dash",
+                  "dash": [
+                    6,
+                    3
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Created: Story"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#4e79a7",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Created: Task"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#9467bd",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Created: Improvement"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#17becf",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Created: Sub-task"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#7f7f7f",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Resolved: Story"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#9bbdd4",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Resolved: Task"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#c4a8e0",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Resolved: Improvement"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#7adde8",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Resolved: Sub-task"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#b8b8b8",
+                  "mode": "fixed"
                 }
               }
             ]
