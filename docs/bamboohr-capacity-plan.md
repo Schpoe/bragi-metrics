@@ -1,6 +1,11 @@
 # Plan — BambooHR Absences → Team Capacity KPI
 
-Status: **Implemented — pending deploy & live verification** · Owner: Benjamin · Created: 2026-06-08
+Status: **LIVE** (deployed & verified 2026-06-08) · Owner: Benjamin · Created: 2026-06-08
+
+> Verified on server: 115 employees pulled, 113 mapped to Jira (2 unmatched), 896 absence
+> spans synced; `v_team_capacity` math correct on closed sprints (team sizes 6–15, absences
+> flowing). Confluence page promoted Capacity to the 7-KPI set. Assignee-identity backfill
+> completed (≈125 residual = Jira users without an accountId).
 
 > Decisions taken: roster from Jira assignees (a); ratio = Option A velocity-scaled;
 > link by email (robust, `assignee_account_id`/`assignee_email` added + backfilled);
