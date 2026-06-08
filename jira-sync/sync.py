@@ -1656,17 +1656,20 @@ def main():
         log.error("QASE links sync failed: %s", exc, exc_info=True)
         errors.append(f"qase: {exc}")
 
-    try:
-        backfill_assignee_identity(conn)
-    except Exception as exc:
-        log.error("Assignee identity backfill failed: %s", exc, exc_info=True)
-        errors.append(f"assignee_identity: {exc}")
-
+    # Absence sync runs before the (potentially slow, one-time) identity backfill
+    # so BambooHR data is never gated behind it. Employee→Jira mapping still works
+    # here: it uses Jira user search for any email not yet matched via issues.
     try:
         sync_absences(conn)
     except Exception as exc:
         log.error("BambooHR absence sync failed: %s", exc, exc_info=True)
         errors.append(f"absences: {exc}")
+
+    try:
+        backfill_assignee_identity(conn)
+    except Exception as exc:
+        log.error("Assignee identity backfill failed: %s", exc, exc_info=True)
+        errors.append(f"assignee_identity: {exc}")
 
     # Record success as long as the issues sync completed — that is the
     # step that determines whether the next run can be incremental.
