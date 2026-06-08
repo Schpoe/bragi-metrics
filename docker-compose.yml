@@ -56,6 +56,7 @@ services:
     restart: unless-stopped
     volumes:
       - ./jira-sync/sync.py:/app/sync.py:ro
+      - ./jira-sync/bamboohr.py:/app/bamboohr.py:ro
     environment:
       JIRA_URL: ${JIRA_URL}
       JIRA_EMAIL: ${JIRA_EMAIL}
@@ -66,6 +67,9 @@ services:
       JIRA_ACCEPTANCE_CRITERIA_FIELD: ${JIRA_ACCEPTANCE_CRITERIA_FIELD:-customfield_10028}
       JIRA_HISTORY_START: ${JIRA_HISTORY_START:-2024-01-01}
       NOTIFY_WEBHOOK_URL: ${NOTIFY_WEBHOOK_URL:-}
+      BAMBOOHR_SUBDOMAIN: ${BAMBOOHR_SUBDOMAIN:-}
+      BAMBOOHR_API_KEY: ${BAMBOOHR_API_KEY:-}
+      BAMBOOHR_HISTORY_START: ${BAMBOOHR_HISTORY_START:-2026-01-01}
       POSTGRES_HOST: postgres
       POSTGRES_DB: jira_metrics
       POSTGRES_USER: metrics

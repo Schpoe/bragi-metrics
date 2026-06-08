@@ -1,6 +1,14 @@
 # Plan — BambooHR Absences → Team Capacity KPI
 
-Status: **Proposed** · Owner: Benjamin · Created: 2026-06-08
+Status: **Implemented — pending deploy & live verification** · Owner: Benjamin · Created: 2026-06-08
+
+> Decisions taken: roster from Jira assignees (a); ratio = Option A velocity-scaled;
+> link by email (robust, `assignee_account_id`/`assignee_email` added + backfilled);
+> history window `2026-01-01`. PII: name + work email + absence dates/type stored.
+> Code landed: `init.sql` (columns, `bamboohr_employees`, `absences`, `v_team_capacity`),
+> `jira-sync/bamboohr.py`, `sync_absences()` + `backfill_assignee_identity()` in `sync.py`,
+> 3 panels in `po-kpis.json`, env wiring, `test_bamboohr.py`. Awaiting server deploy + the
+> Task-4/5 hand-checks before flipping the Confluence Capacity status to LIVE.
 
 Brings BambooHR absence data into the metrics platform to unlock the **Capacity** KPI
 (PO Competence Model, Core KPI, target ratio **0.8–1.2** = over/under committed). Today the
@@ -129,7 +137,7 @@ optional `BAMBOOHR_HISTORY_START`. Also add `BAMBOOHR_` to the `printenv` filter
 
 ### Available person-days per sprint
 
-```
+```text
 working_days(sprint)      = business days in [start_date, end_date]   -- e.g. 10 for a 2-week sprint
 roster                    = distinct assignees on committed issues (see §4)
 nominal_days              = |roster| * working_days

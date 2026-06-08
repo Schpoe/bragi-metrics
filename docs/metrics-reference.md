@@ -284,6 +284,34 @@ Links `issues.fix_versions` (array) to `releases` via `r.name = ANY(i.fix_versio
 
 ---
 
+## Team Capacity (BambooHR)
+
+Available person-days per sprint, derived from BambooHR absences. Powers the Capacity panels on the PO KPIs dashboard. Populated by `sync_absences()` in jira-sync — skipped entirely if `BAMBOOHR_SUBDOMAIN` / `BAMBOOHR_API_KEY` are unset, so the rest of the platform is unaffected.
+
+**Source tables/views:** `bamboohr_employees`, `absences`, and the `v_team_capacity` view.
+
+**Roster:** distinct Jira assignees (`issues.assignee_account_id`) on each sprint's `was_in_initial_scope = TRUE` issues. No separate team-membership table; it auto-updates as teams change.
+
+**`v_team_capacity` (per sprint):**
+
+| Column | Meaning |
+|--------|---------|
+| `working_days` | Business days (Mon–Fri) in `[start_date, end_date]` |
+| `team_size` | Roster size |
+| `nominal_days` | `team_size × working_days` |
+| `absence_days` | Per-person time-off business days within the window + company holidays × `team_size` |
+| `available_days` | `nominal_days − absence_days`, floored at 0 |
+
+**Capacity Ratio (panel, velocity-scaled — Option A):** `committed_SP / (avg_velocity × available_days / avg_available_days)`, averaged over closed sprints in the quarter, project-majority filtered. `avg_velocity` (delivered SP) and `avg_available_days` are window means. **Target band 0.8–1.2.** Below 0.8 = under-committed for the staffing available; above 1.2 = over-committed.
+
+**Linking BambooHR → Jira:** match `workEmail` to a Jira account — first from assignee emails already on `issues`, then Jira user search as a fallback. Unmatched employees are logged and their time off is not counted.
+
+**Absence pull:** BambooHR "Who's Out" (approved time off + company holidays) for a rolling window `BAMBOOHR_HISTORY_START` → today + 90 days, upserted by item id; items no longer returned within the window are pruned (cancelled requests).
+
+**Limitations:** date-granular (any listed day counts as a full day off); a person with no committed issues is not in the roster so their absence is missed; historical rosters require `assignee_account_id` backfilled by `backfill_assignee_identity()` on first run.
+
+---
+
 ## Team Overview Dashboard
 
 Per-assignee metrics for selected team and quarter/sprint.

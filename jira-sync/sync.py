@@ -29,6 +29,8 @@ from dateutil import parser as dtparser
 from psycopg2.extras import execute_values
 from requests.auth import HTTPBasicAuth
 
+from bamboohr import BambooClient, parse_whos_out
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(message)s",
@@ -51,6 +53,11 @@ QA_FIELD = os.environ.get("JIRA_QA_FIELD", "customfield_10132")
 
 # Optional webhook for failure notifications (Slack/Teams/make.com/etc.)
 NOTIFY_WEBHOOK_URL = os.environ.get("NOTIFY_WEBHOOK_URL", "")
+
+# BambooHR (team capacity). Absence sync is skipped if these are not set.
+BAMBOOHR_SUBDOMAIN = os.environ.get("BAMBOOHR_SUBDOMAIN", "")
+BAMBOOHR_API_KEY = os.environ.get("BAMBOOHR_API_KEY", "")
+BAMBOOHR_HISTORY_START = os.environ.get("BAMBOOHR_HISTORY_START", "2026-01-01")
 
 PG_DSN = (
     f"host={os.environ['POSTGRES_HOST']} "
@@ -450,6 +457,8 @@ def sync_issues(conn, sync_id, since=None, last_sync_duration=None, resume_token
                 project_name,
                 qa_assignee,
                 components,
+                f["assignee"].get("accountId") if f.get("assignee") else None,
+                f["assignee"].get("emailAddress") if f.get("assignee") else None,
             ))
 
             # Extract all issue links (both directions)
@@ -486,7 +495,8 @@ def sync_issues(conn, sync_id, since=None, last_sync_duration=None, resume_token
                     priority, story_points, assignee, reporter,
                     created_at, updated_at, resolved_at,
                     fix_versions, labels, epic_key, has_acceptance_criteria,
-                    customer_project, customer, project_name, qa_assignee, components
+                    customer_project, customer, project_name, qa_assignee, components,
+                    assignee_account_id, assignee_email
                 ) VALUES %s
                 ON CONFLICT (key) DO UPDATE SET
                     summary                  = EXCLUDED.summary,
@@ -506,7 +516,9 @@ def sync_issues(conn, sync_id, since=None, last_sync_duration=None, resume_token
                     customer                 = EXCLUDED.customer,
                     project_name             = EXCLUDED.project_name,
                     qa_assignee              = EXCLUDED.qa_assignee,
-                    components               = EXCLUDED.components,
+                    components                = EXCLUDED.components,
+                    assignee_account_id      = EXCLUDED.assignee_account_id,
+                    assignee_email           = EXCLUDED.assignee_email,
                     synced_at                = NOW()
                 """,
                 issue_rows,
@@ -1378,6 +1390,171 @@ def sync_qase_links(conn):
     log.info("QASE links synced: %d linked, %d not linked", linked, len(results) - linked)
 
 
+# ─── BambooHR absences → capacity ────────────────────────────────────────────
+
+def backfill_assignee_identity(conn):
+    """Populate assignee_account_id / assignee_email on issues that predate those
+    columns. Only fetches issues still missing an account id (that have an
+    assignee), in key batches, so it is cheap after the first full pass."""
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT key FROM issues WHERE assignee_account_id IS NULL AND assignee IS NOT NULL"
+        )
+        keys = [r[0] for r in cur.fetchall()]
+    if not keys:
+        return
+    log.info("Backfilling assignee identity for %d issues", len(keys))
+    updated = 0
+    batch_size = 100
+    for i in range(0, len(keys), batch_size):
+        batch = keys[i:i + batch_size]
+        jql = "key in (%s)" % ",".join(batch)
+        data = jira_search(jql, fields=["assignee"], max_results=batch_size)
+        rows = []
+        for issue in data.get("issues", []):
+            a = issue["fields"].get("assignee") or {}
+            rows.append((a.get("accountId"), a.get("emailAddress"), issue["key"]))
+        if rows:
+            with conn.cursor() as cur:
+                execute_values(
+                    cur,
+                    "UPDATE issues AS i SET"
+                    "   assignee_account_id = v.acc,"
+                    "   assignee_email = COALESCE(v.email, i.assignee_email)"
+                    " FROM (VALUES %s) AS v(acc, email, key) WHERE i.key = v.key",
+                    rows,
+                )
+            conn.commit()
+            updated += len(rows)
+    log.info("Assignee identity backfill updated %d issues", updated)
+
+
+def _jira_user_search_by_email(email):
+    """Resolve a Jira accountId from an email via user search. None if not found."""
+    try:
+        results = jira_get("api/3/user/search", params={"query": email})
+    except Exception as exc:
+        log.warning("Jira user search failed for %s: %s", email, exc)
+        return None
+    results = results or []
+    for u in results:
+        if (u.get("emailAddress") or "").lower() == email.lower():
+            return u.get("accountId")
+    if len(results) == 1:
+        return results[0].get("accountId")
+    return None
+
+
+def _map_employees_to_jira(conn):
+    """Resolve bamboohr_employees.jira_account_id by email — first from assignee
+    emails already on issues (no API cost), then Jira user search for the rest."""
+    with conn.cursor() as cur:
+        cur.execute(
+            "UPDATE bamboohr_employees e"
+            "   SET jira_account_id = i.assignee_account_id, updated_at = NOW()"
+            " FROM (SELECT DISTINCT lower(assignee_email) AS email, assignee_account_id"
+            "         FROM issues"
+            "        WHERE assignee_email IS NOT NULL AND assignee_account_id IS NOT NULL) i"
+            " WHERE e.jira_account_id IS NULL AND lower(e.work_email) = i.email"
+        )
+        matched = cur.rowcount
+    conn.commit()
+
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT employee_id, work_email FROM bamboohr_employees"
+            " WHERE jira_account_id IS NULL AND work_email IS NOT NULL"
+        )
+        unmatched = cur.fetchall()
+    resolved = 0
+    for emp_id, email in unmatched:
+        acc = _jira_user_search_by_email(email)
+        if acc:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "UPDATE bamboohr_employees SET jira_account_id = %s, updated_at = NOW()"
+                    " WHERE employee_id = %s",
+                    (acc, emp_id),
+                )
+            conn.commit()
+            resolved += 1
+    with conn.cursor() as cur:
+        cur.execute("SELECT COUNT(*) FROM bamboohr_employees WHERE jira_account_id IS NULL")
+        still_unmatched = cur.fetchone()[0]
+    log.info("Employee→Jira mapping: %d via issues, %d via user search, %d unmatched",
+             matched, resolved, still_unmatched)
+
+
+def sync_absences(conn):
+    """Sync BambooHR directory + Who's Out into bamboohr_employees and absences.
+    No-op if BambooHR is not configured, so the rest of the sync is unaffected."""
+    if not (BAMBOOHR_SUBDOMAIN and BAMBOOHR_API_KEY):
+        log.info("BambooHR not configured — skipping absence sync")
+        return
+    client = BambooClient(BAMBOOHR_SUBDOMAIN, BAMBOOHR_API_KEY)
+
+    # 1. Directory → employees
+    employees = client.directory()
+    emp_rows = []
+    for e in employees:
+        try:
+            emp_id = int(e.get("id"))
+        except (TypeError, ValueError):
+            continue
+        emp_rows.append((emp_id, e.get("displayName"), e.get("workEmail") or None))
+    if emp_rows:
+        with conn.cursor() as cur:
+            execute_values(
+                cur,
+                "INSERT INTO bamboohr_employees (employee_id, display_name, work_email)"
+                " VALUES %s ON CONFLICT (employee_id) DO UPDATE SET"
+                "   display_name = EXCLUDED.display_name,"
+                "   work_email = EXCLUDED.work_email, updated_at = NOW()",
+                emp_rows,
+            )
+        conn.commit()
+    log.info("BambooHR directory: %d employees", len(emp_rows))
+
+    # 2. Map employees → Jira accounts by email
+    _map_employees_to_jira(conn)
+
+    # 3. Who's Out → absences (rolling window: history start → +90 days)
+    start = BAMBOOHR_HISTORY_START
+    end = (datetime.now(timezone.utc) + timedelta(days=90)).strftime("%Y-%m-%d")
+    rows = parse_whos_out(client.whos_out(start, end))
+    if rows:
+        with conn.cursor() as cur:
+            execute_values(
+                cur,
+                "INSERT INTO absences (id, employee_id, kind, start_date, end_date, label)"
+                " VALUES %s ON CONFLICT (id) DO UPDATE SET"
+                "   employee_id = EXCLUDED.employee_id, kind = EXCLUDED.kind,"
+                "   start_date = EXCLUDED.start_date, end_date = EXCLUDED.end_date,"
+                "   label = EXCLUDED.label, synced_at = NOW()",
+                [(r["id"], r["employee_id"], r["kind"], r["start_date"],
+                  r["end_date"], r["label"]) for r in rows],
+            )
+        conn.commit()
+
+    # 4. Prune items no longer returned in the pulled window (cancelled requests)
+    ids = [r["id"] for r in rows]
+    with conn.cursor() as cur:
+        if ids:
+            cur.execute(
+                "DELETE FROM absences WHERE start_date <= %s AND end_date >= %s"
+                "   AND NOT (id = ANY(%s))",
+                (end, start, ids),
+            )
+        else:
+            cur.execute(
+                "DELETE FROM absences WHERE start_date <= %s AND end_date >= %s",
+                (end, start),
+            )
+        pruned = cur.rowcount
+    conn.commit()
+    log.info("BambooHR Who's Out: %d absence spans synced, %d stale pruned", len(rows), pruned)
+
+
 # ─── Entry point ─────────────────────────────────────────────────────────────
 
 def main():
@@ -1478,6 +1655,18 @@ def main():
     except Exception as exc:
         log.error("QASE links sync failed: %s", exc, exc_info=True)
         errors.append(f"qase: {exc}")
+
+    try:
+        backfill_assignee_identity(conn)
+    except Exception as exc:
+        log.error("Assignee identity backfill failed: %s", exc, exc_info=True)
+        errors.append(f"assignee_identity: {exc}")
+
+    try:
+        sync_absences(conn)
+    except Exception as exc:
+        log.error("BambooHR absence sync failed: %s", exc, exc_info=True)
+        errors.append(f"absences: {exc}")
 
     # Record success as long as the issues sync completed — that is the
     # step that determines whether the next run can be incremental.

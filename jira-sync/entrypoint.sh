@@ -2,7 +2,7 @@
 set -e
 
 # Make env vars available to cron (cron runs with a clean environment)
-printenv | grep -E "^(JIRA_|POSTGRES_|NOTIFY_)" > /etc/environment
+printenv | grep -E "^(JIRA_|POSTGRES_|NOTIFY_|BAMBOOHR_)" > /etc/environment
 
 # Pipe cron job log to container stdout so it appears in docker compose logs
 touch /var/log/jira-sync.log

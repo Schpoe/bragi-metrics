@@ -48,6 +48,34 @@ ALTER TABLE issues ADD COLUMN IF NOT EXISTS customer TEXT;
 ALTER TABLE issues ADD COLUMN IF NOT EXISTS project_name TEXT;
 ALTER TABLE issues ADD COLUMN IF NOT EXISTS qa_assignee TEXT;
 ALTER TABLE issues ADD COLUMN IF NOT EXISTS components TEXT[];
+-- Stable Jira identity for the assignee — needed to link issues to BambooHR people for capacity.
+-- account_id is always present; email may be NULL when Jira hides it for privacy.
+ALTER TABLE issues ADD COLUMN IF NOT EXISTS assignee_account_id TEXT;
+ALTER TABLE issues ADD COLUMN IF NOT EXISTS assignee_email TEXT;
+
+-- ─── BambooHR (capacity) ─────────────────────────────────────────────────────
+-- People pulled from the BambooHR directory, mapped to Jira where the email matches.
+CREATE TABLE IF NOT EXISTS bamboohr_employees (
+    employee_id      INTEGER PRIMARY KEY,   -- BambooHR employee id
+    display_name     TEXT,
+    work_email       TEXT,
+    jira_account_id  TEXT,                  -- resolved via email; NULL if unmatched
+    updated_at       TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- One row per absence span from BambooHR "Who's Out" (approved time off + company holidays).
+-- Company holidays apply to the whole team and have employee_id IS NULL.
+CREATE TABLE IF NOT EXISTS absences (
+    id           BIGINT PRIMARY KEY,        -- BambooHR item id
+    employee_id  INTEGER,                   -- NULL for company-wide holidays
+    kind         TEXT NOT NULL,             -- 'timeOff' | 'holiday'
+    start_date   DATE NOT NULL,
+    end_date     DATE NOT NULL,
+    label        TEXT,
+    synced_at    TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_absences_dates ON absences (start_date, end_date);
+CREATE INDEX IF NOT EXISTS idx_absences_emp   ON absences (employee_id);
 
 -- Sprint membership with scope-change tracking
 CREATE TABLE IF NOT EXISTS sprint_issues (
@@ -503,3 +531,87 @@ LEFT JOIN issues ci
     ON  ci.epic_key    = dl.from_key
     AND ci.issue_type NOT IN ('Epic', 'Sub-task')
 GROUP BY dl.to_key, dl.from_key;
+
+-- ─── Team capacity (BambooHR absences) ───────────────────────────────────────
+-- Per-sprint available person-days = nominal team capacity minus absences and
+-- company holidays falling inside the sprint window. Roster is derived from the
+-- distinct Jira assignees on the sprint's committed (initial-scope) issues, so
+-- it needs no separate team-membership table and auto-updates as teams change.
+-- Only business days (Mon–Fri) are counted. The capacity *ratio* against
+-- committed story points is computed in the dashboard panel (velocity-scaled),
+-- not here — this view stays a clean per-sprint primitive.
+CREATE OR REPLACE VIEW v_team_capacity AS
+WITH sprint_days AS (
+    SELECT
+        s.id AS sprint_id,
+        s.start_date::date AS d_start,
+        s.end_date::date   AS d_end,
+        COUNT(*) FILTER (WHERE EXTRACT(DOW FROM d) NOT IN (0, 6)) AS working_days
+    FROM sprints s
+    CROSS JOIN LATERAL generate_series(s.start_date::date, s.end_date::date, INTERVAL '1 day') AS d
+    WHERE s.start_date IS NOT NULL AND s.end_date IS NOT NULL
+    GROUP BY s.id, s.start_date, s.end_date
+),
+roster AS (
+    -- distinct committed-issue assignees per sprint, by stable account id
+    SELECT DISTINCT si.sprint_id, i.assignee_account_id AS account_id
+    FROM sprint_issues si
+    JOIN issues i ON i.key = si.issue_key
+    WHERE si.was_in_initial_scope = TRUE
+      AND i.assignee_account_id IS NOT NULL
+),
+roster_size AS (
+    SELECT sprint_id, COUNT(*) AS team_size FROM roster GROUP BY sprint_id
+),
+-- per-person time-off business days overlapping the sprint window
+person_absence AS (
+    SELECT r.sprint_id,
+        SUM((
+            SELECT COUNT(*)
+            FROM generate_series(GREATEST(a.start_date, sd.d_start),
+                                 LEAST(a.end_date, sd.d_end), INTERVAL '1 day') g
+            WHERE EXTRACT(DOW FROM g) NOT IN (0, 6)
+        )) AS absence_days
+    FROM roster r
+    JOIN sprint_days sd ON sd.sprint_id = r.sprint_id
+    JOIN bamboohr_employees e ON e.jira_account_id = r.account_id
+    JOIN absences a
+        ON a.employee_id = e.employee_id
+       AND a.kind = 'timeOff'
+       AND a.start_date <= sd.d_end
+       AND a.end_date   >= sd.d_start
+    GROUP BY r.sprint_id
+),
+-- company holidays apply to the whole team
+holidays AS (
+    SELECT sd.sprint_id,
+        SUM((
+            SELECT COUNT(*)
+            FROM generate_series(GREATEST(a.start_date, sd.d_start),
+                                 LEAST(a.end_date, sd.d_end), INTERVAL '1 day') g
+            WHERE EXTRACT(DOW FROM g) NOT IN (0, 6)
+        )) AS holiday_days
+    FROM sprint_days sd
+    JOIN absences a
+        ON a.kind = 'holiday'
+       AND a.start_date <= sd.d_end
+       AND a.end_date   >= sd.d_start
+    GROUP BY sd.sprint_id
+)
+SELECT
+    sd.sprint_id,
+    rs.team_size,
+    sd.working_days,
+    rs.team_size * sd.working_days                                          AS nominal_days,
+    COALESCE(pa.absence_days, 0)
+        + COALESCE(h.holiday_days, 0) * rs.team_size                        AS absence_days,
+    GREATEST(
+        rs.team_size * sd.working_days
+        - COALESCE(pa.absence_days, 0)
+        - COALESCE(h.holiday_days, 0) * rs.team_size,
+        0
+    )                                                                       AS available_days
+FROM sprint_days sd
+JOIN roster_size rs   ON rs.sprint_id = sd.sprint_id
+LEFT JOIN person_absence pa ON pa.sprint_id = sd.sprint_id
+LEFT JOIN holidays h        ON h.sprint_id = sd.sprint_id;
