@@ -23,7 +23,11 @@ class BambooClient:
     def __init__(self, subdomain, api_key, max_retries=5, timeout=30):
         if not subdomain or not api_key:
             raise ValueError("BambooHR subdomain and API key are required")
-        self.base = f"https://{subdomain}.bamboohr.com/api/v1"
+        # Tolerate full domain / URL forms — we only want the subdomain label.
+        sub = subdomain.strip().replace("https://", "").replace("http://", "").strip("/")
+        if sub.endswith(".bamboohr.com"):
+            sub = sub[: -len(".bamboohr.com")]
+        self.base = f"https://{sub}.bamboohr.com/api/v1"
         self.max_retries = max_retries
         self.timeout = timeout
         self._session = requests.Session()
