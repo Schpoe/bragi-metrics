@@ -1611,6 +1611,15 @@ def main():
         log.error("Issues sync failed: %s", exc, exc_info=True)
         errors.append(f"issues: {exc}")
 
+    # BambooHR absences depend only on issues (for email mapping) + the BambooHR
+    # API, not on sprints/scope. Run it right after issues so capacity data is
+    # never gated behind the slow sprint-history or identity backfills.
+    try:
+        sync_absences(conn)
+    except Exception as exc:
+        log.error("BambooHR absence sync failed: %s", exc, exc_info=True)
+        errors.append(f"absences: {exc}")
+
     # Sprints and releases are independent — run even if issues sync failed,
     # and record success for whichever steps completed so the next incremental
     # run does not have to redo the full issue import.
@@ -1655,15 +1664,6 @@ def main():
     except Exception as exc:
         log.error("QASE links sync failed: %s", exc, exc_info=True)
         errors.append(f"qase: {exc}")
-
-    # Absence sync runs before the (potentially slow, one-time) identity backfill
-    # so BambooHR data is never gated behind it. Employee→Jira mapping still works
-    # here: it uses Jira user search for any email not yet matched via issues.
-    try:
-        sync_absences(conn)
-    except Exception as exc:
-        log.error("BambooHR absence sync failed: %s", exc, exc_info=True)
-        errors.append(f"absences: {exc}")
 
     try:
         backfill_assignee_identity(conn)
