@@ -286,11 +286,11 @@ Links `issues.fix_versions` (array) to `releases` via `r.name = ANY(i.fix_versio
 
 ## Team Capacity (BambooHR)
 
-Available person-days per sprint, derived from BambooHR absences. Powers the Capacity panels on the PO KPIs dashboard. Populated by `sync_absences()` in jira-sync — skipped entirely if `BAMBOOHR_SUBDOMAIN` / `BAMBOOHR_API_KEY` are unset, so the rest of the platform is unaffected.
+Available person-days per sprint, derived from BambooHR absences. Powers the Capacity panels on the **PO KPIs** dashboard (retrospective, quarter-aggregate) and the **Capacity (BambooHR)** section of the **Sprint Detail** dashboard (per selected sprint, for planning). Populated by `sync_absences()` in jira-sync — skipped entirely if `BAMBOOHR_SUBDOMAIN` / `BAMBOOHR_API_KEY` are unset, so the rest of the platform is unaffected.
 
-**Source tables/views:** `bamboohr_employees`, `absences`, and the `v_team_capacity` view.
+**Source tables/views:** `bamboohr_employees`, `absences`, and the `v_sprint_roster`, `v_team_capacity`, `v_sprint_capacity_detail` views.
 
-**Roster:** distinct Jira assignees (`issues.assignee_account_id`) on each sprint's `was_in_initial_scope = TRUE` issues. No separate team-membership table; it auto-updates as teams change.
+**Roster (`v_sprint_roster`):** distinct Jira assignees (`issues.assignee_account_id`) on each sprint's `was_in_initial_scope = TRUE` issues, tagged `source = 'committed'`. **Fallback** (`source = 'fallback'`): for sprints with *no* committed assignees yet (a future sprint being planned), the roster is inferred from the people who carried committed work on the **same board's last 3 closed sprints**. This lets POs see capacity before a sprint is staffed. No separate team-membership table; it auto-updates as teams change.
 
 **`v_team_capacity` (per sprint):**
 
@@ -301,6 +301,9 @@ Available person-days per sprint, derived from BambooHR absences. Powers the Cap
 | `nominal_days` | `team_size × working_days` |
 | `absence_days` | Per-person time-off business days within the window + company holidays × `team_size` |
 | `available_days` | `nominal_days − absence_days`, floored at 0 |
+| `is_estimated` | `TRUE` when the roster came from the board-history fallback (sprint not yet staffed) rather than committed issues |
+
+**`v_sprint_capacity_detail` (per sprint × person):** one row per roster member — `person`, `source`, `working_days`, `absence_days` (personal time-off), `holiday_days`, `available_days`. Drives the **Capacity by Person** table on Sprint Detail. Per-person `available_days` sum to the sprint's `v_team_capacity.available_days`.
 
 **Capacity Ratio (panel, velocity-scaled — Option A):** `committed_SP / (avg_velocity × available_days / avg_available_days)`, averaged over closed sprints in the quarter, project-majority filtered. `avg_velocity` (delivered SP) and `avg_available_days` are window means. **Target band 0.8–1.2.** Below 0.8 = under-committed for the staffing available; above 1.2 = over-committed.
 
@@ -308,7 +311,7 @@ Available person-days per sprint, derived from BambooHR absences. Powers the Cap
 
 **Absence pull:** BambooHR "Who's Out" (approved time off + company holidays) for a rolling window `BAMBOOHR_HISTORY_START` → today + 90 days, upserted by item id; items no longer returned within the window are pruned (cancelled requests).
 
-**Limitations:** date-granular (any listed day counts as a full day off); a person with no committed issues is not in the roster so their absence is missed; historical rosters require `assignee_account_id` backfilled by `backfill_assignee_identity()` on first run.
+**Limitations:** date-granular (any listed day counts as a full day off); for `source = 'committed'` sprints a person with no committed issues is not in the roster so their absence is missed; the `source = 'fallback'` estimate assumes the next sprint is staffed like the board's recent closed sprints — wrong if the team changed; fallback yields nothing for a brand-new board with no closed history or when `board_id` is NULL; historical rosters require `assignee_account_id` backfilled by `backfill_assignee_identity()` on first run.
 
 ---
 

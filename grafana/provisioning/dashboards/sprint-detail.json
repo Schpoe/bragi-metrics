@@ -1099,7 +1099,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 17
+        "y": 30
       },
       "id": 9,
       "title": "Story Readiness",
@@ -1139,7 +1139,7 @@
         "h": 4,
         "w": 2,
         "x": 0,
-        "y": 18
+        "y": 31
       },
       "id": 53,
       "options": {
@@ -1208,7 +1208,7 @@
         "h": 4,
         "w": 2,
         "x": 2,
-        "y": 18
+        "y": 31
       },
       "id": 118,
       "options": {
@@ -1277,7 +1277,7 @@
         "h": 4,
         "w": 2,
         "x": 4,
-        "y": 18
+        "y": 31
       },
       "id": 119,
       "options": {
@@ -1346,7 +1346,7 @@
         "h": 4,
         "w": 2,
         "x": 6,
-        "y": 18
+        "y": 31
       },
       "id": 10,
       "options": {
@@ -1418,7 +1418,7 @@
         "h": 4,
         "w": 2,
         "x": 8,
-        "y": 18
+        "y": 31
       },
       "id": 104,
       "options": {
@@ -1490,7 +1490,7 @@
         "h": 4,
         "w": 2,
         "x": 10,
-        "y": 18
+        "y": 31
       },
       "id": 52,
       "options": {
@@ -1562,7 +1562,7 @@
         "h": 4,
         "w": 2,
         "x": 12,
-        "y": 18
+        "y": 31
       },
       "id": 11,
       "options": {
@@ -1634,7 +1634,7 @@
         "h": 4,
         "w": 2,
         "x": 14,
-        "y": 18
+        "y": 31
       },
       "id": 12,
       "options": {
@@ -1706,7 +1706,7 @@
         "h": 4,
         "w": 2,
         "x": 16,
-        "y": 18
+        "y": 31
       },
       "id": 117,
       "options": {
@@ -1780,7 +1780,7 @@
         "h": 4,
         "w": 2,
         "x": 18,
-        "y": 18
+        "y": 31
       },
       "id": 13,
       "options": {
@@ -1847,7 +1847,7 @@
         "h": 4,
         "w": 2,
         "x": 20,
-        "y": 18
+        "y": 31
       },
       "id": 102,
       "options": {
@@ -1916,7 +1916,7 @@
         "h": 4,
         "w": 2,
         "x": 22,
-        "y": 18
+        "y": 31
       },
       "id": 103,
       "options": {
@@ -2109,7 +2109,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 22
+        "y": 35
       },
       "id": 14,
       "options": {
@@ -2146,7 +2146,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 30
+        "y": 43
       },
       "id": 40,
       "title": "Scope Change",
@@ -2183,7 +2183,7 @@
         "h": 4,
         "w": 4,
         "x": 0,
-        "y": 31
+        "y": 44
       },
       "id": 41,
       "options": {
@@ -2249,7 +2249,7 @@
         "h": 4,
         "w": 4,
         "x": 4,
-        "y": 31
+        "y": 44
       },
       "id": 42,
       "options": {
@@ -2315,7 +2315,7 @@
         "h": 4,
         "w": 4,
         "x": 8,
-        "y": 31
+        "y": 44
       },
       "id": 43,
       "options": {
@@ -2381,7 +2381,7 @@
         "h": 4,
         "w": 4,
         "x": 12,
-        "y": 31
+        "y": 44
       },
       "id": 44,
       "options": {
@@ -2454,7 +2454,7 @@
         "h": 4,
         "w": 8,
         "x": 16,
-        "y": 31
+        "y": 44
       },
       "id": 45,
       "options": {
@@ -2763,7 +2763,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 35
+        "y": 48
       },
       "id": 46,
       "options": {
@@ -2799,7 +2799,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 43
+        "y": 56
       },
       "id": 105,
       "panels": [],
@@ -2842,7 +2842,7 @@
         "h": 4,
         "w": 4,
         "x": 0,
-        "y": 44
+        "y": 57
       },
       "id": 106,
       "options": {
@@ -2913,7 +2913,7 @@
         "h": 4,
         "w": 4,
         "x": 12,
-        "y": 44
+        "y": 57
       },
       "id": 107,
       "options": {
@@ -3239,7 +3239,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 48
+        "y": 61
       },
       "id": 108,
       "options": {
@@ -3537,7 +3537,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 48
+        "y": 61
       },
       "id": 109,
       "options": {
@@ -3574,7 +3574,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 55
+        "y": 68
       },
       "id": 55,
       "panels": [
@@ -3738,7 +3738,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 56
+        "y": 69
       },
       "id": 100,
       "panels": [
@@ -3942,7 +3942,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 57
+        "y": 70
       },
       "id": 15,
       "title": "Issue Counts",
@@ -3983,7 +3983,7 @@
         "h": 4,
         "w": 24,
         "x": 0,
-        "y": 58
+        "y": 71
       },
       "id": 16,
       "options": {
@@ -4020,7 +4020,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 62
+        "y": 75
       },
       "id": 17,
       "title": "All Issues in Sprint",
@@ -4321,7 +4321,7 @@
         "h": 12,
         "w": 24,
         "x": 0,
-        "y": 63
+        "y": 76
       },
       "id": 18,
       "options": {
@@ -4358,7 +4358,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 75
+        "y": 88
       },
       "id": 30,
       "panels": [
@@ -5181,6 +5181,538 @@
       ],
       "title": "QASE Test Coverage",
       "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "jira-metrics-pg"
+      },
+      "id": 130,
+      "title": "Capacity (BambooHR)",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 17
+      },
+      "panels": [],
+      "description": "Capacity from BambooHR absences. Team = assignees of the sprint's committed (initial-scope) issues. For sprints not yet staffed, an estimate is derived from the board's last 3 closed sprints \u2014 shown as 'Estimated' in Data Basis."
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "jira-metrics-pg"
+      },
+      "id": 131,
+      "title": "Team Size",
+      "type": "stat",
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 0,
+        "y": 18
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "blue",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawSql": "SELECT team_size AS value FROM v_team_capacity WHERE sprint_id = $sprint::bigint",
+          "refId": "A"
+        }
+      ],
+      "description": "People on the sprint team (distinct assignees of committed work, or estimated roster)."
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "jira-metrics-pg"
+      },
+      "id": 132,
+      "title": "Working Days",
+      "type": "stat",
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 3,
+        "y": 18
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "blue",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "d"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawSql": "SELECT working_days AS value FROM v_team_capacity WHERE sprint_id = $sprint::bigint",
+          "refId": "A"
+        }
+      ],
+      "description": "Mon\u2013Fri days in the sprint window."
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "jira-metrics-pg"
+      },
+      "id": 133,
+      "title": "Nominal Person-Days",
+      "type": "stat",
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 6,
+        "y": 18
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "blue",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "d"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawSql": "SELECT nominal_days AS value FROM v_team_capacity WHERE sprint_id = $sprint::bigint",
+          "refId": "A"
+        }
+      ],
+      "description": "Team size \u00d7 working days, before absences."
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "jira-metrics-pg"
+      },
+      "id": 134,
+      "title": "Absence Days",
+      "type": "stat",
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 9,
+        "y": 18
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "orange",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "d"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawSql": "SELECT absence_days AS value FROM v_team_capacity WHERE sprint_id = $sprint::bigint",
+          "refId": "A"
+        }
+      ],
+      "description": "Person-days lost to time-off + company holidays in the sprint window."
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "jira-metrics-pg"
+      },
+      "id": 135,
+      "title": "Available Person-Days",
+      "type": "stat",
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 12,
+        "y": 18
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "green",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "d"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawSql": "SELECT available_days AS value FROM v_team_capacity WHERE sprint_id = $sprint::bigint",
+          "refId": "A"
+        }
+      ],
+      "description": "Real capacity for planning: nominal \u2212 absences."
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "jira-metrics-pg"
+      },
+      "id": 136,
+      "title": "Available %",
+      "type": "gauge",
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 16,
+        "y": 18
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "min": 0,
+          "max": 100,
+          "unit": "percent",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 60
+              },
+              {
+                "color": "green",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawSql": "SELECT ROUND(100.0 * available_days / NULLIF(nominal_days,0), 0) AS value FROM v_team_capacity WHERE sprint_id = $sprint::bigint",
+          "refId": "A"
+        }
+      ],
+      "description": "Share of nominal capacity actually available after absences."
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "jira-metrics-pg"
+      },
+      "id": 137,
+      "title": "Data Basis",
+      "type": "stat",
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 20,
+        "y": 18
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "purple",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "value",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawSql": "SELECT CASE WHEN is_estimated THEN 'Estimated' ELSE 'Actual' END AS value FROM v_team_capacity WHERE sprint_id = $sprint::bigint",
+          "refId": "A"
+        }
+      ],
+      "description": "Actual = team derived from committed issues. Estimated = roster inferred from the board's last 3 closed sprints (sprint not yet staffed)."
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "jira-metrics-pg"
+      },
+      "id": 138,
+      "title": "Capacity by Person",
+      "type": "table",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 22
+      },
+      "description": "Per-person availability in this sprint. 'Source' shows whether the person comes from committed issues or the estimated board roster.",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawSql": "SELECT person AS \"Person\", source AS \"Source\", working_days AS \"Working Days\", absence_days AS \"Days Off\", holiday_days AS \"Holidays\", available_days AS \"Available Days\" FROM v_sprint_capacity_detail WHERE sprint_id = $sprint::bigint ORDER BY available_days ASC",
+          "refId": "A"
+        }
+      ]
     }
   ],
   "schemaVersion": 39,

@@ -540,6 +540,43 @@ GROUP BY dl.to_key, dl.from_key;
 -- Only business days (Mon–Fri) are counted. The capacity *ratio* against
 -- committed story points is computed in the dashboard panel (velocity-scaled),
 -- not here — this view stays a clean per-sprint primitive.
+-- Per-sprint team roster, by stable Jira account id.
+-- Primary source ('committed'): assignees of issues in the sprint's initial scope.
+-- Fallback ('fallback'): for not-yet-staffed sprints (no committed assignees),
+-- people who carried committed work on the same board's last 3 closed sprints.
+-- Lets capacity be estimated for future sprints the PO is planning.
+CREATE OR REPLACE VIEW v_sprint_roster AS
+WITH committed AS (
+    SELECT DISTINCT si.sprint_id, i.assignee_account_id AS account_id
+    FROM sprint_issues si
+    JOIN issues i ON i.key = si.issue_key
+    WHERE si.was_in_initial_scope = TRUE
+      AND i.assignee_account_id IS NOT NULL
+),
+need_fallback AS (
+    SELECT s.id AS sprint_id, s.board_id, s.start_date
+    FROM sprints s
+    WHERE NOT EXISTS (SELECT 1 FROM committed c WHERE c.sprint_id = s.id)
+),
+board_history AS (
+    SELECT nf.sprint_id, c.account_id
+    FROM need_fallback nf
+    JOIN LATERAL (
+        SELECT prev.id
+        FROM sprints prev
+        WHERE prev.board_id = nf.board_id
+          AND prev.state = 'closed'
+          AND prev.start_date < nf.start_date
+        ORDER BY prev.start_date DESC
+        LIMIT 3
+    ) recent ON TRUE
+    JOIN committed c ON c.sprint_id = recent.id
+    GROUP BY nf.sprint_id, c.account_id
+)
+SELECT sprint_id, account_id, 'committed'::text AS source FROM committed
+UNION
+SELECT sprint_id, account_id, 'fallback'::text  AS source FROM board_history;
+
 CREATE OR REPLACE VIEW v_team_capacity AS
 WITH sprint_days AS (
     SELECT
@@ -553,15 +590,13 @@ WITH sprint_days AS (
     GROUP BY s.id, s.start_date, s.end_date
 ),
 roster AS (
-    -- distinct committed-issue assignees per sprint, by stable account id
-    SELECT DISTINCT si.sprint_id, i.assignee_account_id AS account_id
-    FROM sprint_issues si
-    JOIN issues i ON i.key = si.issue_key
-    WHERE si.was_in_initial_scope = TRUE
-      AND i.assignee_account_id IS NOT NULL
+    -- committed-issue assignees, with board-history fallback for unstaffed sprints
+    SELECT sprint_id, account_id, source FROM v_sprint_roster
 ),
 roster_size AS (
-    SELECT sprint_id, COUNT(*) AS team_size FROM roster GROUP BY sprint_id
+    SELECT sprint_id, COUNT(*) AS team_size,
+           bool_or(source = 'fallback') AS is_estimated
+    FROM roster GROUP BY sprint_id
 ),
 -- per-person time-off business days overlapping the sprint window
 person_absence AS (
@@ -610,8 +645,70 @@ SELECT
         - COALESCE(pa.absence_days, 0)
         - COALESCE(h.holiday_days, 0) * rs.team_size,
         0
-    )                                                                       AS available_days
+    )                                                                       AS available_days,
+    rs.is_estimated
 FROM sprint_days sd
 JOIN roster_size rs   ON rs.sprint_id = sd.sprint_id
 LEFT JOIN person_absence pa ON pa.sprint_id = sd.sprint_id
 LEFT JOIN holidays h        ON h.sprint_id = sd.sprint_id;
+
+-- Per-person capacity breakdown for a sprint (drives the absence detail table).
+-- Sums to v_team_capacity: working - personal time-off - company holidays.
+CREATE OR REPLACE VIEW v_sprint_capacity_detail AS
+WITH sprint_days AS (
+    SELECT
+        s.id AS sprint_id,
+        s.start_date::date AS d_start,
+        s.end_date::date   AS d_end,
+        COUNT(*) FILTER (WHERE EXTRACT(DOW FROM d) NOT IN (0, 6)) AS working_days
+    FROM sprints s
+    CROSS JOIN LATERAL generate_series(s.start_date::date, s.end_date::date, INTERVAL '1 day') AS d
+    WHERE s.start_date IS NOT NULL AND s.end_date IS NOT NULL
+    GROUP BY s.id, s.start_date, s.end_date
+),
+holidays AS (
+    SELECT sd.sprint_id,
+        COALESCE(SUM((
+            SELECT COUNT(*)
+            FROM generate_series(GREATEST(a.start_date, sd.d_start),
+                                 LEAST(a.end_date, sd.d_end), INTERVAL '1 day') g
+            WHERE EXTRACT(DOW FROM g) NOT IN (0, 6)
+        )), 0) AS holiday_days
+    FROM sprint_days sd
+    LEFT JOIN absences a
+        ON a.kind = 'holiday'
+       AND a.start_date <= sd.d_end
+       AND a.end_date   >= sd.d_start
+    GROUP BY sd.sprint_id
+),
+person_off AS (
+    SELECT r.sprint_id, r.account_id,
+        COALESCE(SUM((
+            SELECT COUNT(*)
+            FROM generate_series(GREATEST(a.start_date, sd.d_start),
+                                 LEAST(a.end_date, sd.d_end), INTERVAL '1 day') g
+            WHERE EXTRACT(DOW FROM g) NOT IN (0, 6)
+        )), 0) AS absence_days
+    FROM v_sprint_roster r
+    JOIN sprint_days sd ON sd.sprint_id = r.sprint_id
+    JOIN bamboohr_employees e ON e.jira_account_id = r.account_id
+    LEFT JOIN absences a
+        ON a.employee_id = e.employee_id
+       AND a.kind = 'timeOff'
+       AND a.start_date <= sd.d_end
+       AND a.end_date   >= sd.d_start
+    GROUP BY r.sprint_id, r.account_id
+)
+SELECT
+    r.sprint_id,
+    e.display_name                                                          AS person,
+    r.source,
+    sd.working_days,
+    COALESCE(po.absence_days, 0)                                            AS absence_days,
+    h.holiday_days,
+    GREATEST(sd.working_days - COALESCE(po.absence_days, 0) - h.holiday_days, 0) AS available_days
+FROM v_sprint_roster r
+JOIN sprint_days sd        ON sd.sprint_id = r.sprint_id
+JOIN bamboohr_employees e  ON e.jira_account_id = r.account_id
+LEFT JOIN person_off po    ON po.sprint_id = r.sprint_id AND po.account_id = r.account_id
+LEFT JOIN holidays h       ON h.sprint_id = r.sprint_id;
