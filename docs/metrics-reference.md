@@ -130,9 +130,9 @@ Per-sprint drill-down for Scrum Masters and Release Managers.
 
 **Delivery %** — `delivery_pct` from `v_planning_deviation`. Gauge: red < 60%, yellow 60–80%, green ≥ 80%.
 
-**Avg Velocity (Last 6 Sprints)** — `AVG(delivered_points)` from `v_planning_deviation` across the 6 most recent closed sprints (by `complete_date`) before the current sprint's `start_date`, filtered to the same team via project-majority filter (>50% of committed issues share a project key). No board_id filter — some teams alternate boards.
+**Avg Velocity (Last 6 Sprints)** — average per-sprint delivered SP across the 6 most recent closed sprints (by `complete_date`) before the current sprint's `start_date`, restricted to sprints that pass the project-majority filter (>50% of initial-scope issues belong to `$project`). Delivered SP is summed directly from `sprint_scope_final` (`was_completed = TRUE AND was_added_mid_sprint = FALSE`, Epics/Sub-tasks/Obsolete excluded) and **scoped to `$project`** — only the selected team's completed initial-scope points count, so shared-board sprints don't pull in other teams' delivery. Not taken from `v_planning_deviation.delivered_points`, which is whole-sprint (all projects). No board_id filter — some teams alternate boards.
 
-**Velocity Booked %** — `ROUND(100.0 * committed_sp / avg_velocity, 1)`. Gauge: green < 80%, yellow 80–100%, red > 100% (capped at 150%).
+**Velocity Booked %** — `ROUND(100.0 * committed_sp / avg_velocity, 1)`. Committed SP is `$project`-scoped (`was_in_initial_scope = TRUE AND removed_at IS NULL`, excl. Epics). Gauge: green < 80%, yellow 80–100%, red > 100% (capped at 150%).
 
 ### Story Readiness
 
