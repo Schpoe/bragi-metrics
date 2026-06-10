@@ -27,7 +27,9 @@ These are intentional differences worth understanding when comparing numbers:
 
 ## `v_planning_deviation` View
 
-Used by: Sprint Detail (Delivery %, Avg Velocity, Velocity Booked %), Sprint Overview Quarter, PO KPIs.
+Used by: Sprint Overview Quarter, Sprint Health. **Grain: per sprint, all projects on the board** — it has no `project_key` dimension, so its `committed_points`/`delivered_points`/`delivery_pct` describe the *whole sprint*. On a shared (multi-project) board these sum across teams. Do **not** read these columns per-team.
+
+> **Project-scoped sibling — `v_planning_deviation_proj`.** Same logic at **(sprint, project_key)** grain. PO KPIs (Planning Accuracy, Scope Change, Capacity Ratio) and the reporter use this with `project_key IN ($project)` so a team's numbers exclude other teams sharing the board. Both views anchor committed/delivered to true initial scope by joining `sprint_scope_initial` (not the leaky `was_added_mid_sprint` proxy).
 
 The view uses two different data sources depending on whether a sprint has been processed into the scope tables:
 
@@ -114,6 +116,8 @@ Used by the Quality & Bugs dashboard **Release Bug History** section to identify
 
 Per-sprint drill-down for Scrum Masters and Release Managers.
 
+**Team scoping (all panels):** every per-sprint panel is scoped to the selected team with `i.project_key IN ($project)`. A Jira board can hold several projects, so a `sprint_id` may contain other teams' issues; without this filter the SP/count/readiness/QASE/scope-change/capacity figures would include them. Exceptions: Sprint Info/Goal (sprint metadata) and the "blocked by/blocking other teams" panels (cross-team by design — only the *this-team* side is `$project`-scoped).
+
 **Common exclusions (unless noted):** `issue_type IN ('Epic', 'Sub-task')`, `status = 'Obsolete / Won''t Do'`, `removed_at IS NOT NULL`.
 
 ### Story Points
@@ -128,7 +132,7 @@ Per-sprint drill-down for Scrum Masters and Release Managers.
 
 **Completed** — SUM where `status_category = 'Done'`, excl. Epics, with `resolved_at` in sprint window (`>= start_date AND <= COALESCE(complete_date, end_date, NOW())`). `resolved_at IS NOT NULL` required. Counts all Done issues including unplanned and Sub-tasks. The `resolved_at` window is required here because unplanned Done issues appear in multiple sprints' `sprint_issues` with `removed_at IS NULL`.
 
-**Delivery %** — `delivery_pct` from `v_planning_deviation`. Gauge: red < 60%, yellow 60–80%, green ≥ 80%.
+**Delivery %** — project-scoped delivered ÷ committed SP for the selected sprint, computed inline from `sprint_scope_final` (`was_completed`/`was_punted`, initial scope, `project_key IN ($project)`) with a `sprint_issues` fallback for not-yet-backfilled sprints — **not** `v_planning_deviation.delivery_pct`, which is whole-sprint (all projects). Gauge: red < 60%, yellow 60–80%, green ≥ 80%.
 
 **Avg Velocity (Last 6 Sprints)** — average per-sprint delivered SP across the 6 most recent closed sprints (by `complete_date`) before the current sprint's `start_date`, restricted to sprints that pass the project-majority filter (>50% of initial-scope issues belong to `$project`). Delivered SP is summed directly from `sprint_scope_final` (`was_completed = TRUE AND was_added_mid_sprint = FALSE`, Epics/Sub-tasks/Obsolete excluded) and **scoped to `$project`** — only the selected team's completed initial-scope points count, so shared-board sprints don't pull in other teams' delivery. Not taken from `v_planning_deviation.delivered_points`, which is whole-sprint (all projects). No board_id filter — some teams alternate boards.
 
@@ -240,7 +244,7 @@ Quarterly KPIs for Product Owners: planning quality, delivery accuracy, re-work,
 
 **Avg Scope Change %** — `AVG((added_sp + removed_sp) / committed_sp × 100)` across closed sprints in quarter. Only additions and removals that occurred after sprint start are counted — pre-sprint churn is excluded. Target ≤ 10%.
 
-**Avg Planning Accuracy %** — `AVG(delivery_pct)` from `v_planning_deviation` for closed sprints. Since `delivery_pct` only counts committed issues, this cannot exceed 100%.
+**Avg Planning Accuracy %** — per-sprint delivered ÷ committed (from `v_planning_deviation_proj`, `project_key IN ($project)`, aggregated per sprint) then averaged across the quarter's project-majority closed sprints. Since only committed issues count, this cannot exceed 100%.
 
 **Ticket Reopens** — Issues that transitioned from a testing status to In Progress: `LOWER(from_status) LIKE '%test%' AND LOWER(to_status) LIKE '%progress%'`. Filtered by `transitioned_at` quarter.
 
@@ -290,9 +294,9 @@ Links `issues.fix_versions` (array) to `releases` via `r.name = ANY(i.fix_versio
 
 Available person-days per sprint, derived from BambooHR absences. Powers the Capacity panels on the **PO KPIs** dashboard (retrospective, quarter-aggregate) and the **Capacity (BambooHR)** section of the **Sprint Detail** dashboard (per selected sprint, for planning). Populated by `sync_absences()` in jira-sync — skipped entirely if `BAMBOOHR_SUBDOMAIN` / `BAMBOOHR_API_KEY` are unset, so the rest of the platform is unaffected.
 
-**Source tables/views:** `bamboohr_employees`, `absences`, and the `v_sprint_roster`, `v_team_capacity`, `v_sprint_capacity_detail` views.
+**Source tables/views:** `bamboohr_employees`, `absences`, and the `v_sprint_roster`, `v_team_capacity`, `v_sprint_capacity_detail` views. **All three carry a `project_key` dimension** (per sprint × project × person), so capacity describes the *selected team* — not the whole board. Panels filter `project_key IN ($project)` and aggregate (`SUM` of per-project team_size/days; `Capacity by Person` de-dupes persons across selected projects with `DISTINCT ON (account_id)`). For a single-project team selection this is exact; selecting multiple projects that share people slightly over-counts shared members.
 
-**Roster (`v_sprint_roster`):** distinct Jira assignees (`issues.assignee_account_id`) on each sprint's `was_in_initial_scope = TRUE` issues, tagged `source = 'committed'`. **Fallback** (`source = 'fallback'`): for sprints with *no* committed assignees yet (a future sprint being planned), the roster is inferred from the people who carried committed work on the **same board's last 3 closed sprints**. This lets POs see capacity before a sprint is staffed. No separate team-membership table; it auto-updates as teams change.
+**Roster (`v_sprint_roster`):** distinct Jira assignees (`issues.assignee_account_id`) on each sprint's `was_in_initial_scope = TRUE AND removed_at IS NULL` issues, per `project_key`, tagged `source = 'committed'`. **Fallback** (`source = 'fallback'`): for sprints with *no* committed assignees yet (a future sprint being planned), the roster is inferred from the people who carried committed work on the **same board's last 3 closed sprints**. This lets POs see capacity before a sprint is staffed. No separate team-membership table; it auto-updates as teams change.
 
 **`v_team_capacity` (per sprint):**
 

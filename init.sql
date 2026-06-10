@@ -370,9 +370,9 @@ committed AS (
         COUNT(*)                                                                AS committed_issues,
         COALESCE(SUM(COALESCE(ssf.story_points, 0)), 0)                        AS committed_points
     FROM sprint_scope_final ssf
+    JOIN sprint_scope_initial ssi ON ssi.sprint_id = ssf.sprint_id AND ssi.issue_key = ssf.issue_key
     JOIN issues i ON i.key = ssf.issue_key
-    WHERE ssf.was_punted = FALSE
-      AND ssf.was_added_mid_sprint = FALSE   -- committed = initial scope only (matches active branch)
+    WHERE ssf.was_punted = FALSE   -- committed = true initial scope via ssi join, not punted, matches active branch
       AND i.issue_type NOT IN ('Epic', 'Sub-task')
       AND i.status != 'Obsolete / Won''t Do'
     GROUP BY ssf.sprint_id
@@ -400,9 +400,9 @@ delivered AS (
         COUNT(*)                                                                AS delivered_issues,
         COALESCE(SUM(COALESCE(ssf.story_points, 0)), 0)                        AS delivered_points
     FROM sprint_scope_final ssf
+    JOIN sprint_scope_initial ssi ON ssi.sprint_id = ssf.sprint_id AND ssi.issue_key = ssf.issue_key
     JOIN issues i ON i.key = ssf.issue_key
-    WHERE ssf.was_completed = TRUE
-      AND ssf.was_added_mid_sprint = FALSE   -- delivered = completed initial-scope work (matches active branch)
+    WHERE ssf.was_completed = TRUE   -- delivered = completed true initial-scope work (ssi join); matches active branch
       AND i.issue_type NOT IN ('Epic', 'Sub-task')
       AND i.status != 'Obsolete / Won''t Do'
     GROUP BY ssf.sprint_id
@@ -449,6 +449,95 @@ SELECT
 FROM sprints s
 LEFT JOIN committed c ON c.sprint_id = s.id
 LEFT JOIN delivered d ON d.sprint_id = s.id;
+
+-- Project-aware planning deviation: same logic as v_planning_deviation but at
+-- (sprint, project_key) grain, so team metrics on shared (multi-project) boards
+-- aren't inflated by other teams' issues. Filter with project_key IN ($project).
+CREATE OR REPLACE VIEW v_planning_deviation_proj AS
+WITH scope_sprints AS (
+    SELECT DISTINCT sprint_id FROM sprint_scope_final
+),
+committed AS (
+    SELECT ssf.sprint_id, i.project_key,
+        COUNT(*)                                                            AS committed_issues,
+        COALESCE(SUM(COALESCE(ssf.story_points, 0)), 0)                     AS committed_points
+    FROM sprint_scope_final ssf
+    JOIN sprint_scope_initial ssi ON ssi.sprint_id = ssf.sprint_id AND ssi.issue_key = ssf.issue_key
+    JOIN issues i ON i.key = ssf.issue_key
+    WHERE ssf.was_punted = FALSE
+      AND i.issue_type NOT IN ('Epic', 'Sub-task')
+      AND i.status != 'Obsolete / Won''t Do'
+    GROUP BY ssf.sprint_id, i.project_key
+
+    UNION ALL
+
+    SELECT si.sprint_id, i.project_key,
+        COUNT(*),
+        COALESCE(SUM(COALESCE(si.story_points_at_add, i.story_points, 0)), 0)
+    FROM sprint_issues si
+    JOIN issues i ON i.key = si.issue_key
+    WHERE si.was_in_initial_scope = TRUE
+      AND si.removed_at IS NULL
+      AND i.issue_type NOT IN ('Epic', 'Sub-task')
+      AND i.status != 'Obsolete / Won''t Do'
+      AND si.sprint_id NOT IN (SELECT sprint_id FROM scope_sprints)
+    GROUP BY si.sprint_id, i.project_key
+),
+delivered AS (
+    SELECT ssf.sprint_id, i.project_key,
+        COUNT(*)                                                            AS delivered_issues,
+        COALESCE(SUM(COALESCE(ssf.story_points, 0)), 0)                     AS delivered_points
+    FROM sprint_scope_final ssf
+    JOIN sprint_scope_initial ssi ON ssi.sprint_id = ssf.sprint_id AND ssi.issue_key = ssf.issue_key
+    JOIN issues i ON i.key = ssf.issue_key
+    WHERE ssf.was_completed = TRUE
+      AND i.issue_type NOT IN ('Epic', 'Sub-task')
+      AND i.status != 'Obsolete / Won''t Do'
+    GROUP BY ssf.sprint_id, i.project_key
+
+    UNION ALL
+
+    SELECT si.sprint_id, i.project_key,
+        COUNT(*),
+        COALESCE(SUM(COALESCE(si.story_points_at_add, i.story_points, 0)), 0)
+    FROM sprint_issues si
+    JOIN issues i ON i.key = si.issue_key
+    JOIN sprints s ON s.id = si.sprint_id
+    WHERE si.was_in_initial_scope = TRUE
+      AND si.removed_at IS NULL
+      AND i.status_category = 'Done'
+      AND i.status != 'Obsolete / Won''t Do'
+      AND i.issue_type NOT IN ('Epic', 'Sub-task')
+      AND i.resolved_at IS NOT NULL
+      AND i.resolved_at <= COALESCE(s.complete_date, s.end_date, NOW()) + INTERVAL '7 days'
+      AND si.sprint_id NOT IN (SELECT sprint_id FROM scope_sprints)
+    GROUP BY si.sprint_id, i.project_key
+),
+keys AS (
+    SELECT sprint_id, project_key FROM committed
+    UNION
+    SELECT sprint_id, project_key FROM delivered
+)
+SELECT
+    k.sprint_id,
+    k.project_key,
+    s.name                                                          AS sprint_name,
+    s.state,
+    s.start_date,
+    s.complete_date,
+    COALESCE(c.committed_points, 0)                                AS committed_points,
+    COALESCE(c.committed_issues, 0)                                AS committed_issues,
+    COALESCE(d.delivered_points, 0)                                AS delivered_points,
+    COALESCE(d.delivered_issues, 0)                                AS delivered_issues,
+    CASE
+        WHEN COALESCE(c.committed_points, 0) > 0
+        THEN ROUND(100.0 * COALESCE(d.delivered_points, 0) / c.committed_points, 1)
+        ELSE NULL
+    END                                                             AS delivery_pct
+FROM keys k
+JOIN sprints s ON s.id = k.sprint_id
+LEFT JOIN committed c ON c.sprint_id = k.sprint_id AND c.project_key = k.project_key
+LEFT JOIN delivered d ON d.sprint_id = k.sprint_id AND d.project_key = k.project_key;
 
 -- Lead time: created → resolved (excludes Epics and Sub-tasks)
 CREATE OR REPLACE VIEW v_lead_time AS
@@ -547,12 +636,15 @@ GROUP BY dl.to_key, dl.from_key;
 -- Fallback ('fallback'): for not-yet-staffed sprints (no committed assignees),
 -- people who carried committed work on the same board's last 3 closed sprints.
 -- Lets capacity be estimated for future sprints the PO is planning.
+-- project_key dimension: roster is per (sprint, project_key, person), so capacity
+-- can be scoped to the selected team rather than the whole (multi-project) board.
 CREATE OR REPLACE VIEW v_sprint_roster AS
 WITH committed AS (
-    SELECT DISTINCT si.sprint_id, i.assignee_account_id AS account_id
+    SELECT DISTINCT si.sprint_id, i.project_key, i.assignee_account_id AS account_id
     FROM sprint_issues si
     JOIN issues i ON i.key = si.issue_key
     WHERE si.was_in_initial_scope = TRUE
+      AND si.removed_at IS NULL
       AND i.assignee_account_id IS NOT NULL
 ),
 need_fallback AS (
@@ -561,7 +653,7 @@ need_fallback AS (
     WHERE NOT EXISTS (SELECT 1 FROM committed c WHERE c.sprint_id = s.id)
 ),
 board_history AS (
-    SELECT nf.sprint_id, c.account_id
+    SELECT nf.sprint_id, c.project_key, c.account_id
     FROM need_fallback nf
     JOIN LATERAL (
         SELECT prev.id
@@ -573,11 +665,11 @@ board_history AS (
         LIMIT 3
     ) recent ON TRUE
     JOIN committed c ON c.sprint_id = recent.id
-    GROUP BY nf.sprint_id, c.account_id
+    GROUP BY nf.sprint_id, c.project_key, c.account_id
 )
-SELECT sprint_id, account_id, 'committed'::text AS source FROM committed
+SELECT sprint_id, project_key, account_id, 'committed'::text AS source FROM committed
 UNION
-SELECT sprint_id, account_id, 'fallback'::text  AS source FROM board_history;
+SELECT sprint_id, project_key, account_id, 'fallback'::text  AS source FROM board_history;
 
 CREATE OR REPLACE VIEW v_team_capacity AS
 WITH sprint_days AS (
@@ -593,16 +685,16 @@ WITH sprint_days AS (
 ),
 roster AS (
     -- committed-issue assignees, with board-history fallback for unstaffed sprints
-    SELECT sprint_id, account_id, source FROM v_sprint_roster
+    SELECT sprint_id, project_key, account_id, source FROM v_sprint_roster
 ),
 roster_size AS (
-    SELECT sprint_id, COUNT(*) AS team_size,
+    SELECT sprint_id, project_key, COUNT(*) AS team_size,
            bool_or(source = 'fallback') AS is_estimated
-    FROM roster GROUP BY sprint_id
+    FROM roster GROUP BY sprint_id, project_key
 ),
 -- per-person time-off business days overlapping the sprint window
 person_absence AS (
-    SELECT r.sprint_id,
+    SELECT r.sprint_id, r.project_key,
         SUM((
             SELECT COUNT(*)
             FROM generate_series(GREATEST(a.start_date, sd.d_start),
@@ -617,7 +709,7 @@ person_absence AS (
        AND a.kind = 'timeOff'
        AND a.start_date <= sd.d_end
        AND a.end_date   >= sd.d_start
-    GROUP BY r.sprint_id
+    GROUP BY r.sprint_id, r.project_key
 ),
 -- company holidays apply to the whole team
 holidays AS (
@@ -636,7 +728,8 @@ holidays AS (
     GROUP BY sd.sprint_id
 )
 SELECT
-    sd.sprint_id,
+    rs.sprint_id,
+    rs.project_key,
     rs.team_size,
     sd.working_days,
     rs.team_size * sd.working_days                                          AS nominal_days,
@@ -649,10 +742,10 @@ SELECT
         0
     )                                                                       AS available_days,
     rs.is_estimated
-FROM sprint_days sd
-JOIN roster_size rs   ON rs.sprint_id = sd.sprint_id
-LEFT JOIN person_absence pa ON pa.sprint_id = sd.sprint_id
-LEFT JOIN holidays h        ON h.sprint_id = sd.sprint_id;
+FROM roster_size rs
+JOIN sprint_days sd         ON sd.sprint_id = rs.sprint_id
+LEFT JOIN person_absence pa ON pa.sprint_id = rs.sprint_id AND pa.project_key = rs.project_key
+LEFT JOIN holidays h        ON h.sprint_id = rs.sprint_id;
 
 -- Per-person capacity breakdown for a sprint (drives the absence detail table).
 -- Sums to v_team_capacity: working - personal time-off - company holidays.
@@ -684,7 +777,7 @@ holidays AS (
     GROUP BY sd.sprint_id
 ),
 person_off AS (
-    SELECT r.sprint_id, r.account_id,
+    SELECT r.sprint_id, r.project_key, r.account_id,
         COALESCE(SUM((
             SELECT COUNT(*)
             FROM generate_series(GREATEST(a.start_date, sd.d_start),
@@ -699,10 +792,12 @@ person_off AS (
        AND a.kind = 'timeOff'
        AND a.start_date <= sd.d_end
        AND a.end_date   >= sd.d_start
-    GROUP BY r.sprint_id, r.account_id
+    GROUP BY r.sprint_id, r.project_key, r.account_id
 )
 SELECT
     r.sprint_id,
+    r.project_key,
+    r.account_id,
     e.display_name                                                          AS person,
     r.source,
     sd.working_days,
@@ -712,5 +807,5 @@ SELECT
 FROM v_sprint_roster r
 JOIN sprint_days sd        ON sd.sprint_id = r.sprint_id
 JOIN bamboohr_employees e  ON e.jira_account_id = r.account_id
-LEFT JOIN person_off po    ON po.sprint_id = r.sprint_id AND po.account_id = r.account_id
+LEFT JOIN person_off po    ON po.sprint_id = r.sprint_id AND po.project_key = r.project_key AND po.account_id = r.account_id
 LEFT JOIN holidays h       ON h.sprint_id = r.sprint_id;

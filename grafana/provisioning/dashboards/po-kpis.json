@@ -87,7 +87,7 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "Hours since the last Jira sync attempt and its status. Green \u2264 12 h \u2022 Yellow 12\u201324 h \u2022 Red > 24 h or ERROR status. Queries most recent run regardless of success.",
+      "description": "Hours since the last Jira sync attempt and its status. Green ≤ 12 h • Yellow 12–24 h • Red > 24 h or ERROR status. Queries most recent run regardless of success.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -160,7 +160,7 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "Average % of story points added or removed after sprint start (lower = more stable plans). Target: \u2264 10%",
+      "description": "Average % of story points added or removed after sprint start (lower = more stable plans). Target: ≤ 10%",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -221,7 +221,7 @@
             "type": "postgres",
             "uid": "jira-metrics-pg"
           },
-          "rawSql": "SELECT ROUND(AVG(\n  100.0 * (COALESCE(added.sp,0) + COALESCE(removed.sp,0))\n  / NULLIF(pd.committed_points, 0)\n)::numeric, 1) AS value\nFROM v_planning_deviation pd\nLEFT JOIN (SELECT sprint_id, SUM(COALESCE(si.story_points_at_add,0)) AS sp FROM sprint_issues si JOIN issues i ON i.key = si.issue_key WHERE si.was_in_initial_scope = FALSE AND si.removed_at IS NULL AND i.issue_type NOT IN ('Epic', 'Sub-task') AND i.status != 'Obsolete / Won''t Do' GROUP BY si.sprint_id) added ON added.sprint_id = pd.sprint_id\nLEFT JOIN (SELECT sprint_id, SUM(COALESCE(si.story_points_at_add,0)) AS sp FROM sprint_issues si JOIN issues i ON i.key = si.issue_key WHERE si.removed_at IS NOT NULL AND i.issue_type NOT IN ('Epic', 'Sub-task') AND i.status != 'Obsolete / Won''t Do' GROUP BY si.sprint_id) removed ON removed.sprint_id = pd.sprint_id\nWHERE pd.sprint_id IN (\n    SELECT DISTINCT si2.sprint_id FROM sprint_issues si2\n    JOIN issues i2 ON i2.key = si2.issue_key\n    WHERE i2.project_key IN ($project)\n      AND si2.was_in_initial_scope = TRUE\n    GROUP BY si2.sprint_id\n    HAVING COUNT(*) * 2 > (\n      SELECT COUNT(*) FROM sprint_issues si3\n      WHERE si3.sprint_id = si2.sprint_id AND si3.was_in_initial_scope = TRUE\n    )\n  )\n  AND pd.state = 'closed' AND pd.committed_points > 0\n  AND date_trunc('quarter', pd.start_date) = '$quarter'::date",
+          "rawSql": "SELECT ROUND(AVG(sc)::numeric, 1) AS value FROM (\n  SELECT 100.0 * (SUM(COALESCE(a.sp,0)) + SUM(COALESCE(r.sp,0))) / NULLIF(SUM(pd.committed_points),0) AS sc\n  FROM v_planning_deviation_proj pd\n  LEFT JOIN (SELECT si.sprint_id, i.project_key, SUM(COALESCE(si.story_points_at_add,0)) AS sp, COUNT(*) AS cnt\n   FROM sprint_issues si JOIN issues i ON i.key = si.issue_key\n   WHERE si.was_in_initial_scope = FALSE AND si.removed_at IS NULL\n     AND i.issue_type NOT IN ('Epic','Sub-task') AND i.status != 'Obsolete / Won''t Do'\n   GROUP BY si.sprint_id, i.project_key) a ON a.sprint_id = pd.sprint_id AND a.project_key = pd.project_key\n  LEFT JOIN (SELECT si.sprint_id, i.project_key, SUM(COALESCE(si.story_points_at_add,0)) AS sp, COUNT(*) AS cnt\n   FROM sprint_issues si JOIN issues i ON i.key = si.issue_key\n   WHERE si.removed_at IS NOT NULL\n     AND i.issue_type NOT IN ('Epic','Sub-task') AND i.status != 'Obsolete / Won''t Do'\n   GROUP BY si.sprint_id, i.project_key) r ON r.sprint_id = pd.sprint_id AND r.project_key = pd.project_key\n  WHERE pd.project_key IN ($project) AND pd.sprint_id IN (\n    SELECT DISTINCT si2.sprint_id FROM sprint_issues si2\n    JOIN issues i2 ON i2.key = si2.issue_key\n    WHERE i2.project_key IN ($project) AND si2.was_in_initial_scope = TRUE\n    GROUP BY si2.sprint_id\n    HAVING COUNT(*) * 2 > (SELECT COUNT(*) FROM sprint_issues si3 WHERE si3.sprint_id = si2.sprint_id AND si3.was_in_initial_scope = TRUE)\n  )\n    AND pd.state = 'closed' AND pd.committed_points > 0\n    AND date_trunc('quarter', pd.start_date) = '$quarter'::date\n  GROUP BY pd.sprint_id HAVING SUM(pd.committed_points) > 0\n) t",
           "format": "table",
           "refId": "A"
         }
@@ -234,7 +234,7 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "Average % of committed story points delivered (delivery % per sprint). Target: \u2265 80%",
+      "description": "Average % of committed story points delivered (delivery % per sprint). Target: ≥ 80%",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -295,7 +295,7 @@
             "type": "postgres",
             "uid": "jira-metrics-pg"
           },
-          "rawSql": "SELECT ROUND(AVG(delivery_pct)::numeric, 1) AS value\nFROM v_planning_deviation pd\nWHERE pd.sprint_id IN (\n    SELECT DISTINCT si2.sprint_id FROM sprint_issues si2\n    JOIN issues i2 ON i2.key = si2.issue_key\n    WHERE i2.project_key IN ($project)\n      AND si2.was_in_initial_scope = TRUE\n    GROUP BY si2.sprint_id\n    HAVING COUNT(*) * 2 > (\n      SELECT COUNT(*) FROM sprint_issues si3\n      WHERE si3.sprint_id = si2.sprint_id AND si3.was_in_initial_scope = TRUE\n    )\n  )\n  AND pd.state = 'closed' AND pd.delivery_pct IS NOT NULL\n  AND date_trunc('quarter', pd.start_date) = '$quarter'::date",
+          "rawSql": "SELECT ROUND(AVG(acc)::numeric, 1) AS value FROM (\n  SELECT ROUND(100.0 * SUM(pd.delivered_points) / NULLIF(SUM(pd.committed_points),0), 1) AS acc\n  FROM v_planning_deviation_proj pd\n  WHERE pd.project_key IN ($project) AND pd.sprint_id IN (\n    SELECT DISTINCT si2.sprint_id FROM sprint_issues si2\n    JOIN issues i2 ON i2.key = si2.issue_key\n    WHERE i2.project_key IN ($project) AND si2.was_in_initial_scope = TRUE\n    GROUP BY si2.sprint_id\n    HAVING COUNT(*) * 2 > (SELECT COUNT(*) FROM sprint_issues si3 WHERE si3.sprint_id = si2.sprint_id AND si3.was_in_initial_scope = TRUE)\n  )\n    AND pd.state = 'closed'\n    AND date_trunc('quarter', pd.start_date) = '$quarter'::date\n  GROUP BY pd.sprint_id HAVING SUM(pd.committed_points) > 0\n) t",
           "format": "table",
           "refId": "A"
         }
@@ -380,7 +380,7 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "Average hours from creation to resolution for Blocker-priority issues. Target: \u2264 1 sprint.",
+      "description": "Average hours from creation to resolution for Blocker-priority issues. Target: ≤ 1 sprint.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -452,7 +452,7 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "% of bugs raised this quarter that are closed (Done). Target: \u2265 80%.",
+      "description": "% of bugs raised this quarter that are closed (Done). Target: ≥ 80%.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -526,7 +526,7 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "Avg % of committed Stories/Tasks per sprint that meet Definition of Ready (Assignee, QA Assignee, SP \u2265 1, Acceptance Criteria, Epic, Component). Excludes Epics, Sub-tasks, Bugs. Target: \u2265 80%.",
+      "description": "Avg % of committed Stories/Tasks per sprint that meet Definition of Ready (Assignee, QA Assignee, SP ≥ 1, Acceptance Criteria, Epic, Component). Excludes Epics, Sub-tasks, Bugs. Target: ≥ 80%.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -600,7 +600,7 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "Avg % of Done Stories/Tasks per sprint that meet Definition of Done (Assignee, QA Assignee, SP \u2265 1, Acceptance Criteria, Epic, Component). Denominator = tickets with status = \u2018Done\u2019 only. Excludes Epics, Sub-tasks, Bugs. Target: \u2265 80%.",
+      "description": "Avg % of Done Stories/Tasks per sprint that meet Definition of Done (Assignee, QA Assignee, SP ≥ 1, Acceptance Criteria, Epic, Component). Denominator = tickets with status = ‘Done’ only. Excludes Epics, Sub-tasks, Bugs. Target: ≥ 80%.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -674,7 +674,7 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "Weighted bug score per release: (Blocker\u00d75 + Critical\u00d74 + High\u00d73 + Medium\u00d72 + Low\u00d71) divided by number of releases in the quarter. Lower is better.",
+      "description": "Weighted bug score per release: (Blocker×5 + Critical×4 + High×3 + Medium×2 + Low×1) divided by number of releases in the quarter. Lower is better.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -759,7 +759,7 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "Story points added + removed after sprint start as % of committed SP. Target \u2264 10%.",
+      "description": "Story points added + removed after sprint start as % of committed SP. Target ≤ 10%.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -853,7 +853,7 @@
             "type": "postgres",
             "uid": "jira-metrics-pg"
           },
-          "rawSql": "SELECT pd.sprint_name AS \"Sprint\",\n  COALESCE(ROUND(100.0*(COALESCE(added.sp,0)+COALESCE(removed.sp,0))/NULLIF(pd.committed_points,0)::numeric,1),0) AS \"Scope Change %\",\n  COALESCE(added.cnt,0) AS \"Issues Added\",\n  COALESCE(removed.cnt,0) AS \"Issues Removed\"\nFROM v_planning_deviation pd\nLEFT JOIN (SELECT sprint_id, SUM(COALESCE(si.story_points_at_add,0)) AS sp, COUNT(*) AS cnt FROM sprint_issues si JOIN issues i ON i.key = si.issue_key WHERE si.was_in_initial_scope=FALSE AND si.removed_at IS NULL AND i.issue_type NOT IN ('Epic', 'Sub-task') AND i.status != 'Obsolete / Won''t Do' GROUP BY si.sprint_id) added ON added.sprint_id=pd.sprint_id\nLEFT JOIN (SELECT sprint_id, SUM(COALESCE(si.story_points_at_add,0)) AS sp, COUNT(*) AS cnt FROM sprint_issues si JOIN issues i ON i.key = si.issue_key WHERE si.removed_at IS NOT NULL AND i.issue_type NOT IN ('Epic', 'Sub-task') AND i.status != 'Obsolete / Won''t Do' GROUP BY si.sprint_id) removed ON removed.sprint_id=pd.sprint_id\nWHERE pd.sprint_id IN (\n    SELECT DISTINCT si2.sprint_id FROM sprint_issues si2\n    JOIN issues i2 ON i2.key = si2.issue_key\n    WHERE i2.project_key IN ($project)\n      AND si2.was_in_initial_scope = TRUE\n    GROUP BY si2.sprint_id\n    HAVING COUNT(*) * 2 > (\n      SELECT COUNT(*) FROM sprint_issues si3\n      WHERE si3.sprint_id = si2.sprint_id AND si3.was_in_initial_scope = TRUE\n    )\n  )\n  AND pd.state='closed' AND pd.committed_points>0\n  AND date_trunc('quarter', pd.start_date) = '$quarter'::date\nORDER BY pd.start_date ASC LIMIT 20",
+          "rawSql": "SELECT pd.sprint_name AS \"Sprint\",\n  COALESCE(ROUND(100.0*(SUM(COALESCE(a.sp,0))+SUM(COALESCE(r.sp,0)))/NULLIF(SUM(pd.committed_points),0)::numeric,1),0) AS \"Scope Change %\",\n  COALESCE(SUM(a.cnt),0) AS \"Issues Added\",\n  COALESCE(SUM(r.cnt),0) AS \"Issues Removed\"\nFROM v_planning_deviation_proj pd\nLEFT JOIN (SELECT si.sprint_id, i.project_key, SUM(COALESCE(si.story_points_at_add,0)) AS sp, COUNT(*) AS cnt\n   FROM sprint_issues si JOIN issues i ON i.key = si.issue_key\n   WHERE si.was_in_initial_scope = FALSE AND si.removed_at IS NULL\n     AND i.issue_type NOT IN ('Epic','Sub-task') AND i.status != 'Obsolete / Won''t Do'\n   GROUP BY si.sprint_id, i.project_key) a ON a.sprint_id = pd.sprint_id AND a.project_key = pd.project_key\nLEFT JOIN (SELECT si.sprint_id, i.project_key, SUM(COALESCE(si.story_points_at_add,0)) AS sp, COUNT(*) AS cnt\n   FROM sprint_issues si JOIN issues i ON i.key = si.issue_key\n   WHERE si.removed_at IS NOT NULL\n     AND i.issue_type NOT IN ('Epic','Sub-task') AND i.status != 'Obsolete / Won''t Do'\n   GROUP BY si.sprint_id, i.project_key) r ON r.sprint_id = pd.sprint_id AND r.project_key = pd.project_key\nWHERE pd.project_key IN ($project) AND pd.sprint_id IN (\n    SELECT DISTINCT si2.sprint_id FROM sprint_issues si2\n    JOIN issues i2 ON i2.key = si2.issue_key\n    WHERE i2.project_key IN ($project) AND si2.was_in_initial_scope = TRUE\n    GROUP BY si2.sprint_id\n    HAVING COUNT(*) * 2 > (SELECT COUNT(*) FROM sprint_issues si3 WHERE si3.sprint_id = si2.sprint_id AND si3.was_in_initial_scope = TRUE)\n  )\n  AND pd.state = 'closed' AND pd.committed_points > 0\n  AND date_trunc('quarter', pd.start_date) = '$quarter'::date\nGROUP BY pd.sprint_name, pd.start_date\nORDER BY pd.start_date ASC LIMIT 20",
           "format": "table",
           "refId": "A"
         }
@@ -866,7 +866,7 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "Committed SP, Delivered SP (committed issues that are Done), and Planning Accuracy % per sprint. Target \u2265 80%.",
+      "description": "Committed SP, Delivered SP (committed issues that are Done), and Planning Accuracy % per sprint. Target ≥ 80%.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1018,7 +1018,7 @@
             "type": "postgres",
             "uid": "jira-metrics-pg"
           },
-          "rawSql": "SELECT pd.sprint_name AS \"Sprint\",\n  COALESCE(pd.committed_points, 0) AS \"Committed SP\",\n  COALESCE(pd.delivered_points, 0) AS \"Delivered SP\",\n  COALESCE(pd.delivery_pct, 0) AS \"Planning Accuracy %\"\nFROM v_planning_deviation pd\nWHERE pd.sprint_id IN (\n    SELECT DISTINCT si2.sprint_id FROM sprint_issues si2\n    JOIN issues i2 ON i2.key = si2.issue_key\n    WHERE i2.project_key IN ($project)\n      AND si2.was_in_initial_scope = TRUE\n    GROUP BY si2.sprint_id\n    HAVING COUNT(*) * 2 > (\n      SELECT COUNT(*) FROM sprint_issues si3\n      WHERE si3.sprint_id = si2.sprint_id AND si3.was_in_initial_scope = TRUE\n    )\n  )\n  AND pd.state = 'closed'\n  AND date_trunc('quarter', pd.start_date) = '$quarter'::date\nORDER BY pd.start_date ASC LIMIT 20",
+          "rawSql": "SELECT pd.sprint_name AS \"Sprint\",\n  SUM(pd.committed_points) AS \"Committed SP\",\n  SUM(pd.delivered_points) AS \"Delivered SP\",\n  ROUND(100.0 * SUM(pd.delivered_points) / NULLIF(SUM(pd.committed_points),0), 1) AS \"Planning Accuracy %\"\nFROM v_planning_deviation_proj pd\nWHERE pd.project_key IN ($project) AND pd.sprint_id IN (\n    SELECT DISTINCT si2.sprint_id FROM sprint_issues si2\n    JOIN issues i2 ON i2.key = si2.issue_key\n    WHERE i2.project_key IN ($project) AND si2.was_in_initial_scope = TRUE\n    GROUP BY si2.sprint_id\n    HAVING COUNT(*) * 2 > (SELECT COUNT(*) FROM sprint_issues si3 WHERE si3.sprint_id = si2.sprint_id AND si3.was_in_initial_scope = TRUE)\n  )\n  AND pd.state = 'closed'\n  AND date_trunc('quarter', pd.start_date) = '$quarter'::date\nGROUP BY pd.sprint_name, pd.start_date\nORDER BY pd.start_date ASC LIMIT 20",
           "format": "table",
           "refId": "A"
         }
@@ -1307,7 +1307,7 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "Average hours to resolve Blocker-priority issues per sprint. Target: \u2264 168h (1 sprint).",
+      "description": "Average hours to resolve Blocker-priority issues per sprint. Target: ≤ 168h (1 sprint).",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -2326,7 +2326,7 @@
             "type": "postgres",
             "uid": "jira-metrics-pg"
           },
-          "rawSql": "WITH ms AS (\n  SELECT pd.sprint_id, pd.sprint_name, pd.start_date, pd.committed_points, pd.delivered_points, tc.available_days\n  FROM v_planning_deviation pd\n  JOIN v_team_capacity tc ON tc.sprint_id = pd.sprint_id\n  WHERE pd.state = 'closed' AND pd.committed_points > 0 AND tc.available_days > 0\n    AND date_trunc('quarter', pd.start_date) = '$quarter'::date\n    AND pd.sprint_id IN (\n    SELECT DISTINCT si2.sprint_id FROM sprint_issues si2\n    JOIN issues i2 ON i2.key = si2.issue_key\n    WHERE i2.project_key IN ($project)\n      AND si2.was_in_initial_scope = TRUE\n    GROUP BY si2.sprint_id\n    HAVING COUNT(*) * 2 > (\n      SELECT COUNT(*) FROM sprint_issues si3\n      WHERE si3.sprint_id = si2.sprint_id AND si3.was_in_initial_scope = TRUE\n    )\n  )\n),\nagg AS (SELECT AVG(delivered_points) AS avg_vel, AVG(available_days) AS avg_avail FROM ms)\nSELECT ROUND(AVG(ms.committed_points * agg.avg_avail\n  / NULLIF(agg.avg_vel * ms.available_days, 0))::numeric, 2) AS value\nFROM ms CROSS JOIN agg",
+          "rawSql": "WITH ms AS (\n  SELECT pd.sprint_id, MAX(pd.sprint_name) AS sprint_name, MAX(pd.start_date) AS start_date,\n         SUM(pd.committed_points) AS committed_points, SUM(pd.delivered_points) AS delivered_points,\n         SUM(tc.available_days) AS available_days\n  FROM v_planning_deviation_proj pd\n  JOIN v_team_capacity tc ON tc.sprint_id = pd.sprint_id AND tc.project_key = pd.project_key\n  WHERE pd.state = 'closed' AND pd.project_key IN ($project)\n    AND date_trunc('quarter', pd.start_date) = '$quarter'::date\n    AND pd.sprint_id IN (\n    SELECT DISTINCT si2.sprint_id FROM sprint_issues si2\n    JOIN issues i2 ON i2.key = si2.issue_key\n    WHERE i2.project_key IN ($project) AND si2.was_in_initial_scope = TRUE\n    GROUP BY si2.sprint_id\n    HAVING COUNT(*) * 2 > (SELECT COUNT(*) FROM sprint_issues si3 WHERE si3.sprint_id = si2.sprint_id AND si3.was_in_initial_scope = TRUE)\n  )\n  GROUP BY pd.sprint_id\n  HAVING SUM(pd.committed_points) > 0 AND SUM(tc.available_days) > 0\n),\nagg AS (SELECT AVG(delivered_points) AS avg_vel, AVG(available_days) AS avg_avail FROM ms)\nSELECT ROUND(AVG(ms.committed_points * agg.avg_avail\n  / NULLIF(agg.avg_vel * ms.available_days, 0))::numeric, 2) AS value\nFROM ms CROSS JOIN agg",
           "format": "table",
           "refId": "A"
         }
@@ -2392,7 +2392,7 @@
             "type": "postgres",
             "uid": "jira-metrics-pg"
           },
-          "rawSql": "SELECT ROUND(AVG(tc.available_days)::numeric, 1) AS value\nFROM v_team_capacity tc\nJOIN v_planning_deviation pd ON pd.sprint_id = tc.sprint_id\nWHERE pd.state = 'closed'\n  AND date_trunc('quarter', pd.start_date) = '$quarter'::date\n  AND pd.sprint_id IN (\n    SELECT DISTINCT si2.sprint_id FROM sprint_issues si2\n    JOIN issues i2 ON i2.key = si2.issue_key\n    WHERE i2.project_key IN ($project)\n      AND si2.was_in_initial_scope = TRUE\n    GROUP BY si2.sprint_id\n    HAVING COUNT(*) * 2 > (\n      SELECT COUNT(*) FROM sprint_issues si3\n      WHERE si3.sprint_id = si2.sprint_id AND si3.was_in_initial_scope = TRUE\n    )\n  )",
+          "rawSql": "SELECT ROUND(AVG(avail)::numeric, 1) AS value FROM (\n  SELECT SUM(tc.available_days) AS avail\n  FROM v_team_capacity tc\n  JOIN v_planning_deviation_proj pd ON pd.sprint_id = tc.sprint_id AND pd.project_key = tc.project_key\n  WHERE pd.state = 'closed' AND pd.project_key IN ($project)\n    AND date_trunc('quarter', pd.start_date) = '$quarter'::date\n    AND pd.sprint_id IN (\n    SELECT DISTINCT si2.sprint_id FROM sprint_issues si2\n    JOIN issues i2 ON i2.key = si2.issue_key\n    WHERE i2.project_key IN ($project) AND si2.was_in_initial_scope = TRUE\n    GROUP BY si2.sprint_id\n    HAVING COUNT(*) * 2 > (SELECT COUNT(*) FROM sprint_issues si3 WHERE si3.sprint_id = si2.sprint_id AND si3.was_in_initial_scope = TRUE)\n  )\n  GROUP BY tc.sprint_id\n) t",
           "format": "table",
           "refId": "A"
         }
@@ -2483,7 +2483,7 @@
             "type": "postgres",
             "uid": "jira-metrics-pg"
           },
-          "rawSql": "WITH ms AS (\n  SELECT pd.sprint_id, pd.sprint_name, pd.start_date, pd.committed_points, pd.delivered_points, tc.available_days\n  FROM v_planning_deviation pd\n  JOIN v_team_capacity tc ON tc.sprint_id = pd.sprint_id\n  WHERE pd.state = 'closed' AND pd.committed_points > 0 AND tc.available_days > 0\n    AND date_trunc('quarter', pd.start_date) = '$quarter'::date\n    AND pd.sprint_id IN (\n    SELECT DISTINCT si2.sprint_id FROM sprint_issues si2\n    JOIN issues i2 ON i2.key = si2.issue_key\n    WHERE i2.project_key IN ($project)\n      AND si2.was_in_initial_scope = TRUE\n    GROUP BY si2.sprint_id\n    HAVING COUNT(*) * 2 > (\n      SELECT COUNT(*) FROM sprint_issues si3\n      WHERE si3.sprint_id = si2.sprint_id AND si3.was_in_initial_scope = TRUE\n    )\n  )\n),\nagg AS (SELECT AVG(delivered_points) AS avg_vel, AVG(available_days) AS avg_avail FROM ms)\nSELECT ms.sprint_name AS \"Sprint\",\n  ROUND((ms.committed_points * agg.avg_avail\n    / NULLIF(agg.avg_vel * ms.available_days, 0))::numeric, 2) AS \"Capacity Ratio\"\nFROM ms CROSS JOIN agg\nORDER BY ms.start_date ASC LIMIT 20",
+          "rawSql": "WITH ms AS (\n  SELECT pd.sprint_id, MAX(pd.sprint_name) AS sprint_name, MAX(pd.start_date) AS start_date,\n         SUM(pd.committed_points) AS committed_points, SUM(pd.delivered_points) AS delivered_points,\n         SUM(tc.available_days) AS available_days\n  FROM v_planning_deviation_proj pd\n  JOIN v_team_capacity tc ON tc.sprint_id = pd.sprint_id AND tc.project_key = pd.project_key\n  WHERE pd.state = 'closed' AND pd.project_key IN ($project)\n    AND date_trunc('quarter', pd.start_date) = '$quarter'::date\n    AND pd.sprint_id IN (\n    SELECT DISTINCT si2.sprint_id FROM sprint_issues si2\n    JOIN issues i2 ON i2.key = si2.issue_key\n    WHERE i2.project_key IN ($project) AND si2.was_in_initial_scope = TRUE\n    GROUP BY si2.sprint_id\n    HAVING COUNT(*) * 2 > (SELECT COUNT(*) FROM sprint_issues si3 WHERE si3.sprint_id = si2.sprint_id AND si3.was_in_initial_scope = TRUE)\n  )\n  GROUP BY pd.sprint_id\n  HAVING SUM(pd.committed_points) > 0 AND SUM(tc.available_days) > 0\n),\nagg AS (SELECT AVG(delivered_points) AS avg_vel, AVG(available_days) AS avg_avail FROM ms)\nSELECT ms.sprint_name AS \"Sprint\",\n  ROUND((ms.committed_points * agg.avg_avail\n    / NULLIF(agg.avg_vel * ms.available_days, 0))::numeric, 2) AS \"Capacity Ratio\"\nFROM ms CROSS JOIN agg\nORDER BY ms.start_date ASC LIMIT 20",
           "format": "table",
           "refId": "A"
         }
