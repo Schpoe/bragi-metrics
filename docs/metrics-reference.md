@@ -120,17 +120,21 @@ Per-sprint drill-down for Scrum Masters and Release Managers.
 
 **Common exclusions (unless noted):** `issue_type IN ('Epic', 'Sub-task')`, `status = 'Obsolete / Won''t Do'`, `removed_at IS NOT NULL`.
 
+All SP/count panels exclude **Epic, Sub-task, and Obsolete / Won't Do** (consistent with `v_planning_deviation_proj` and the velocity/Delivery % metrics). Headline scope numbers come from the authoritative changelog-derived view, not the raw `sprint_issues.was_in_initial_scope` flag.
+
 ### Story Points
 
-**Committed** — `SUM(COALESCE(story_points_at_add, story_points, 0))` where `was_in_initial_scope = TRUE AND removed_at IS NULL`, excl. Epics. Sub-tasks and Obsolete are included. Uses `story_points_at_add` so mid-sprint re-estimation doesn't change what was committed.
+**Committed** — `SUM(committed_points)` from `v_planning_deviation_proj` for the sprint, `project_key IN ($project)`. This is the authoritative initial scope at sprint start (changelog-derived; issues committed then later removed still count — their removal shows up as scope change). Equals the Delivery % denominator. Not the raw `was_in_initial_scope` flag, which under/over-counts and disagreed with Delivery %.
 
-**Unplanned** — Same SUM for `was_in_initial_scope = FALSE AND removed_at IS NULL`, excl. Epics. Sub-tasks included. Target ≤ 10% of Committed.
+**Completed** / **Completed Issues** — `SUM(delivered_points)` / `SUM(delivered_issues)` from `v_planning_deviation_proj` — committed initial-scope issues that completed. Equals the Delivery % numerator.
 
-**Total in Sprint** — SUM where `removed_at IS NULL`, excl. Epics. Sub-tasks included.
+**Planned** — `SUM(committed_issues)` from `v_planning_deviation_proj` (issue count of committed scope).
 
-**Obsolete / Won't Do** — SUM where `removed_at IS NULL AND status = 'Obsolete / Won''t Do'`. No type filter — counts all types so nothing is silently hidden.
+**Unplanned** — `SUM(story_points_at_add)` for `was_in_initial_scope = FALSE AND removed_at IS NULL` (current members added after start), excl. Epic/Sub-task/Obsolete. Target ≤ 10% of Committed.
 
-**Completed** — SUM where `status_category = 'Done'`, excl. Epics, with `resolved_at` in sprint window (`>= start_date AND <= COALESCE(complete_date, end_date, NOW())`). `resolved_at IS NOT NULL` required. Counts all Done issues including unplanned and Sub-tasks. The `resolved_at` window is required here because unplanned Done issues appear in multiple sprints' `sprint_issues` with `removed_at IS NULL`.
+**Total in Sprint** — SUM for current members (`removed_at IS NULL`), excl. Epic/Sub-task/Obsolete. This is a *current-snapshot* lens, so it can differ from Committed (a *planning* lens that includes issues later removed).
+
+**Obsolete / Won't Do** — SUM where `removed_at IS NULL AND status = 'Obsolete / Won''t Do'`. The dedicated tally of obsolete work (this one intentionally includes it).
 
 **Delivery %** — project-scoped delivered ÷ committed SP for the selected sprint, computed inline from `sprint_scope_final` (`was_completed`/`was_punted`, initial scope, `project_key IN ($project)`) with a `sprint_issues` fallback for not-yet-backfilled sprints — **not** `v_planning_deviation.delivery_pct`, which is whole-sprint (all projects). Gauge: red < 60%, yellow 60–80%, green ≥ 80%.
 
