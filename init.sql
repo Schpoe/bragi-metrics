@@ -372,6 +372,7 @@ committed AS (
     FROM sprint_scope_final ssf
     JOIN issues i ON i.key = ssf.issue_key
     WHERE ssf.was_punted = FALSE
+      AND ssf.was_added_mid_sprint = FALSE   -- committed = initial scope only (matches active branch)
       AND i.issue_type NOT IN ('Epic', 'Sub-task')
       AND i.status != 'Obsolete / Won''t Do'
     GROUP BY ssf.sprint_id
@@ -401,6 +402,7 @@ delivered AS (
     FROM sprint_scope_final ssf
     JOIN issues i ON i.key = ssf.issue_key
     WHERE ssf.was_completed = TRUE
+      AND ssf.was_added_mid_sprint = FALSE   -- delivered = completed initial-scope work (matches active branch)
       AND i.issue_type NOT IN ('Epic', 'Sub-task')
       AND i.status != 'Obsolete / Won''t Do'
     GROUP BY ssf.sprint_id

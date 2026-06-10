@@ -38,6 +38,7 @@ The view uses two different data sources depending on whether a sprint has been 
 ```sql
 FROM sprint_scope_final ssf
 WHERE ssf.was_punted = FALSE
+  AND ssf.was_added_mid_sprint = FALSE   -- initial scope only, matches active branch
   AND issue_type NOT IN ('Epic', 'Sub-task')
   AND status != 'Obsolete / Won''t Do'
 ```
@@ -50,6 +51,7 @@ WHERE ssf.was_punted = FALSE
 ```sql
 FROM sprint_scope_final ssf
 WHERE ssf.was_completed = TRUE
+  AND ssf.was_added_mid_sprint = FALSE   -- completed initial-scope work only, matches active branch
   AND issue_type NOT IN ('Epic', 'Sub-task')
   AND status != 'Obsolete / Won''t Do'
 ```
