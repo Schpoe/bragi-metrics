@@ -100,6 +100,24 @@ services:
     networks:
       - default
 
+  mcp-server:
+    build: ./mcp-server
+    restart: unless-stopped
+    volumes:
+      - ./reporter/queries.py:/app/queries.py:ro
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_DB: jira_metrics
+      POSTGRES_USER: metrics
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      MCP_API_KEY: ${MCP_API_KEY}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - default
+      - proxy_net
+
 networks:
   default:
     driver: bridge
