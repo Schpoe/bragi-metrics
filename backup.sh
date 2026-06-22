@@ -72,7 +72,7 @@ log "  postgres.sql.gz: $(du -sh "$BACKUP_DIR/postgres.sql.gz" | cut -f1)"
 # ── 2. Grafana volume ─────────────────────────────────────────────────────────
 log "Backing up Grafana data volume..."
 docker run --rm \
-    -v jira-grafana-metrics_grafana_data:/data:ro \
+    -v bragi-metrics_grafana_data:/data:ro \
     -v "$BACKUP_DIR":/backup \
     alpine tar czf /backup/grafana-data.tar.gz -C /data . \
     || die "Grafana volume backup failed"
