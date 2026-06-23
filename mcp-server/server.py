@@ -220,11 +220,19 @@ TOOLS = [
         description=(
             "Release quality metrics per Jira fix version: total issues, bug count and rate, "
             "open vs resolved issues, bugs fixed after the release date (escape rate), and "
-            "overdue status. Optionally filter by team or limit to released versions only."
+            "overdue status. Filter by release name/fixVersion and/or team. When no team is "
+            "given, an aggregated 'overall' rollup across the matched releases is also returned."
         ),
         inputSchema={
             "type": "object",
             "properties": {
+                "release_name": {
+                    "type": "string",
+                    "description": (
+                        "Filter by fix version name (case-insensitive substring). "
+                        "e.g. 'Bose QCE 3.0.3', 'QCE 3.0.3', or '3.0.3'."
+                    ),
+                },
                 "project_key": {
                     "type": "string",
                     "enum": ["STORE", "AAONE", "AATWO", "CONNECT", "BEST", "GROW", "TCSA"],
@@ -272,6 +280,32 @@ async def call_tool(name: str, arguments: dict) -> list[types.TextContent]:
         raise
 
 
+def _release_overall(releases: list[dict], release_name: Any) -> dict:
+    """Aggregate matched releases into a single overall quality rollup.
+
+    Counts are summed; bug_pct is recomputed from totals (not averaged), so a
+    fix version shared across teams reads as one combined release.
+    """
+    def total(field: str) -> int:
+        return sum(int(r.get(field) or 0) for r in releases)
+
+    bug_count = total("bug_count")
+    story_count = total("story_count")
+    non_meta = bug_count + story_count  # bug_pct denominator (excludes Epic/Sub-task)
+    return {
+        "release_name_filter": release_name,
+        "release_count": len(releases),
+        "teams": sorted({r["team"] for r in releases}),
+        "total_issues": total("total_issues"),
+        "bug_count": bug_count,
+        "story_count": story_count,
+        "bug_pct": round(100.0 * bug_count / non_meta, 1) if non_meta else None,
+        "resolved_issues": total("resolved_issues"),
+        "open_issues": total("open_issues"),
+        "bugs_after_release": total("bugs_after_release"),
+    }
+
+
 def _dispatch(name: str, arguments: dict) -> list[types.TextContent]:
     if name == "get_quarterly_metrics":
         yr, q = int(arguments["year"]), int(arguments["quarter"])
@@ -308,13 +342,20 @@ def _dispatch(name: str, arguments: dict) -> list[types.TextContent]:
 
     if name == "get_release_quality":
         project_key = arguments.get("project_key")
+        release_name = arguments.get("release_name")
         released_only = bool(arguments.get("released_only", False))
         limit = int(arguments.get("limit", 20))
         with db() as conn:
             rows = queries.release_quality(
-                conn, project_key=project_key, released_only=released_only, limit=limit
+                conn, project_key=project_key, released_only=released_only,
+                limit=limit, release_name=release_name,
             )
-        return [types.TextContent(type="text", text=to_json({"releases": [dict(r) for r in rows]}))]
+        releases = [dict(r) for r in rows]
+        payload = {"releases": releases}
+        # No team requested -> add an aggregated rollup across matched releases.
+        if not project_key:
+            payload["overall"] = _release_overall(releases, release_name)
+        return [types.TextContent(type="text", text=to_json(payload))]
 
     if name == "list_available_metrics":
         return [types.TextContent(type="text", text=to_json({

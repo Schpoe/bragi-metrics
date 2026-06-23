@@ -304,13 +304,21 @@ def trend_quarterly(conn, metric, n=6):
 
 # Release Quality ──────────────────────────────────────────────────────────────
 
-def release_quality(conn, project_key=None, released_only=False, limit=20):
-    """Per-release metrics: issue counts, bug rate, open issues, overdue status."""
+def release_quality(conn, project_key=None, released_only=False, limit=20,
+                    release_name=None):
+    """Per-release metrics: issue counts, bug rate, open issues, overdue status.
+
+    release_name does a case-insensitive substring match on the fix version
+    name, so "Bose QCE 3.0.3", "QCE 3.0.3", or "3.0.3" all resolve.
+    """
     conditions = ["r.archived = FALSE"]
     params = []
     if project_key:
         conditions.append("r.project_key = %s")
         params.append(project_key)
+    if release_name:
+        conditions.append("r.name ILIKE %s")
+        params.append(f"%{release_name}%")
     if released_only:
         conditions.append("r.released = TRUE")
     where = " AND ".join(conditions)
