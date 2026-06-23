@@ -21,6 +21,7 @@ POST /messages/                      MCP post-message (admin key or user token)
 """
 
 import asyncio
+import datetime
 import decimal
 import hashlib
 import json
@@ -67,6 +68,8 @@ server = Server("bragi-metrics")
 def _json_default(obj: Any) -> Any:
     if isinstance(obj, decimal.Decimal):
         return float(obj)
+    if isinstance(obj, datetime.date):  # covers date and datetime
+        return obj.isoformat()
     raise TypeError(f"Not JSON serializable: {type(obj)}")
 
 
