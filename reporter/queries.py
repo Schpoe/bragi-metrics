@@ -4,8 +4,8 @@ import os
 import psycopg2
 import psycopg2.extras
 
-TEAMS = ("STORE", "AAONE", "AATWO", "CONNECT")
-TEAMS_SQL = "('STORE','AAONE','AATWO','CONNECT')"
+TEAMS = ("STORE", "AAONE", "AATWO", "CONNECT", "BEST", "GROW", "TCSA")
+TEAMS_SQL = "('STORE','AAONE','AATWO','CONNECT','BEST','GROW','TCSA')"
 OBSOLETE_SQL = "LOWER(i.status) NOT IN ('obsolete','won''t do','obsolete / won''t do','obsolete / won')"
 
 

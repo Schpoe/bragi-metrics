@@ -809,3 +809,21 @@ JOIN sprint_days sd        ON sd.sprint_id = r.sprint_id
 JOIN bamboohr_employees e  ON e.jira_account_id = r.account_id
 LEFT JOIN person_off po    ON po.sprint_id = r.sprint_id AND po.project_key = r.project_key AND po.account_id = r.account_id
 LEFT JOIN holidays h       ON h.sprint_id = r.sprint_id;
+
+-- MCP user & token management (appended; server.py also creates these with IF NOT EXISTS on startup)
+CREATE TABLE IF NOT EXISTS mcp_users (
+    email      TEXT PRIMARY KEY,
+    name       TEXT        NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    active     BOOLEAN     NOT NULL DEFAULT TRUE
+);
+
+CREATE TABLE IF NOT EXISTS mcp_tokens (
+    id           SERIAL      PRIMARY KEY,
+    user_email   TEXT        NOT NULL REFERENCES mcp_users(email) ON DELETE CASCADE,
+    token_hash   TEXT        NOT NULL UNIQUE,
+    label        TEXT        NOT NULL DEFAULT 'default',
+    created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    revoked_at   TIMESTAMPTZ,
+    last_used_at TIMESTAMPTZ
+);
