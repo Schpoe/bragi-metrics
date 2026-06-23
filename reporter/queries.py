@@ -300,3 +300,72 @@ def trend_quarterly(conn, metric, n=6):
         vals = {r["team"]: float(r["val"]) for r in rows if r["yr"] == yr and r["q"] == q}
         result.append({"label": f"{yr}-Q{int(q)}", "vals": vals})
     return result
+
+
+# Release Quality ──────────────────────────────────────────────────────────────
+
+def release_quality(conn, project_key=None, released_only=False, limit=20):
+    """Per-release metrics: issue counts, bug rate, open issues, overdue status."""
+    conditions = ["r.archived = FALSE"]
+    params = []
+    if project_key:
+        conditions.append("r.project_key = %s")
+        params.append(project_key)
+    if released_only:
+        conditions.append("r.released = TRUE")
+    where = " AND ".join(conditions)
+    params.append(limit)
+    sql = f"""
+    SELECT
+        r.project_key                                                       AS team,
+        r.name                                                              AS release,
+        r.release_date,
+        r.released,
+        COUNT(i.key)                                                        AS total_issues,
+        COUNT(i.key) FILTER (WHERE i.issue_type = 'Bug')                   AS bug_count,
+        COUNT(i.key) FILTER (
+            WHERE i.issue_type NOT IN ('Bug','Epic','Sub-task')
+        )                                                                   AS story_count,
+        ROUND(
+            100.0 * COUNT(i.key) FILTER (WHERE i.issue_type = 'Bug')
+            / NULLIF(COUNT(i.key) FILTER (
+                WHERE i.issue_type NOT IN ('Epic','Sub-task')
+            ), 0), 1
+        )                                                                   AS bug_pct,
+        COUNT(i.key) FILTER (
+            WHERE i.resolved_at IS NOT NULL
+              AND i.issue_type NOT IN ('Epic','Sub-task')
+              AND {OBSOLETE_SQL}
+        )                                                                   AS resolved_issues,
+        COUNT(i.key) FILTER (
+            WHERE i.resolved_at IS NULL
+              AND i.issue_type NOT IN ('Epic','Sub-task')
+              AND {OBSOLETE_SQL}
+        )                                                                   AS open_issues,
+        COUNT(i.key) FILTER (
+            WHERE i.issue_type = 'Bug'
+              AND r.released = TRUE
+              AND r.release_date IS NOT NULL
+              AND i.resolved_at > r.release_date
+        )                                                                   AS bugs_after_release,
+        CASE
+            WHEN NOT r.released
+              AND r.release_date IS NOT NULL
+              AND r.release_date < CURRENT_DATE
+            THEN TRUE ELSE FALSE
+        END                                                                 AS is_overdue,
+        CASE
+            WHEN NOT r.released AND r.release_date IS NOT NULL
+            THEN (r.release_date - CURRENT_DATE)::integer
+            ELSE NULL
+        END                                                                 AS days_until_release
+    FROM releases r
+    LEFT JOIN issues i
+        ON r.name = ANY(i.fix_versions)
+       AND i.project_key = r.project_key
+    WHERE {where}
+    GROUP BY r.id, r.project_key, r.name, r.release_date, r.released
+    ORDER BY r.release_date DESC NULLS LAST, r.project_key
+    LIMIT %s
+    """
+    return fetchall(conn, sql, tuple(params))
