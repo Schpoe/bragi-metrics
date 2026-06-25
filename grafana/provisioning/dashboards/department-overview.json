@@ -2,7 +2,7 @@
   "id": null,
   "uid": "jira-dept-overview",
   "title": "Department Overview",
-  "description": "Quarterly performance across STORE, AAONE, AATWO, CONNECT — efficiency, quality, transparency.",
+  "description": "Quarterly performance across STORE, AAONE, AATWO, CONNECT \u2014 efficiency, quality, transparency.",
   "tags": [
     "department",
     "quarterly",
@@ -36,16 +36,6 @@
       "includeVars": true,
       "keepTime": false,
       "targetBlank": false,
-      "title": "Sprint Overview",
-      "type": "link",
-      "url": "/d/jira-sprint-health"
-    },
-    {
-      "asDropdown": false,
-      "icon": "external link",
-      "includeVars": true,
-      "keepTime": false,
-      "targetBlank": false,
       "title": "Release Overview",
       "type": "link",
       "url": "/d/jira-release-overview"
@@ -56,29 +46,29 @@
       "includeVars": true,
       "keepTime": false,
       "targetBlank": false,
-      "title": "Department Overview",
-      "type": "link",
-      "url": "/d/jira-dept-overview"
-    },
-    {
-      "asDropdown": false,
-      "icon": "external link",
-      "includeVars": true,
-      "keepTime": false,
-      "targetBlank": false,
-      "title": "Quality & Bugs",
-      "type": "link",
-      "url": "/d/jira-quality-bugs"
-    },
-    {
-      "asDropdown": false,
-      "icon": "external link",
-      "includeVars": true,
-      "keepTime": false,
-      "targetBlank": false,
       "title": "PO KPIs",
       "type": "link",
       "url": "/d/jira-po-kpis"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": false,
+      "targetBlank": false,
+      "title": "Sprint Overview",
+      "type": "link",
+      "url": "/d/jira-sprint-health"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": false,
+      "targetBlank": false,
+      "title": "Team Overview",
+      "type": "link",
+      "url": "/d/jira-team-overview"
     }
   ],
   "panels": [
@@ -90,7 +80,7 @@
       "id": 1,
       "title": "Data Age",
       "type": "stat",
-      "description": "Hours since last Jira sync. Green ≤ 12 h · Yellow 12–24 h · Red > 24 h.",
+      "description": "Hours since last Jira sync. Green \u2264 12 h \u00b7 Yellow 12\u201324 h \u00b7 Red > 24 h.",
       "gridPos": {
         "x": 0,
         "y": 0,
@@ -168,7 +158,7 @@
       },
       "id": 2,
       "panels": [],
-      "title": "Department Overview — $quarter",
+      "title": "Department Overview \u2014 $quarter",
       "type": "row"
     },
     {
@@ -381,7 +371,7 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "Total bugs resolved (closed/done) in the selected quarter across all teams, based on resolved_at date. Counts bugs regardless of when they were originally created — reflects the team's bug-fixing throughput in the quarter.",
+      "description": "Total bugs resolved (closed/done) in the selected quarter across all teams, based on resolved_at date. Counts bugs regardless of when they were originally created \u2014 reflects the team's bug-fixing throughput in the quarter.",
       "id": 6,
       "title": "Bugs Resolved",
       "type": "stat",
@@ -444,7 +434,7 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "Percentage of Stories, Tasks and Improvements created this quarter that had story points, acceptance criteria AND an assignee set. Measures how well-defined work items were before starting.\n\n⚠ Only shown for quarters ≥ $readiness_valid_from. Before that, the acceptance_criteria field was backfilled from current state and does not reflect historical values.",
+      "description": "Percentage of Stories, Tasks and Improvements created this quarter that had story points, acceptance criteria AND an assignee set. Measures how well-defined work items were before starting.\n\n\u26a0 Only shown for quarters \u2265 $readiness_valid_from. Before that, the acceptance_criteria field was backfilled from current state and does not reflect historical values.",
       "id": 7,
       "title": "Story Readiness %",
       "type": "stat",
@@ -515,7 +505,7 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "Percentage of resolved issues (non-Epic, non-Sub-task) with a linked QASE test case.\n\n⚠ Only shown for quarters ≥ $readiness_valid_from. Before that, the QASE link field was not synced and reflects current state rather than the state at resolution time.",
+      "description": "Percentage of resolved issues (non-Epic, non-Sub-task) with a linked QASE test case.\n\n\u26a0 Only shown for quarters \u2265 $readiness_valid_from. Before that, the QASE link field was not synced and reflects current state rather than the state at resolution time.",
       "id": 8,
       "title": "QASE Coverage %",
       "type": "stat",
@@ -603,7 +593,7 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "Average story points delivered per closed sprint, per team. Only sprints starting in the selected quarter are included. Sprint-to-team mapping uses the project key that appears most in that sprint's issues.\n\nBlue = selected quarter · Gray = previous quarter.",
+      "description": "Average story points delivered per closed sprint, per team. Only sprints starting in the selected quarter are included. Sprint-to-team mapping uses the project key that appears most in that sprint's issues.\n\nBlue = selected quarter \u00b7 Gray = previous quarter.",
       "id": 11,
       "title": "Avg Velocity (SP/sprint)",
       "type": "barchart",
@@ -708,9 +698,9 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "Percentage of committed story points delivered per team. Committed SP = issues not punted; Delivered SP = issues marked completed. Shows per-team predictability and sprint reliability.\n\nBlue = selected quarter · Gray = previous quarter.",
+      "description": "Percentage of committed story points delivered per team. Committed SP = issues not punted; Delivered SP = issues marked completed. Shows per-team predictability and sprint reliability.\n\nBlue = selected quarter \u00b7 Gray = previous quarter.",
       "id": 12,
-      "title": "Delivery % (Committed → Delivered)",
+      "title": "Delivery % (Committed \u2192 Delivered)",
       "type": "barchart",
       "gridPos": {
         "x": 8,
@@ -813,7 +803,7 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "Average calendar days from issue creation to resolution, per team. Excludes Epics, Sub-tasks, and Obsolete/Won't Do issues. Lower lead time = faster flow. Issues resolved in the selected quarter are included.\n\nBlue = selected quarter · Gray = previous quarter.",
+      "description": "Average calendar days from issue creation to resolution, per team. Excludes Epics, Sub-tasks, and Obsolete/Won't Do issues. Lower lead time = faster flow. Issues resolved in the selected quarter are included.\n\nBlue = selected quarter \u00b7 Gray = previous quarter.",
       "id": 13,
       "title": "Avg Lead Time (days)",
       "type": "barchart",
@@ -935,7 +925,7 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "Bugs created per team this quarter, stacked by priority (Blocker/Critical/High/Medium/Low). Based on creation date.\n\n⚠ Priority reflects the current value on the issue. Historical priority changes are not tracked, so older quarters may show minor drift if priorities were changed after creation.",
+      "description": "Bugs created per team this quarter, stacked by priority (Blocker/Critical/High/Medium/Low). Based on creation date.\n\n\u26a0 Priority reflects the current value on the issue. Historical priority changes are not tracked, so older quarters may show minor drift if priorities were changed after creation.",
       "id": 21,
       "title": "Bugs Created by Priority",
       "type": "barchart",
@@ -1115,7 +1105,7 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "Number of bugs resolved (closed) per team in the selected quarter, by resolved_at date. Counts all bugs resolved in the period regardless of when they were originally created. Measures bug-fixing throughput.\n\nBlue = selected quarter · Gray = previous quarter.",
+      "description": "Number of bugs resolved (closed) per team in the selected quarter, by resolved_at date. Counts all bugs resolved in the period regardless of when they were originally created. Measures bug-fixing throughput.\n\nBlue = selected quarter \u00b7 Gray = previous quarter.",
       "id": 22,
       "title": "Bugs Resolved",
       "type": "barchart",
@@ -1220,7 +1210,7 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "Percentage of resolved issues with a linked QASE test case, per team.\n\n⚠ Only shown for quarters ≥ $readiness_valid_from. The has_qase_link field was not synced before Q2 2026.\n\nBlue = selected quarter · Gray = previous quarter.",
+      "description": "Percentage of resolved issues with a linked QASE test case, per team.\n\n\u26a0 Only shown for quarters \u2265 $readiness_valid_from. The has_qase_link field was not synced before Q2 2026.\n\nBlue = selected quarter \u00b7 Gray = previous quarter.",
       "id": 23,
       "title": "QASE Coverage %",
       "type": "barchart",
@@ -1342,7 +1332,7 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "Percentage of Stories/Tasks/Improvements with story points + acceptance criteria + assignee, per team. Measures process discipline at work-item creation.\n\n⚠ Only shown for quarters ≥ $readiness_valid_from. The has_acceptance_criteria field was backfilled and does not reflect historical state before that quarter.\n\nBlue = selected quarter · Gray = previous quarter.",
+      "description": "Percentage of Stories/Tasks/Improvements with story points + acceptance criteria + assignee, per team. Measures process discipline at work-item creation.\n\n\u26a0 Only shown for quarters \u2265 $readiness_valid_from. The has_acceptance_criteria field was backfilled and does not reflect historical state before that quarter.\n\nBlue = selected quarter \u00b7 Gray = previous quarter.",
       "id": 31,
       "title": "Story Readiness %",
       "type": "barchart",
@@ -1447,7 +1437,7 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "Percentage of mid-sprint scope additions relative to initial sprint commitment, per team. Formula: issues added after sprint start / issues in initial scope × 100. Higher rate = more unplanned work pulled in.\n\nBlue = selected quarter · Gray = previous quarter.",
+      "description": "Percentage of mid-sprint scope additions relative to initial sprint commitment, per team. Formula: issues added after sprint start / issues in initial scope \u00d7 100. Higher rate = more unplanned work pulled in.\n\nBlue = selected quarter \u00b7 Gray = previous quarter.",
       "id": 32,
       "title": "Scope Change Rate %",
       "type": "barchart",
@@ -1552,7 +1542,7 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "Total non-Epic/Sub-task issues resolved per team in the selected quarter, by resolved_at date. Excludes Obsolete/Won't Do. Measures delivery throughput as item count (not SP). Use alongside Velocity for a fuller picture.\n\nBlue = selected quarter · Gray = previous quarter.",
+      "description": "Total non-Epic/Sub-task issues resolved per team in the selected quarter, by resolved_at date. Excludes Obsolete/Won't Do. Measures delivery throughput as item count (not SP). Use alongside Velocity for a fuller picture.\n\nBlue = selected quarter \u00b7 Gray = previous quarter.",
       "id": 33,
       "title": "Issues Resolved (Throughput)",
       "type": "barchart",
@@ -1675,8 +1665,8 @@
         "uid": "jira-metrics-pg"
       },
       "id": 41,
-      "title": "Team Scorecard — $quarter",
-      "description": "Summary of all key metrics per team for the selected quarter.\n\n• Resolved = non-Epic/Sub-task issues resolved in the quarter\n• Bugs = bugs created in the quarter\n• Bugs Resolved = bugs resolved in the quarter (by resolved_at)\n• Readiness % = % of Stories/Tasks/Improvements with SP + AC + assignee (only valid from $readiness_valid_from)\n• QASE % = % resolved issues with QASE link (only valid from $readiness_valid_from)\n• Lead Time = avg days from creation to resolution\n\nDept Total = aggregate across all 4 teams.",
+      "title": "Team Scorecard \u2014 $quarter",
+      "description": "Summary of all key metrics per team for the selected quarter.\n\n\u2022 Resolved = non-Epic/Sub-task issues resolved in the quarter\n\u2022 Bugs = bugs created in the quarter\n\u2022 Bugs Resolved = bugs resolved in the quarter (by resolved_at)\n\u2022 Readiness % = % of Stories/Tasks/Improvements with SP + AC + assignee (only valid from $readiness_valid_from)\n\u2022 QASE % = % resolved issues with QASE link (only valid from $readiness_valid_from)\n\u2022 Lead Time = avg days from creation to resolution\n\nDept Total = aggregate across all 4 teams.",
       "type": "table",
       "gridPos": {
         "x": 0,
@@ -1902,7 +1892,7 @@
       },
       "id": 50,
       "panels": [],
-      "title": "Trends — All Quarters",
+      "title": "Trends \u2014 All Quarters",
       "type": "row"
     },
     {

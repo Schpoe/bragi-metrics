@@ -2261,24 +2261,14 @@
   },
   "links": [
     {
-      "type": "link",
+      "asDropdown": false,
       "icon": "external link",
-      "targetBlank": false,
       "includeVars": true,
       "keepTime": false,
-      "asDropdown": false,
+      "targetBlank": false,
       "title": "Sprint Detail",
-      "url": "/d/cfih5an4hj7y8e"
-    },
-    {
       "type": "link",
-      "icon": "external link",
-      "targetBlank": false,
-      "includeVars": true,
-      "keepTime": false,
-      "asDropdown": false,
-      "title": "Sprint Overview",
-      "url": "/d/jira-sprint-health"
+      "url": "/d/cfih5an4hj7y8e"
     },
     {
       "asDropdown": false,
@@ -2296,29 +2286,29 @@
       "includeVars": true,
       "keepTime": false,
       "targetBlank": false,
-      "title": "Department Overview",
-      "type": "link",
-      "url": "/d/jira-dept-overview"
-    },
-    {
-      "type": "link",
-      "icon": "external link",
-      "targetBlank": false,
-      "includeVars": true,
-      "keepTime": false,
-      "asDropdown": false,
-      "title": "Quality & Bugs",
-      "url": "/d/jira-quality-bugs"
-    },
-    {
-      "type": "link",
-      "icon": "external link",
-      "targetBlank": false,
-      "includeVars": true,
-      "keepTime": false,
-      "asDropdown": false,
       "title": "PO KPIs",
+      "type": "link",
       "url": "/d/jira-po-kpis"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": false,
+      "targetBlank": false,
+      "title": "Sprint Overview",
+      "type": "link",
+      "url": "/d/jira-sprint-health"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": false,
+      "targetBlank": false,
+      "title": "Team Overview",
+      "type": "link",
+      "url": "/d/jira-team-overview"
     }
   ]
 }

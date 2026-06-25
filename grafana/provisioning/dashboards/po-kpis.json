@@ -36,16 +36,6 @@
       "includeVars": true,
       "keepTime": false,
       "targetBlank": false,
-      "title": "Sprint Overview",
-      "type": "link",
-      "url": "/d/jira-sprint-health"
-    },
-    {
-      "asDropdown": false,
-      "icon": "external link",
-      "includeVars": true,
-      "keepTime": false,
-      "targetBlank": false,
       "title": "Release Overview",
       "type": "link",
       "url": "/d/jira-release-overview"
@@ -56,29 +46,29 @@
       "includeVars": true,
       "keepTime": false,
       "targetBlank": false,
-      "title": "Department Overview",
-      "type": "link",
-      "url": "/d/jira-dept-overview"
-    },
-    {
-      "asDropdown": false,
-      "icon": "external link",
-      "includeVars": true,
-      "keepTime": false,
-      "targetBlank": false,
-      "title": "Quality & Bugs",
-      "type": "link",
-      "url": "/d/jira-quality-bugs"
-    },
-    {
-      "asDropdown": false,
-      "icon": "external link",
-      "includeVars": true,
-      "keepTime": false,
-      "targetBlank": false,
       "title": "PO KPIs",
       "type": "link",
       "url": "/d/jira-po-kpis"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": false,
+      "targetBlank": false,
+      "title": "Sprint Overview",
+      "type": "link",
+      "url": "/d/jira-sprint-health"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": false,
+      "targetBlank": false,
+      "title": "Team Overview",
+      "type": "link",
+      "url": "/d/jira-team-overview"
     }
   ],
   "panels": [
@@ -87,7 +77,7 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "Hours since the last Jira sync attempt and its status. Green ≤ 12 h • Yellow 12–24 h • Red > 24 h or ERROR status. Queries most recent run regardless of success.",
+      "description": "Hours since the last Jira sync attempt and its status. Green \u2264 12 h \u2022 Yellow 12\u201324 h \u2022 Red > 24 h or ERROR status. Queries most recent run regardless of success.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -160,7 +150,7 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "Average % of story points added or removed after sprint start (lower = more stable plans). Target: ≤ 10%",
+      "description": "Average % of story points added or removed after sprint start (lower = more stable plans). Target: \u2264 10%",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -234,7 +224,7 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "Average % of committed story points delivered (delivery % per sprint). Target: ≥ 80%",
+      "description": "Average % of committed story points delivered (delivery % per sprint). Target: \u2265 80%",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -380,7 +370,7 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "Average hours from creation to resolution for Blocker-priority issues. Target: ≤ 1 sprint.",
+      "description": "Average hours from creation to resolution for Blocker-priority issues. Target: \u2264 1 sprint.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -452,7 +442,7 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "% of bugs raised this quarter that are closed (Done). Target: ≥ 80%.",
+      "description": "% of bugs raised this quarter that are closed (Done). Target: \u2265 80%.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -526,7 +516,7 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "Avg % of committed Stories/Tasks per sprint that meet Definition of Ready (Assignee, QA Assignee, SP ≥ 1, Acceptance Criteria, Epic, Component). Excludes Epics, Sub-tasks, Bugs. Target: ≥ 80%.",
+      "description": "Avg % of committed Stories/Tasks per sprint that meet Definition of Ready (Assignee, QA Assignee, SP \u2265 1, Acceptance Criteria, Epic, Component). Excludes Epics, Sub-tasks, Bugs. Target: \u2265 80%.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -600,7 +590,7 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "Avg % of Done Stories/Tasks per sprint that meet Definition of Done (Assignee, QA Assignee, SP ≥ 1, Acceptance Criteria, Epic, Component). Denominator = tickets with status = ‘Done’ only. Excludes Epics, Sub-tasks, Bugs. Target: ≥ 80%.",
+      "description": "Avg % of Done Stories/Tasks per sprint that meet Definition of Done (Assignee, QA Assignee, SP \u2265 1, Acceptance Criteria, Epic, Component). Denominator = tickets with status = \u2018Done\u2019 only. Excludes Epics, Sub-tasks, Bugs. Target: \u2265 80%.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -674,7 +664,7 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "Weighted bug score per release: (Blocker×5 + Critical×4 + High×3 + Medium×2 + Low×1) divided by number of releases in the quarter. Lower is better.",
+      "description": "Weighted bug score per release: (Blocker\u00d75 + Critical\u00d74 + High\u00d73 + Medium\u00d72 + Low\u00d71) divided by number of releases in the quarter. Lower is better.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -759,7 +749,7 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "Story points added + removed after sprint start as % of committed SP. Target ≤ 10%.",
+      "description": "Story points added + removed after sprint start as % of committed SP. Target \u2264 10%.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -866,7 +856,7 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "Committed SP, Delivered SP (committed issues that are Done), and Planning Accuracy % per sprint. Target ≥ 80%.",
+      "description": "Committed SP, Delivered SP (committed issues that are Done), and Planning Accuracy % per sprint. Target \u2265 80%.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1307,7 +1297,7 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "Average hours to resolve Blocker-priority issues per sprint. Target: ≤ 168h (1 sprint).",
+      "description": "Average hours to resolve Blocker-priority issues per sprint. Target: \u2264 168h (1 sprint).",
       "fieldConfig": {
         "defaults": {
           "color": {

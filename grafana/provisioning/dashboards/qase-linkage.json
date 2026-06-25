@@ -36,16 +36,6 @@
       "includeVars": true,
       "keepTime": false,
       "targetBlank": false,
-      "title": "Sprint Overview",
-      "type": "link",
-      "url": "/d/jira-sprint-health"
-    },
-    {
-      "asDropdown": false,
-      "icon": "external link",
-      "includeVars": true,
-      "keepTime": false,
-      "targetBlank": false,
       "title": "Release Overview",
       "type": "link",
       "url": "/d/jira-release-overview"
@@ -56,29 +46,29 @@
       "includeVars": true,
       "keepTime": false,
       "targetBlank": false,
-      "title": "Department Overview",
-      "type": "link",
-      "url": "/d/jira-dept-overview"
-    },
-    {
-      "asDropdown": false,
-      "icon": "external link",
-      "includeVars": true,
-      "keepTime": false,
-      "targetBlank": false,
-      "title": "Quality & Bugs",
-      "type": "link",
-      "url": "/d/jira-quality-bugs"
-    },
-    {
-      "asDropdown": false,
-      "icon": "external link",
-      "includeVars": true,
-      "keepTime": false,
-      "targetBlank": false,
       "title": "PO KPIs",
       "type": "link",
       "url": "/d/jira-po-kpis"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": false,
+      "targetBlank": false,
+      "title": "Sprint Overview",
+      "type": "link",
+      "url": "/d/jira-sprint-health"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": false,
+      "targetBlank": false,
+      "title": "Team Overview",
+      "type": "link",
+      "url": "/d/jira-team-overview"
     }
   ],
   "templating": {
