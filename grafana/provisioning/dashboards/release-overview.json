@@ -4133,7 +4133,7 @@
     {
       "id": 31,
       "title": "Data Age",
-      "description": "Time since the most recent issue sync for this release.",
+      "description": "Time since any issue in this release was last updated in Jira. Not a sync freshness indicator — a quiet release will show higher age even if data is current.",
       "type": "stat",
       "datasource": {
         "type": "postgres",
