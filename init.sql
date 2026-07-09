@@ -260,19 +260,27 @@ ALTER TABLE sprints ADD COLUMN IF NOT EXISTS scope_synced_at TIMESTAMPTZ;
 
 -- Bragi's PO quarters (see Confluence "Sprint naming convention and sprint
 -- mapping") don't align to calendar quarters. Sprints created under that
--- convention encode the true quarter in their name, e.g. "STORE 26-Q3-1" or
--- "TCSA 2026 Q3 - Sprint #1". Parse it from there instead of the sprint's
--- start_date; fall back to the calendar quarter of start_date for sprints
--- that predate the convention (no "YY-Q#"/"YYYY Q#" pattern in the name).
+-- convention encode the true quarter in their name - in either order
+-- depending on team/board: "STORE 26-Q3-1" / "TCSA 2026 Q3 - Sprint #1"
+-- (year before quarter), or "Q3-26 AudioApp2 Sprint 1" (quarter before
+-- year, seen on AATWO's own board). Parse it from there instead of the
+-- sprint's start_date; fall back to the calendar quarter of start_date for
+-- sprints that predate the convention (no such pattern in the name).
 -- Returns a calendar-quarter-start date, matching the shape of the $quarter
 -- dashboard variable (e.g. '2026-07-01'), so it's a drop-in comparison target.
 CREATE OR REPLACE FUNCTION po_quarter_date(p_name TEXT, p_fallback TIMESTAMPTZ)
 RETURNS DATE AS $$
+    -- m[1..2] = year,quarter when "YY-Q#" order matches; m[3..4] = quarter,year
+    -- when "Q#-YY" order matches instead. Exactly one pair is non-NULL.
     SELECT CASE
-        WHEN m IS NOT NULL THEN make_date(2000 + (m[1])::int, ((m[2])::int - 1) * 3 + 1, 1)
+        WHEN COALESCE(m[1], m[4]) IS NOT NULL
+            THEN make_date(2000 + COALESCE(m[1], m[4])::int, (COALESCE(m[2], m[3])::int - 1) * 3 + 1, 1)
         ELSE date_trunc('quarter', p_fallback)::date
     END
-    FROM (SELECT regexp_match(p_name, '(?:20)?(\d{2})\D{0,3}Q([1-4])') AS m) sub
+    FROM (SELECT regexp_match(
+        p_name,
+        '(?:20)?(\d{2})\D{0,3}Q([1-4])|Q([1-4])\D{0,3}(?:20)?(\d{2})'
+    ) AS m) sub
 $$ LANGUAGE sql IMMUTABLE;
 
 -- ─── Useful Views ────────────────────────────────────────────────────────────
