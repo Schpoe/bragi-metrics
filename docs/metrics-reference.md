@@ -5,7 +5,8 @@ This document explains how every metric across all dashboards is calculated, whi
 **Data source:** PostgreSQL (`jira-metrics-pg`).  
 **Key tables:** `sprint_issues`, `issues`, `sprints`, `issue_transitions`, `issue_links`, `releases`, `issue_fix_version_history`, `issue_sprint_history`, `sprint_scope_initial`, `sprint_scope_final`, `sprint_scope_changes`.  
 **Key columns added:** `issues.qa_assignee TEXT` (Jira field `customfield_10132` — QA person assigned), `issues.components TEXT[]` (standard Jira components array).  
-**Key views:** `v_planning_deviation`, `v_cycle_time_rft_to_done`, `v_cycle_time_in_progress_to_rft`, `v_lead_time`, `v_time_in_status`, `v_prod_epic_progress`, `v_prod_item_progress`.
+**Key views:** `v_planning_deviation`, `v_cycle_time_rft_to_done`, `v_cycle_time_in_progress_to_rft`, `v_lead_time`, `v_time_in_status`, `v_prod_epic_progress`, `v_prod_item_progress`.  
+**Key functions:** `po_quarter_date(name, fallback_date)` — see below.
 
 ---
 
@@ -13,17 +14,29 @@ This document explains how every metric across all dashboards is calculated, whi
 
 These are intentional differences worth understanding when comparing numbers:
 
-| Topic | Sprint Detail / PO KPIs / Sprint Overview | Team Overview | Quality & Bugs |
-|-------|------------------------------------------|---------------|----------------|
-| **Quarter assignment** | `start_date` | `resolved_at` (quarter mode) | `created_at` (bugs), `COALESCE(complete_date, start_date)` (QASE) |
-| **story_points field** | `story_points_at_add` (scope-aware) | `story_points` (current) | N/A |
-| **Completed SP** | All Done issues with `resolved_at` window (Sprint Detail stat panels) | N/A | N/A |
-| **Obsolete exclusion** | Yes | Yes | Yes (bug stats and QASE) |
-| **QASE issue exclusion** | Epics, Sub-tasks, Open status, Obsolete status | N/A | Epics, Sub-tasks, Open status, Obsolete status |
+| Topic | Sprint Detail / PO KPIs (sprint-anchored panels) | Sprint Overview (Sprint Health) | Team Overview | Quality & Bugs |
+|-------|--------------------------------------------------|----------------------------------|---------------|----------------|
+| **Quarter assignment** | `po_quarter_date(sprint name, start_date)` — see below | `start_date` (plain calendar quarter) | `resolved_at` (quarter mode) | `created_at` (bugs), `COALESCE(complete_date, start_date)` (QASE) |
+| **story_points field** | `story_points_at_add` (scope-aware) | `story_points_at_add` (scope-aware) | `story_points` (current) | N/A |
+| **Completed SP** | All Done issues with `resolved_at` window (Sprint Detail stat panels) | N/A | N/A | N/A |
+| **Obsolete exclusion** | Yes | Yes | Yes | Yes (bug stats and QASE) |
+| **QASE issue exclusion** | Epics, Sub-tasks, Open status, Obsolete status | N/A | N/A | Epics, Sub-tasks, Open status, Obsolete status |
 
-**Quarter assignment:** Sprint Detail, PO KPIs, and Sprint Overview Quarter all use `start_date` to assign sprints to quarters. A sprint belongs to the quarter it started in, regardless of when it closed. Quality & Bugs QASE panels use `COALESCE(complete_date, start_date)` for sprint-quarter linkage.
+**Quarter assignment:** Sprint-anchored panels on Sprint Detail and PO KPIs (any panel filtering sprints by `$quarter`) use `po_quarter_date()` (see next section) — Bragi's PO quarters don't align to calendar quarters, so the sprint's own name is the source of truth when it encodes one, with `start_date`'s calendar quarter as a fallback. **Sprint Overview / Sprint Health still uses the plain calendar quarter of `start_date`** — it was not migrated, so a sprint near a PO-quarter boundary can show up under a different `$quarter` selection there than it does on PO KPIs. Quality & Bugs QASE panels use `COALESCE(complete_date, start_date)` for sprint-quarter linkage (also plain calendar quarter, unaffected by this change). Team Overview uses `resolved_at`'s calendar quarter.
 
 ---
+
+## `po_quarter_date()` Function
+
+Bragi's PO quarters (Confluence "Sprint naming convention and sprint mapping") don't align to calendar quarters — e.g. Q3 2026 starts 29 June, two days before the calendar quarter. Sprints named under that convention encode the true quarter in the sprint name itself: `STORE 26-Q3-1`, `AA1 26-Q3-1`, `TCSA 2026 Q3 - Sprint #1`. Older sprints (pre-2026-02-19 convention) have no such pattern, e.g. `Cloud Sprint 17-2`.
+
+```sql
+po_quarter_date(p_name TEXT, p_fallback TIMESTAMPTZ) RETURNS DATE
+```
+
+Extracts `(?:20)?(\d{2})\D{0,3}Q([1-4])` from `p_name`. If it matches, returns the 1st of that quarter's first calendar month (e.g. `2026-07-01` for Q3 2026) — the same shape the `$quarter` dashboard variable already uses, so it's a drop-in replacement for `date_trunc('quarter', p_fallback)` anywhere a sprint needs to be matched against the selected `$quarter`. If the name doesn't match (pre-convention sprints), falls back to `date_trunc('quarter', p_fallback)::date`.
+
+Used by every sprint-anchored `$quarter` filter on **PO KPIs** and the **Sprint Detail** `$sprint` picker, and by `reporter/queries.py`'s `quarterly_efficiency`, `quarterly_transparency` (scope-change calc), and `trend_quarterly`'s velocity/delivery_pct bucketing (shared with the `bragi-metrics` MCP tool, which imports the same file). **Not** used for issue-timestamp metrics (lead time, bug counts, QASE linkage) — those aren't anchored to a single sprint, so a sprint name can't apply; they remain on the plain calendar quarter of `created_at`/`resolved_at`.
 
 ## `v_planning_deviation` View
 
@@ -236,7 +249,7 @@ All SP metrics flow through `v_planning_deviation`.
 
 Quarterly KPIs for Product Owners: planning quality, delivery accuracy, re-work, blockers, release quality.
 
-**Quarter assignment:** Uses `start_date` (sprints assigned to the quarter they started in). Consistent with Sprint Detail and Sprint Overview Quarter.
+**Quarter assignment:** Sprint-anchored panels (Scope Change %, Planning Accuracy %, DOR/DOD Rate, Capacity Ratio, Avg Available Person-Days, and their per-sprint table variants) use `po_quarter_date()` — see that section above. Issue-timestamp panels (Avg Blocker Resolution Time, Avg Bug Closure Rate, below) are unaffected and still use the plain calendar quarter of `created_at`.
 
 **Sprint filter:** Project-majority filter (`was_in_initial_scope = TRUE`, >50% committed issues from selected projects). More accurate than simple join for multi-team boards.
 
@@ -270,7 +283,7 @@ Quarterly KPIs for Product Owners: planning quality, delivery accuracy, re-work,
 
 **Planning Accuracy % per Sprint** — Shows Committed SP, Delivered SP, and Delivery % per sprint from `v_planning_deviation`. Ordered oldest to newest.
 
-**Blocker Resolution Time per Sprint** — `AVG((resolved_at - created_at) / 3600)` per sprint for Blocker issues. Uses `was_in_initial_scope = TRUE` to avoid carry-over double-counting.
+**Blocker Resolution Time per Sprint** — `AVG((resolved_at - created_at) / 3600)` per sprint for Blocker issues. Uses `was_in_initial_scope = TRUE` to avoid carry-over double-counting. Sprint-anchored (`po_quarter_date`) — note this differs from the **Avg Blocker Resolution Time** stat panel above, which is calendar-quarter-of-`created_at`-anchored; the two can include slightly different sprints/issues for a boundary quarter.
 
 **Open Blockers** — Currently open (`status_category != 'Done'`) Blocker issues, ordered by age. No time filter — shows all open blockers regardless of quarter. Table columns: Key, Summary, Assignee, Status, Age (days).
 
@@ -315,7 +328,9 @@ Available person-days per sprint, derived from BambooHR absences. Powers the Cap
 
 **`v_sprint_capacity_detail` (per sprint × person):** one row per roster member — `person`, `source`, `working_days`, `absence_days` (personal time-off), `holiday_days`, `available_days`. Drives the **Capacity by Person** table on Sprint Detail. Per-person `available_days` sum to the sprint's `v_team_capacity.available_days`.
 
-**Capacity Ratio (panel, velocity-scaled — Option A):** `committed_SP / (avg_velocity × available_days / avg_available_days)`, averaged over closed sprints in the quarter, project-majority filtered. `avg_velocity` (delivered SP) and `avg_available_days` are window means. **Target band 0.8–1.2.** Below 0.8 = under-committed for the staffing available; above 1.2 = over-committed.
+**Capacity Ratio (panel, velocity-scaled — Option A):** `committed_SP / (avg_velocity × available_days / avg_available_days)`, averaged over closed sprints in the quarter (`po_quarter_date`, project-majority filtered). `avg_velocity` (delivered SP) and `avg_available_days` are window means. **Target band 0.8–1.2.** Below 0.8 = under-committed for the staffing available; above 1.2 = over-committed.
+
+**Avg Available Person-Days / Sprint (panel):** `AVG(team_size × working_days − absence_days − holiday_days)` — i.e. `v_team_capacity.available_days` — averaged **per sprint** over the closed, project-majority sprints in the selected quarter (`po_quarter_date`). This is a per-sprint figure, not a quarter total — a 7-person team on a 2-week sprint can easily show 60–70 here even though a quarter has only ~64 working days for one person. Title and description were clarified for this reason (previously just "Avg Available Person-Days", easy to misread as a per-quarter total on a dashboard where most other stats are quarterly aggregates).
 
 **Linking BambooHR → Jira:** match `workEmail` to a Jira account — first from assignee emails already on `issues`, then Jira user search as a fallback. Unmatched employees are logged and their time off is not counted.
 
@@ -499,8 +514,8 @@ Child issues exclude Epics and Sub-tasks.
 |----------|--------|-------|
 | `$jira_url` | `app_settings` table | Hidden variable used for Jira deep-links |
 | `$project` | `projects.key` | Multi-select, drives all team/project filters |
-| `$quarter` | `issues.created_at` distinct quarters | Descending order; used as `date_trunc('quarter', ...) = '$quarter'::date` |
-| `$sprint` | `sprints` table | Quarter + project-majority filtered; 0 = All |
+| `$quarter` | `issues.created_at` distinct calendar quarters | Descending order; dropdown values are always calendar-quarter-shaped dates (e.g. `2026-07-01`). Compared via plain `date_trunc('quarter', ...)` on most dashboards, or via `po_quarter_date(...)` on PO KPIs' sprint-anchored panels and the Sprint Detail `$sprint` picker — see [`po_quarter_date()`](#po_quarter_date-function) above |
+| `$sprint` | `sprints` table | Quarter (`po_quarter_date`) + project-majority filtered; 0 = All |
 | `$release` | `UNNEST(issues.fix_versions)` | Quality & Bugs only; ALL = no release filter |
 | `$prod_item` | `issue_links.to_key LIKE 'PROD-%'` | PROD Alignment only; ALL = all items |
 
