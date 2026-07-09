@@ -43,6 +43,14 @@ def qf(alias, yp="%s", qp="%s"):
     return f"EXTRACT(YEAR FROM {alias})::int = {yp} AND EXTRACT(QUARTER FROM {alias})::int = {qp}"
 
 
+def sqf(name_alias, date_alias, yp="%s", qp="%s"):
+    """Sprint-quarter filter fragment. Bragi's PO quarters don't align to
+    calendar quarters (see po_quarter_date() in init.sql) - derive the quarter
+    from the sprint's name, falling back to the calendar quarter of its
+    start_date for sprints that predate the naming convention."""
+    return f"po_quarter_date({name_alias}, {date_alias}) = make_date({yp}, (({qp})-1)*3+1, 1)"
+
+
 def mf(alias, yp="%s", mp="%s"):
     """Month filter fragment."""
     return f"EXTRACT(YEAR FROM {alias})::int = {yp} AND EXTRACT(MONTH FROM {alias})::int = {mp}"
@@ -59,7 +67,7 @@ def quarterly_efficiency(conn, yr, q):
         SUM(pd.delivered_points) AS sp_del,
         SUM(pd.committed_points) AS sp_com
       FROM v_planning_deviation_proj pd
-      WHERE pd.state='closed' AND pd.project_key IN {TEAMS_SQL} AND {qf('pd.start_date')}
+      WHERE pd.state='closed' AND pd.project_key IN {TEAMS_SQL} AND {sqf('pd.sprint_name','pd.start_date')}
       GROUP BY pd.project_key
     ),
     prv AS (
@@ -68,7 +76,7 @@ def quarterly_efficiency(conn, yr, q):
         SUM(pd.delivered_points) AS sp_del,
         SUM(pd.committed_points) AS sp_com
       FROM v_planning_deviation_proj pd
-      WHERE pd.state='closed' AND pd.project_key IN {TEAMS_SQL} AND {qf('pd.start_date')}
+      WHERE pd.state='closed' AND pd.project_key IN {TEAMS_SQL} AND {sqf('pd.sprint_name','pd.start_date')}
       GROUP BY pd.project_key
     )
     SELECT
@@ -127,10 +135,10 @@ def quarterly_transparency(conn, yr, q, readiness_valid_yr=2026, readiness_valid
     sql = f"""
     WITH scope_agg AS (
       SELECT pd.project_key,
-        SUM(COALESCE(a.sp,0)+COALESCE(r.sp,0)) FILTER(WHERE {qf('pd.start_date')}) AS chg,
-        SUM(pd.committed_points)               FILTER(WHERE {qf('pd.start_date')}) AS com,
-        SUM(COALESCE(a.sp,0)+COALESCE(r.sp,0)) FILTER(WHERE {qf('pd.start_date')}) AS prev_chg,
-        SUM(pd.committed_points)               FILTER(WHERE {qf('pd.start_date')}) AS prev_com
+        SUM(COALESCE(a.sp,0)+COALESCE(r.sp,0)) FILTER(WHERE {sqf('pd.sprint_name','pd.start_date')}) AS chg,
+        SUM(pd.committed_points)               FILTER(WHERE {sqf('pd.sprint_name','pd.start_date')}) AS com,
+        SUM(COALESCE(a.sp,0)+COALESCE(r.sp,0)) FILTER(WHERE {sqf('pd.sprint_name','pd.start_date')}) AS prev_chg,
+        SUM(pd.committed_points)               FILTER(WHERE {sqf('pd.sprint_name','pd.start_date')}) AS prev_com
       FROM v_planning_deviation_proj pd
       LEFT JOIN (
         SELECT si.sprint_id, i.project_key, SUM(COALESCE(si.story_points_at_add,0)) AS sp
@@ -147,7 +155,7 @@ def quarterly_transparency(conn, yr, q, readiness_valid_yr=2026, readiness_valid
         GROUP BY si.sprint_id, i.project_key
       ) r ON r.sprint_id = pd.sprint_id AND r.project_key = pd.project_key
       WHERE pd.state='closed' AND pd.project_key IN {TEAMS_SQL}
-        AND ({qf('pd.start_date')} OR {qf('pd.start_date')})
+        AND ({sqf('pd.sprint_name','pd.start_date')} OR {sqf('pd.sprint_name','pd.start_date')})
       GROUP BY pd.project_key
     )
     SELECT i.project_key AS team,
@@ -242,8 +250,8 @@ def trend_quarterly(conn, metric, n=6):
     if metric in ("velocity", "delivery_pct"):
         sql = f"""
         SELECT pd.project_key AS team,
-          EXTRACT(YEAR FROM pd.start_date)::int AS yr,
-          EXTRACT(QUARTER FROM pd.start_date)::int AS q,
+          EXTRACT(YEAR FROM po_quarter_date(pd.sprint_name, pd.start_date))::int AS yr,
+          EXTRACT(QUARTER FROM po_quarter_date(pd.sprint_name, pd.start_date))::int AS q,
           {'ROUND(SUM(pd.delivered_points)::numeric/NULLIF(COUNT(DISTINCT pd.sprint_id),0),1)' if metric=='velocity'
            else 'ROUND(100.0*SUM(pd.delivered_points)/NULLIF(SUM(pd.committed_points),0),1)'} AS val
         FROM v_planning_deviation_proj pd
