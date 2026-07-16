@@ -798,7 +798,7 @@
             "type": "postgres",
             "uid": "jira-metrics-pg"
           },
-          "rawSql": "SELECT COALESCE(ROUND(AVG(completion_pct_sp)::numeric, 1), 0) AS value FROM (SELECT completion_pct_sp FROM v_prod_item_readiness WHERE project_key IN ($project) AND quarter_start = '$quarter'::date) t",
+          "rawSql": "SELECT COALESCE(ROUND(100.0 * SUM(done_sp) / NULLIF(SUM(total_sp), 0), 1), 0) AS value FROM v_prod_item_readiness WHERE project_key IN ($project) AND quarter_start = '$quarter'::date",
           "format": "table",
           "refId": "A"
         }
