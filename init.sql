@@ -740,7 +740,7 @@ issue_snapshots AS (
 SELECT
     prod_key,
     MAX(prod_summary)                                                      AS prod_summary,
-    project_key,
+    iss.project_key,
     quarter_start,
     quarter_cutoff,
     COUNT(DISTINCT issue_key)                                              AS total_issues,
@@ -759,7 +759,7 @@ SELECT
     )                                                                       AS completion_pct_sp
 FROM issue_snapshots iss
 LEFT JOIN issues i ON i.key = iss.issue_key
-GROUP BY prod_key, project_key, quarter_start, quarter_cutoff;
+GROUP BY prod_key, iss.project_key, quarter_start, quarter_cutoff;
 
 -- ─── Team capacity (BambooHR absences) ───────────────────────────────────────
 -- Per-sprint available person-days = nominal team capacity minus absences and
