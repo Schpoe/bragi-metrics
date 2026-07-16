@@ -707,7 +707,10 @@ planned_work AS (
 -- to the project(s) of the issues actually in it. Without this, quarter_cutoffs
 -- below matched on quarter alone and pulled in every other project's sprints that
 -- happened to share the same PO-quarter label, both incorrect and a huge fan-out.
-sprint_project_quarters AS (
+-- MATERIALIZED: referenced once, so Postgres would otherwise inline it and, once
+-- the outer query filters by project/quarter, re-run this whole computation once
+-- per planned_work row instead of joining a precomputed set (observed 233s query).
+sprint_project_quarters AS MATERIALIZED (
     SELECT DISTINCT
         i.project_key,
         po_quarter_date(s.name, s.start_date)                                AS quarter_start,
