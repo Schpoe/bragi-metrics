@@ -721,7 +721,10 @@ sprint_project_quarters AS MATERIALIZED (
     JOIN sprint_issues si ON si.sprint_id = s.id
     JOIN issues i ON i.key = si.issue_key
 ),
-quarter_cutoffs AS (
+-- MATERIALIZED for the same reason as sprint_project_quarters: referenced once,
+-- so once the outer query filters by project/quarter Postgres would otherwise
+-- inline this aggregate and re-run it per planned_work row instead of once.
+quarter_cutoffs AS MATERIALIZED (
     SELECT
         pw.project_key,
         pw.quarter_start,
