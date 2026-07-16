@@ -38,6 +38,47 @@ def prev_month(yr, m):
     return (yr - 1, 12) if m == 1 else (yr, m - 1)
 
 
+def prod_item_readiness_sql(project_key=None, year=None, quarter=None, limit=20):
+    """Quarter-anchored PROD readiness query for project/team rollups."""
+    conditions = ["1 = 1"]
+    if project_key:
+        conditions.append("project_key = %s")
+    if year is not None:
+        conditions.append("EXTRACT(YEAR FROM quarter_start)::int = %s")
+    if quarter is not None:
+        conditions.append("EXTRACT(QUARTER FROM quarter_start)::int = %s")
+    sql = f"""
+    SELECT
+        prod_key,
+        prod_summary,
+        project_key,
+        quarter_start,
+        quarter_cutoff,
+        total_issues,
+        done_issues,
+        completion_pct_issues,
+        completion_pct_sp
+    FROM v_prod_item_readiness
+    WHERE {' AND '.join(conditions)}
+    ORDER BY quarter_start DESC, project_key, prod_key
+    LIMIT %s
+    """
+    return sql
+
+
+def prod_item_readiness(conn, project_key=None, year=None, quarter=None, limit=20):
+    params = []
+    if project_key:
+        params.append(project_key)
+    if year is not None:
+        params.append(year)
+    if quarter is not None:
+        params.append(quarter)
+    params.append(limit)
+    sql = prod_item_readiness_sql(project_key=project_key, year=year, quarter=quarter, limit=limit)
+    return fetchall(conn, sql, tuple(params))
+
+
 def qf(alias, yp="%s", qp="%s"):
     """Quarter filter fragment."""
     return f"EXTRACT(YEAR FROM {alias})::int = {yp} AND EXTRACT(QUARTER FROM {alias})::int = {qp}"

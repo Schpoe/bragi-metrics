@@ -650,6 +650,100 @@ LEFT JOIN issues ci
     AND ci.issue_type NOT IN ('Epic', 'Sub-task')
 GROUP BY dl.to_key, dl.from_key;
 
+-- Quarter-anchored PROD readiness: measures linked Epic progress as of the
+-- quarter-close cutoff, using the same PO quarter logic as the other KPIs.
+CREATE OR REPLACE VIEW v_prod_item_readiness AS
+WITH deduped_links AS (
+    SELECT DISTINCT ON (from_key, to_key) from_key, to_key, to_summary
+    FROM issue_links
+    WHERE to_key LIKE 'PROD-%' AND link_label = 'implements'
+    ORDER BY from_key, to_key
+),
+linked_issues AS (
+    SELECT
+        dl.to_key                                                           AS prod_key,
+        dl.from_key                                                         AS epic_key,
+        dl.to_summary                                                       AS prod_summary,
+        i.project_key,
+        ci.key                                                              AS issue_key
+    FROM deduped_links dl
+    JOIN issues i ON i.key = dl.from_key
+    LEFT JOIN issues ci
+        ON ci.epic_key = dl.from_key
+       AND ci.issue_type NOT IN ('Epic', 'Sub-task')
+),
+planned_work AS (
+    SELECT
+        li.prod_key,
+        li.epic_key,
+        li.prod_summary,
+        li.project_key,
+        li.issue_key,
+        po_quarter_date(s.name, s.start_date)                                AS quarter_start
+    FROM linked_issues li
+    JOIN issue_sprint_history ish
+        ON ish.issue_key = li.issue_key
+       AND ish.event = 'added'
+    JOIN sprints s ON s.id = ish.sprint_id
+),
+quarter_cutoffs AS (
+    SELECT
+        pw.project_key,
+        pw.quarter_start,
+        MAX(COALESCE(s.complete_date, s.end_date, s.start_date))           AS quarter_cutoff
+    FROM planned_work pw
+    JOIN sprints s
+        ON po_quarter_date(s.name, s.start_date) = pw.quarter_start
+    GROUP BY pw.project_key, pw.quarter_start
+),
+issue_snapshots AS (
+    SELECT
+        pw.prod_key,
+        pw.epic_key,
+        pw.prod_summary,
+        pw.project_key,
+        pw.issue_key,
+        pw.quarter_start,
+        qc.quarter_cutoff,
+        COALESCE(last_transition.to_status, i.status)                       AS status_at_cutoff
+    FROM planned_work pw
+    JOIN quarter_cutoffs qc
+        ON qc.project_key = pw.project_key
+       AND qc.quarter_start = pw.quarter_start
+    JOIN issues i ON i.key = pw.issue_key
+    LEFT JOIN LATERAL (
+        SELECT it.to_status
+        FROM issue_transitions it
+        WHERE it.issue_key = pw.issue_key
+          AND it.transitioned_at <= qc.quarter_cutoff
+        ORDER BY it.transitioned_at DESC, it.id DESC
+        LIMIT 1
+    ) last_transition ON TRUE
+)
+SELECT
+    prod_key,
+    MAX(prod_summary)                                                      AS prod_summary,
+    project_key,
+    quarter_start,
+    quarter_cutoff,
+    COUNT(DISTINCT issue_key)                                              AS total_issues,
+    COUNT(DISTINCT issue_key) FILTER (
+        WHERE LOWER(status_at_cutoff) = 'done'
+    )                                                                       AS done_issues,
+    COALESCE(SUM(i.story_points), 0)                                        AS total_sp,
+    COALESCE(SUM(i.story_points) FILTER (WHERE LOWER(status_at_cutoff) = 'done'), 0) AS done_sp,
+    ROUND(
+        100.0 * COUNT(DISTINCT issue_key) FILTER (WHERE LOWER(status_at_cutoff) = 'done')
+        / NULLIF(COUNT(DISTINCT issue_key), 0), 1
+    )                                                                       AS completion_pct_issues,
+    ROUND(
+        100.0 * COALESCE(SUM(i.story_points) FILTER (WHERE LOWER(status_at_cutoff) = 'done'), 0)
+        / NULLIF(COALESCE(SUM(i.story_points), 0), 0), 1
+    )                                                                       AS completion_pct_sp
+FROM issue_snapshots iss
+LEFT JOIN issues i ON i.key = iss.issue_key
+GROUP BY prod_key, project_key, quarter_start, quarter_cutoff;
+
 -- ─── Team capacity (BambooHR absences) ───────────────────────────────────────
 -- Per-sprint available person-days = nominal team capacity minus absences and
 -- company holidays falling inside the sprint window. Roster is derived from the

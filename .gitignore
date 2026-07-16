@@ -3,3 +3,5 @@
 backup.log
 *.swp
 .claude
+# Local VS Code settings
+.vscode/settings.json

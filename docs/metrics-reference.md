@@ -245,6 +245,24 @@ All SP metrics flow through `v_planning_deviation`.
 
 ---
 
+## Recommended KPI set (7 live now)
+
+The PO KPI set is built around seven measures that together cover planning quality, delivery reliability, team readiness, delivery against strategic outcomes, rework, and release quality. The table below reflects the seven KPI names used in the current PO KPI work and the implementation logic behind them.
+
+| KPI | What it measures | How it is calculated in this implementation | Why it matters |
+|-----|------------------|---------------------------------------------|----------------|
+| Planning Accuracy % | How much of the sprint scope that was committed at the start is actually delivered. | Calculated as delivered story points divided by committed story points for each closed sprint, then averaged across the selected quarter's project-majority sprints. | It shows whether a team is reliable at delivering what it committed to. |
+| Scope Change % | How much the sprint plan changes after the sprint has started. | Calculated as the sum of story points added and removed after sprint start, divided by committed story points. Pre-sprint churn is excluded. | A low score means the team is holding the plan steady; a high score suggests a lot of unplanned work or churn. |
+| Story Readiness / DOR Rate % | How well work is prepared before the sprint starts. | Calculated as the percentage of committed Stories/Tasks/Improvements that meet the DOR criteria: assignee present, QA assignee present, story points present, acceptance criteria present, epic linked, and at least one component. | It highlights whether the team is starting work in a healthy state with the information needed to execute. |
+| Capacity Ratio | Whether the team committed more work than its available staffing could realistically support. | Calculated as committed story points divided by an availability-adjusted expected velocity using available person-days from BambooHR absences and roster-based staffing. | It helps distinguish under-committed vs over-committed sprints once staffing availability is taken into account. |
+| PROD Item Achievement / Avg Completion % | How much progress is being made against the linked PROD outcomes. | Calculated from the PROD progress views as the average completion percentage across PROD items linked to the selected epics. | It connects delivery work back to broader product and initiative outcomes rather than only sprint-level execution. |
+| Ticket Reopens / Quality of Work | How much rework is happening when issues move back from a testing state into progress. | Counted from issue transition history for issues that move from a test-related status back to In Progress during the selected quarter. | It is a direct signal of quality problems and process friction. |
+| Release Quality Score | How much quality debt is carried by released versions. | Calculated as a weighted bug score per release, using a severity weighting (Blocker=5, Critical=4, High=3, Medium=2, Low=1) and averaging across released versions in the period. | It helps teams understand whether releases are shipping with too many serious defects. |
+
+These seven measures are the core of the current PO KPI experience. They are complemented by supporting views such as blocker resolution and bug closure, but the seven items above are the KPI set that should be treated as the recommended live KPI set for PO review.
+
+---
+
 ## PO KPIs Dashboard
 
 Quarterly KPIs for Product Owners: planning quality, delivery accuracy, re-work, blockers, release quality.
