@@ -679,20 +679,37 @@ planned_work AS (
         li.prod_summary,
         li.project_key,
         li.issue_key,
-        po_quarter_date(s.name, s.start_date)                                AS quarter_start
+        COALESCE(
+            po_quarter_date(s.name, s.start_date),
+            po_quarter_date(cs.name, cs.start_date),
+            date_trunc('quarter', i.created_at)::date
+        )                                                                  AS quarter_start
     FROM linked_issues li
-    JOIN issue_sprint_history ish
-        ON ish.issue_key = li.issue_key
-       AND ish.event = 'added'
-    JOIN sprints s ON s.id = ish.sprint_id
+    JOIN issues i ON i.key = li.issue_key
+    LEFT JOIN LATERAL (
+        SELECT ish.sprint_id
+        FROM issue_sprint_history ish
+        WHERE ish.issue_key = li.issue_key
+          AND ish.event = 'added'
+        ORDER BY ish.occurred_at, ish.id
+        LIMIT 1
+    ) first_added ON TRUE
+    LEFT JOIN sprints s ON s.id = first_added.sprint_id
+    LEFT JOIN sprint_issues sp
+        ON sp.issue_key = li.issue_key
+       AND sp.removed_at IS NULL
+    LEFT JOIN sprints cs ON cs.id = sp.sprint_id
 ),
 quarter_cutoffs AS (
     SELECT
         pw.project_key,
         pw.quarter_start,
-        MAX(COALESCE(s.complete_date, s.end_date, s.start_date))           AS quarter_cutoff
+        COALESCE(
+            MAX(COALESCE(s.complete_date, s.end_date, s.start_date)),
+            (pw.quarter_start + interval '3 months' - interval '1 day')::date
+        )                                                                  AS quarter_cutoff
     FROM planned_work pw
-    JOIN sprints s
+    LEFT JOIN sprints s
         ON po_quarter_date(s.name, s.start_date) = pw.quarter_start
     GROUP BY pw.project_key, pw.quarter_start
 ),
