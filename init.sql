@@ -252,6 +252,9 @@ CREATE TABLE IF NOT EXISTS issue_sprint_history (
 CREATE INDEX IF NOT EXISTS idx_ish_sprint  ON issue_sprint_history(sprint_id);
 CREATE INDEX IF NOT EXISTS idx_ish_issue   ON issue_sprint_history(issue_key);
 CREATE INDEX IF NOT EXISTS idx_ish_at      ON issue_sprint_history(occurred_at);
+-- Matches the (issue_key, event) filter + occurred_at ordering in v_prod_item_readiness's
+-- "first added" lookup, so it can use a plain ordered index scan instead of bitmap+sort.
+CREATE INDEX IF NOT EXISTS idx_ish_issue_event_occurred ON issue_sprint_history(issue_key, event, occurred_at, id);
 
 -- Migration: track whether scope tables have been populated per sprint
 ALTER TABLE sprints ADD COLUMN IF NOT EXISTS scope_synced_at TIMESTAMPTZ;
