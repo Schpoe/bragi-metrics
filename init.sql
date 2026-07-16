@@ -703,17 +703,33 @@ planned_work AS (
        AND sp.removed_at IS NULL
     LEFT JOIN sprints cs ON cs.id = sp.sprint_id
 ),
+-- Sprints carry no project_key of their own (only board_id), so scope each sprint
+-- to the project(s) of the issues actually in it. Without this, quarter_cutoffs
+-- below matched on quarter alone and pulled in every other project's sprints that
+-- happened to share the same PO-quarter label, both incorrect and a huge fan-out.
+sprint_project_quarters AS (
+    SELECT DISTINCT
+        i.project_key,
+        po_quarter_date(s.name, s.start_date)                                AS quarter_start,
+        s.complete_date,
+        s.end_date,
+        s.start_date
+    FROM sprints s
+    JOIN sprint_issues si ON si.sprint_id = s.id
+    JOIN issues i ON i.key = si.issue_key
+),
 quarter_cutoffs AS (
     SELECT
         pw.project_key,
         pw.quarter_start,
         COALESCE(
-            MAX(COALESCE(s.complete_date, s.end_date, s.start_date)),
+            MAX(COALESCE(spq.complete_date, spq.end_date, spq.start_date)),
             (pw.quarter_start + interval '3 months' - interval '1 day')::date
         )                                                                  AS quarter_cutoff
     FROM planned_work pw
-    LEFT JOIN sprints s
-        ON po_quarter_date(s.name, s.start_date) = pw.quarter_start
+    LEFT JOIN sprint_project_quarters spq
+        ON spq.project_key = pw.project_key
+       AND spq.quarter_start = pw.quarter_start
     GROUP BY pw.project_key, pw.quarter_start
 ),
 issue_snapshots AS (
