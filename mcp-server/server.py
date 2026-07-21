@@ -36,7 +36,6 @@ from mcp import types
 from mcp.server import Server
 from mcp.server.sse import SseServerTransport
 from starlette.applications import Starlette
-from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 from starlette.routing import Mount, Route
@@ -367,52 +366,66 @@ def _dispatch(name: str, arguments: dict) -> list[types.TextContent]:
 
 
 # -- Auth middleware ----------------------------------------------------------
+#
+# Pure ASGI middleware (not BaseHTTPMiddleware): BaseHTTPMiddleware buffers the
+# downstream response through a background task + memory stream, which races
+# with and can prematurely tear down long-lived streaming responses like the
+# /sse MCP transport -- causing intermittent "Could not find session" errors
+# on /messages/* right after a session was created. Plain ASGI middleware
+# passes the connection straight through.
 
-class AuthMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request: Request, call_next):
+class AuthMiddleware:
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http":
+            return await self.app(scope, receive, send)
+
+        request = Request(scope, receive=receive)
         path = request.url.path
 
         if path == "/health":
-            return await call_next(request)
+            return await self.app(scope, receive, send)
 
         auth = request.headers.get("authorization", "")
         if not auth.startswith("Bearer "):
-            return JSONResponse({"error": "Unauthorized"}, status_code=401)
+            return await JSONResponse({"error": "Unauthorized"}, status_code=401)(scope, receive, send)
         token = auth[7:]
 
         # /admin/* -- admin key only
         if path.startswith("/admin"):
             if token != ADMIN_KEY:
                 log.warning("admin auth rejected path=%s", path)
-                return JSONResponse({"error": "Unauthorized"}, status_code=401)
-            return await call_next(request)
+                return await JSONResponse({"error": "Unauthorized"}, status_code=401)(scope, receive, send)
+            return await self.app(scope, receive, send)
 
         # /my/* -- valid user token required; admin key not accepted here
         if path.startswith("/my"):
             if token == ADMIN_KEY:
-                return JSONResponse(
+                return await JSONResponse(
                     {"error": "Use a personal user token for /my/* — not the admin key"},
                     status_code=403,
-                )
+                )(scope, receive, send)
             with db() as conn:
                 user = _lookup_token(conn, token)
             if not user:
-                return JSONResponse({"error": "Unauthorized"}, status_code=401)
-            request.state.user = user
-            return await call_next(request)
+                return await JSONResponse({"error": "Unauthorized"}, status_code=401)(scope, receive, send)
+            scope.setdefault("state", {})["user"] = user
+            return await self.app(scope, receive, send)
 
         # MCP endpoints (/sse, /messages/*) -- admin key OR valid user token
         if token == ADMIN_KEY:
-            request.state.user = {"email": "admin", "is_admin": True}
+            scope.setdefault("state", {})["user"] = {"email": "admin", "is_admin": True}
         else:
             with db() as conn:
                 user = _lookup_token(conn, token)
             if not user:
                 log.warning("mcp auth rejected path=%s", path)
-                return JSONResponse({"error": "Unauthorized"}, status_code=401)
-            request.state.user = user
+                return await JSONResponse({"error": "Unauthorized"}, status_code=401)(scope, receive, send)
+            scope.setdefault("state", {})["user"] = user
 
-        return await call_next(request)
+        return await self.app(scope, receive, send)
 
 
 # -- Admin endpoints ----------------------------------------------------------
