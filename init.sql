@@ -569,6 +569,32 @@ JOIN sprints s ON s.id = k.sprint_id
 LEFT JOIN committed c ON c.sprint_id = k.sprint_id AND c.project_key = k.project_key
 LEFT JOIN delivered d ON d.sprint_id = k.sprint_id AND d.project_key = k.project_key;
 
+-- Scope-agnostic sibling to v_planning_deviation_proj: counts ALL Done story
+-- points resolved in the sprint window, regardless of whether the issue was
+-- in the sprint's original committed scope. v_planning_deviation_proj's
+-- delivered_points intentionally excludes mid-sprint additions (it's a
+-- plan-vs-actual number); this view is for questions where that gate is
+-- wrong — "how much did the team actually burn" (Sprint Detail's Total
+-- Completed SP, PO KPIs' Capacity Ratio numerator) rather than "did we
+-- deliver what we committed to."
+CREATE OR REPLACE VIEW v_sprint_completion_proj AS
+SELECT
+    si.sprint_id,
+    i.project_key,
+    COUNT(*)                                                              AS completed_issues,
+    COALESCE(SUM(COALESCE(si.story_points_at_add, i.story_points, 0)), 0) AS completed_points
+FROM sprint_issues si
+JOIN issues i ON i.key = si.issue_key
+JOIN sprints s ON s.id = si.sprint_id
+WHERE si.removed_at IS NULL
+  AND i.issue_type NOT IN ('Epic', 'Sub-task')
+  AND i.status != 'Obsolete / Won''t Do'
+  AND i.status_category = 'Done'
+  AND i.resolved_at IS NOT NULL
+  AND i.resolved_at >= s.start_date
+  AND i.resolved_at <= COALESCE(s.complete_date, s.end_date, NOW())
+GROUP BY si.sprint_id, i.project_key;
+
 -- Lead time: created → resolved (excludes Epics and Sub-tasks)
 CREATE OR REPLACE VIEW v_lead_time AS
 SELECT

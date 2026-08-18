@@ -2321,7 +2321,7 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "Committed SP vs available capacity, velocity-scaled by staffing (avg over closed sprints in quarter). Target band 0.8-1.2.",
+      "description": "Committed SP vs available capacity, velocity-scaled by staffing (avg over closed sprints in quarter). Velocity here is ALL Done story points regardless of original scope (v_sprint_completion_proj) — capacity utilization counts everything the team actually completed, not just planned work. Target band 0.8-1.2.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -2390,7 +2390,7 @@
             "type": "postgres",
             "uid": "jira-metrics-pg"
           },
-          "rawSql": "WITH ms AS (\n  SELECT pd.sprint_id, MAX(pd.sprint_name) AS sprint_name, MAX(pd.start_date) AS start_date,\n         SUM(pd.committed_points) AS committed_points, SUM(pd.delivered_points) AS delivered_points,\n         SUM(tc.available_days) AS available_days\n  FROM v_planning_deviation_proj pd\n  JOIN v_team_capacity tc ON tc.sprint_id = pd.sprint_id AND tc.project_key = pd.project_key\n  WHERE pd.state = 'closed' AND pd.project_key IN ($project)\n    AND po_quarter_date(pd.sprint_name, pd.start_date) = '$quarter'::date\n    AND pd.sprint_id IN (\n    SELECT DISTINCT si2.sprint_id FROM sprint_issues si2\n    JOIN issues i2 ON i2.key = si2.issue_key\n    WHERE i2.project_key IN ($project) AND si2.was_in_initial_scope = TRUE\n    GROUP BY si2.sprint_id\n    HAVING COUNT(*) * 2 > (SELECT COUNT(*) FROM sprint_issues si3 WHERE si3.sprint_id = si2.sprint_id AND si3.was_in_initial_scope = TRUE)\n  )\n  GROUP BY pd.sprint_id\n  HAVING SUM(pd.committed_points) > 0 AND SUM(tc.available_days) > 0\n),\nagg AS (SELECT AVG(delivered_points) AS avg_vel, AVG(available_days) AS avg_avail FROM ms)\nSELECT ROUND(AVG(ms.committed_points * agg.avg_avail\n  / NULLIF(agg.avg_vel * ms.available_days, 0))::numeric, 2) AS value\nFROM ms CROSS JOIN agg",
+          "rawSql": "WITH ms AS (\n  SELECT pd.sprint_id, MAX(pd.sprint_name) AS sprint_name, MAX(pd.start_date) AS start_date,\n         SUM(pd.committed_points) AS committed_points, SUM(COALESCE(sc.completed_points, 0)) AS delivered_points,\n         SUM(tc.available_days) AS available_days\n  FROM v_planning_deviation_proj pd\n  JOIN v_team_capacity tc ON tc.sprint_id = pd.sprint_id AND tc.project_key = pd.project_key\n  LEFT JOIN v_sprint_completion_proj sc ON sc.sprint_id = pd.sprint_id AND sc.project_key = pd.project_key\n  WHERE pd.state = 'closed' AND pd.project_key IN ($project)\n    AND po_quarter_date(pd.sprint_name, pd.start_date) = '$quarter'::date\n    AND pd.sprint_id IN (\n    SELECT DISTINCT si2.sprint_id FROM sprint_issues si2\n    JOIN issues i2 ON i2.key = si2.issue_key\n    WHERE i2.project_key IN ($project) AND si2.was_in_initial_scope = TRUE\n    GROUP BY si2.sprint_id\n    HAVING COUNT(*) * 2 > (SELECT COUNT(*) FROM sprint_issues si3 WHERE si3.sprint_id = si2.sprint_id AND si3.was_in_initial_scope = TRUE)\n  )\n  GROUP BY pd.sprint_id\n  HAVING SUM(pd.committed_points) > 0 AND SUM(tc.available_days) > 0\n),\nagg AS (SELECT AVG(delivered_points) AS avg_vel, AVG(available_days) AS avg_avail FROM ms)\nSELECT ROUND(AVG(ms.committed_points * agg.avg_avail\n  / NULLIF(agg.avg_vel * ms.available_days, 0))::numeric, 2) AS value\nFROM ms CROSS JOIN agg",
           "format": "table",
           "refId": "A"
         }
@@ -2469,7 +2469,7 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "Capacity ratio per sprint (committed SP vs staffing-scaled velocity). Target band 0.8-1.2.",
+      "description": "Capacity ratio per sprint (committed SP vs staffing-scaled velocity). Velocity here is ALL Done story points regardless of original scope (v_sprint_completion_proj), not just planned work. Target band 0.8-1.2.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -2547,7 +2547,7 @@
             "type": "postgres",
             "uid": "jira-metrics-pg"
           },
-          "rawSql": "WITH ms AS (\n  SELECT pd.sprint_id, MAX(pd.sprint_name) AS sprint_name, MAX(pd.start_date) AS start_date,\n         SUM(pd.committed_points) AS committed_points, SUM(pd.delivered_points) AS delivered_points,\n         SUM(tc.available_days) AS available_days\n  FROM v_planning_deviation_proj pd\n  JOIN v_team_capacity tc ON tc.sprint_id = pd.sprint_id AND tc.project_key = pd.project_key\n  WHERE pd.state = 'closed' AND pd.project_key IN ($project)\n    AND po_quarter_date(pd.sprint_name, pd.start_date) = '$quarter'::date\n    AND pd.sprint_id IN (\n    SELECT DISTINCT si2.sprint_id FROM sprint_issues si2\n    JOIN issues i2 ON i2.key = si2.issue_key\n    WHERE i2.project_key IN ($project) AND si2.was_in_initial_scope = TRUE\n    GROUP BY si2.sprint_id\n    HAVING COUNT(*) * 2 > (SELECT COUNT(*) FROM sprint_issues si3 WHERE si3.sprint_id = si2.sprint_id AND si3.was_in_initial_scope = TRUE)\n  )\n  GROUP BY pd.sprint_id\n  HAVING SUM(pd.committed_points) > 0 AND SUM(tc.available_days) > 0\n),\nagg AS (SELECT AVG(delivered_points) AS avg_vel, AVG(available_days) AS avg_avail FROM ms)\nSELECT ms.sprint_name AS \"Sprint\",\n  ROUND((ms.committed_points * agg.avg_avail\n    / NULLIF(agg.avg_vel * ms.available_days, 0))::numeric, 2) AS \"Capacity Ratio\"\nFROM ms CROSS JOIN agg\nORDER BY ms.start_date ASC LIMIT 20",
+          "rawSql": "WITH ms AS (\n  SELECT pd.sprint_id, MAX(pd.sprint_name) AS sprint_name, MAX(pd.start_date) AS start_date,\n         SUM(pd.committed_points) AS committed_points, SUM(COALESCE(sc.completed_points, 0)) AS delivered_points,\n         SUM(tc.available_days) AS available_days\n  FROM v_planning_deviation_proj pd\n  JOIN v_team_capacity tc ON tc.sprint_id = pd.sprint_id AND tc.project_key = pd.project_key\n  LEFT JOIN v_sprint_completion_proj sc ON sc.sprint_id = pd.sprint_id AND sc.project_key = pd.project_key\n  WHERE pd.state = 'closed' AND pd.project_key IN ($project)\n    AND po_quarter_date(pd.sprint_name, pd.start_date) = '$quarter'::date\n    AND pd.sprint_id IN (\n    SELECT DISTINCT si2.sprint_id FROM sprint_issues si2\n    JOIN issues i2 ON i2.key = si2.issue_key\n    WHERE i2.project_key IN ($project) AND si2.was_in_initial_scope = TRUE\n    GROUP BY si2.sprint_id\n    HAVING COUNT(*) * 2 > (SELECT COUNT(*) FROM sprint_issues si3 WHERE si3.sprint_id = si2.sprint_id AND si3.was_in_initial_scope = TRUE)\n  )\n  GROUP BY pd.sprint_id\n  HAVING SUM(pd.committed_points) > 0 AND SUM(tc.available_days) > 0\n),\nagg AS (SELECT AVG(delivered_points) AS avg_vel, AVG(available_days) AS avg_avail FROM ms)\nSELECT ms.sprint_name AS \"Sprint\",\n  ROUND((ms.committed_points * agg.avg_avail\n    / NULLIF(agg.avg_vel * ms.available_days, 0))::numeric, 2) AS \"Capacity Ratio\"\nFROM ms CROSS JOIN agg\nORDER BY ms.start_date ASC LIMIT 20",
           "format": "table",
           "refId": "A"
         }

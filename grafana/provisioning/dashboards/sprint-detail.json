@@ -668,7 +668,7 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "SP delivered within this sprint's window. Only counts issues where resolved_at falls between sprint start and complete date, preventing carry-over double-counting. Excludes Epics. Sub-tasks and Obsolete included.",
+      "description": "SP delivered against this sprint's ORIGINAL committed scope only (was_in_initial_scope = TRUE) — work added to the sprint after it started is excluded here even if completed, so this matches the Delivery % denominator. See \"Total Completed SP\" for all Done work regardless of when it entered the sprint. Excludes Epics, Sub-tasks, and Obsolete/Won't Do issues.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -730,6 +730,71 @@
         }
       ],
       "title": "Completed",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "jira-metrics-pg"
+      },
+      "description": "ALL Done story points resolved within this sprint's window, regardless of whether the issue was in the sprint's original committed scope — matches what Jira's own board/burndown shows as done. Excludes Epics, Sub-tasks, and Obsolete/Won't Do issues; excludes issues later removed from the sprint.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "blue",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 12,
+        "y": 13
+      },
+      "id": 139,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.1.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "jira-metrics-pg"
+          },
+          "format": "table",
+          "rawSql": "SELECT COALESCE(SUM(completed_points),0) AS value FROM v_sprint_completion_proj WHERE sprint_id = $sprint::bigint AND project_key IN ($project)",
+          "refId": "A"
+        }
+      ],
+      "title": "Total Completed SP",
       "type": "stat"
     },
     {

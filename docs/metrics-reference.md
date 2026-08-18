@@ -18,7 +18,8 @@ These are intentional differences worth understanding when comparing numbers:
 |-------|--------------------------------------------------|----------------------------------|---------------|----------------|
 | **Quarter assignment** | `po_quarter_date(sprint name, start_date)` — see below | `start_date` (plain calendar quarter) | `resolved_at` (quarter mode) | `created_at` (bugs), `COALESCE(complete_date, start_date)` (QASE) |
 | **story_points field** | `story_points_at_add` (scope-aware) | `story_points_at_add` (scope-aware) | `story_points` (current) | N/A |
-| **Completed SP** | All Done issues with `resolved_at` window (Sprint Detail stat panels) | N/A | N/A | N/A |
+| **Completed SP** (narrow) | `v_planning_deviation_proj.delivered_points` — original committed scope only, matches Delivery % | N/A | N/A | N/A |
+| **Total Completed SP** (broad) | `v_sprint_completion_proj.completed_points` — all Done issues incl. unplanned, `resolved_at` window (Sprint Detail "Total Completed SP" stat, PO KPIs Capacity Ratio numerator) | N/A | N/A | N/A |
 | **Obsolete exclusion** | Yes | Yes | Yes | Yes (bug stats and QASE) |
 | **QASE issue exclusion** | Epics, Sub-tasks, Open status, Obsolete status | N/A | N/A | Epics, Sub-tasks, Open status, Obsolete status |
 
@@ -106,7 +107,37 @@ Same filter plus `status_category = 'Done'` and `resolved_at <= COALESCE(complet
 
 Tickets that were added and removed entirely before sprint start are deleted from `sprint_issues` during the scope sync so they do not appear in any metric.
 
-**Note:** The Sprint Detail **Completed SP** stat panel uses a different formula — it counts *all* Done issues (including unplanned) and does use a `resolved_at` sprint window (`>= start_date AND <= COALESCE(complete_date, end_date, NOW())`) to prevent carry-over double-counting.
+**Note:** The Sprint Detail **"Completed"** stat panel reads this view's `delivered_points` directly — same initial-scope gate, same Delivery % denominator. It does *not* count work added to the sprint after it started, even if that work is done. For "how much did the team actually burn regardless of when it entered scope," see **`v_sprint_completion_proj`** below and the Sprint Detail **"Total Completed SP"** stat panel, which read from it instead.
+
+---
+
+## `v_sprint_completion_proj` View
+
+Scope-agnostic sibling to `v_planning_deviation_proj`. Counts **all** Done story points resolved in the sprint window — no `was_in_initial_scope` gate — for questions where "did we deliver the plan" is the wrong question and "how much did the team actually complete" is the right one (team capacity/throughput, not planning accuracy).
+
+```sql
+FROM sprint_issues si
+JOIN issues i ON i.key = si.issue_key
+JOIN sprints s ON s.id = si.sprint_id
+WHERE si.removed_at IS NULL
+  AND i.issue_type NOT IN ('Epic', 'Sub-task')
+  AND i.status != 'Obsolete / Won''t Do'
+  AND i.status_category = 'Done'
+  AND i.resolved_at IS NOT NULL
+  AND i.resolved_at >= s.start_date
+  AND i.resolved_at <= COALESCE(s.complete_date, s.end_date, NOW())
+GROUP BY si.sprint_id, i.project_key
+```
+
+- `completed_points`: `SUM(COALESCE(story_points_at_add, story_points, 0))`
+- `completed_issues`: `COUNT(*)`
+
+Same grain as `v_planning_deviation_proj` — `(sprint_id, project_key)` — and the same uniform exclusions (Epic/Sub-task/Obsolete, removed issues), just without the initial-scope gate. Applies uniformly to active and closed sprints (no branching), since "all Done work as of now" doesn't need the closed-sprint snapshot machinery `sprint_scope_final` exists for.
+
+**Used by:**
+
+- Sprint Detail **"Total Completed SP"** stat panel.
+- PO KPIs **Avg Capacity Ratio** / **Capacity Ratio per Sprint** — `delivered_points`/`avg_vel` in those panels' `ms` CTE is sourced from here (`LEFT JOIN v_sprint_completion_proj sc`), not from `v_planning_deviation_proj`. Capacity utilization is about what the team actually burned against its available person-days, not about hitting the original plan — `committed_points` in the same CTE is still the scope-gated planning number, unchanged.
 
 ---
 
