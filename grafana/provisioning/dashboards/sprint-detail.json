@@ -874,7 +874,7 @@
         "type": "postgres",
         "uid": "jira-metrics-pg"
       },
-      "description": "Average delivered story points over the last 6 closed sprints for the same team. Provides context for current sprint commitment.",
+      "description": "Average story points completed over the last 6 closed sprints for the same team — ALL Done work regardless of original scope (v_sprint_completion_proj), not just what was originally committed. Provides context for current sprint commitment.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -930,7 +930,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "SELECT ROUND(AVG(dp)::numeric, 1) AS value\nFROM (\n  SELECT SUM(pd.delivered_points) AS dp\n  FROM v_planning_deviation_proj pd JOIN sprints s ON s.id = pd.sprint_id\n  WHERE pd.state='closed' AND pd.project_key IN ($project)\n    AND s.complete_date < (SELECT start_date FROM sprints WHERE id = $sprint::bigint)\n    AND (SELECT COUNT(*) FROM sprint_issues si JOIN issues i ON i.key = si.issue_key WHERE si.sprint_id = pd.sprint_id AND si.was_in_initial_scope = TRUE AND i.project_key IN ($project)) * 2 > (SELECT COUNT(*) FROM sprint_issues si WHERE si.sprint_id = pd.sprint_id AND si.was_in_initial_scope = TRUE)\n  GROUP BY pd.sprint_id, s.complete_date\n  ORDER BY s.complete_date DESC NULLS LAST\n  LIMIT 6\n) t",
+          "rawSql": "SELECT ROUND(AVG(dp)::numeric, 1) AS value\nFROM (\n  SELECT SUM(COALESCE(sc.completed_points,0)) AS dp\n  FROM v_planning_deviation_proj pd JOIN sprints s ON s.id = pd.sprint_id\n  LEFT JOIN v_sprint_completion_proj sc ON sc.sprint_id = pd.sprint_id AND sc.project_key = pd.project_key\n  WHERE pd.state='closed' AND pd.project_key IN ($project)\n    AND s.complete_date < (SELECT start_date FROM sprints WHERE id = $sprint::bigint)\n    AND (SELECT COUNT(*) FROM sprint_issues si JOIN issues i ON i.key = si.issue_key WHERE si.sprint_id = pd.sprint_id AND si.was_in_initial_scope = TRUE AND i.project_key IN ($project)) * 2 > (SELECT COUNT(*) FROM sprint_issues si WHERE si.sprint_id = pd.sprint_id AND si.was_in_initial_scope = TRUE)\n  GROUP BY pd.sprint_id, s.complete_date\n  ORDER BY s.complete_date DESC NULLS LAST\n  LIMIT 6\n) t",
           "refId": "A"
         }
       ],
@@ -1003,7 +1003,7 @@
             "uid": "jira-metrics-pg"
           },
           "format": "table",
-          "rawSql": "WITH committed AS (\n  SELECT COALESCE(SUM(committed_points),0) AS sp\n  FROM v_planning_deviation_proj WHERE sprint_id = $sprint::bigint AND project_key IN ($project)\n),\navg_vel AS (\n  SELECT ROUND(AVG(dp)::numeric, 1) AS avg_sp FROM (\n  SELECT SUM(pd.delivered_points) AS dp\n  FROM v_planning_deviation_proj pd JOIN sprints s ON s.id = pd.sprint_id\n  WHERE pd.state='closed' AND pd.project_key IN ($project)\n    AND s.complete_date < (SELECT start_date FROM sprints WHERE id = $sprint::bigint)\n    AND (SELECT COUNT(*) FROM sprint_issues si JOIN issues i ON i.key = si.issue_key WHERE si.sprint_id = pd.sprint_id AND si.was_in_initial_scope = TRUE AND i.project_key IN ($project)) * 2 > (SELECT COUNT(*) FROM sprint_issues si WHERE si.sprint_id = pd.sprint_id AND si.was_in_initial_scope = TRUE)\n  GROUP BY pd.sprint_id, s.complete_date\n  ORDER BY s.complete_date DESC NULLS LAST\n  LIMIT 6\n  ) t\n)\nSELECT ROUND(100.0 * c.sp / NULLIF(a.avg_sp, 0), 1) AS value\nFROM committed c CROSS JOIN avg_vel a",
+          "rawSql": "WITH committed AS (\n  SELECT COALESCE(SUM(committed_points),0) AS sp\n  FROM v_planning_deviation_proj WHERE sprint_id = $sprint::bigint AND project_key IN ($project)\n),\navg_vel AS (\n  SELECT ROUND(AVG(dp)::numeric, 1) AS avg_sp FROM (\n  SELECT SUM(COALESCE(sc.completed_points,0)) AS dp\n  FROM v_planning_deviation_proj pd JOIN sprints s ON s.id = pd.sprint_id\n  LEFT JOIN v_sprint_completion_proj sc ON sc.sprint_id = pd.sprint_id AND sc.project_key = pd.project_key\n  WHERE pd.state='closed' AND pd.project_key IN ($project)\n    AND s.complete_date < (SELECT start_date FROM sprints WHERE id = $sprint::bigint)\n    AND (SELECT COUNT(*) FROM sprint_issues si JOIN issues i ON i.key = si.issue_key WHERE si.sprint_id = pd.sprint_id AND si.was_in_initial_scope = TRUE AND i.project_key IN ($project)) * 2 > (SELECT COUNT(*) FROM sprint_issues si WHERE si.sprint_id = pd.sprint_id AND si.was_in_initial_scope = TRUE)\n  GROUP BY pd.sprint_id, s.complete_date\n  ORDER BY s.complete_date DESC NULLS LAST\n  LIMIT 6\n  ) t\n)\nSELECT ROUND(100.0 * c.sp / NULLIF(a.avg_sp, 0), 1) AS value\nFROM committed c CROSS JOIN avg_vel a",
           "refId": "A"
         }
       ],

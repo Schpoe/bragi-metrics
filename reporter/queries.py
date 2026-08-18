@@ -106,8 +106,10 @@ def quarterly_efficiency(conn, yr, q):
       SELECT pd.project_key,
         COUNT(DISTINCT pd.sprint_id) AS nsprints,
         SUM(pd.delivered_points) AS sp_del,
-        SUM(pd.committed_points) AS sp_com
+        SUM(pd.committed_points) AS sp_com,
+        SUM(COALESCE(sc.completed_points,0)) AS sp_completed
       FROM v_planning_deviation_proj pd
+      LEFT JOIN v_sprint_completion_proj sc ON sc.sprint_id = pd.sprint_id AND sc.project_key = pd.project_key
       WHERE pd.state='closed' AND pd.project_key IN {TEAMS_SQL} AND {sqf('pd.sprint_name','pd.start_date')}
       GROUP BY pd.project_key
     ),
@@ -115,18 +117,20 @@ def quarterly_efficiency(conn, yr, q):
       SELECT pd.project_key,
         COUNT(DISTINCT pd.sprint_id) AS nsprints,
         SUM(pd.delivered_points) AS sp_del,
-        SUM(pd.committed_points) AS sp_com
+        SUM(pd.committed_points) AS sp_com,
+        SUM(COALESCE(sc.completed_points,0)) AS sp_completed
       FROM v_planning_deviation_proj pd
+      LEFT JOIN v_sprint_completion_proj sc ON sc.sprint_id = pd.sprint_id AND sc.project_key = pd.project_key
       WHERE pd.state='closed' AND pd.project_key IN {TEAMS_SQL} AND {sqf('pd.sprint_name','pd.start_date')}
       GROUP BY pd.project_key
     )
     SELECT
       COALESCE(c.project_key, p.project_key) AS team,
       COALESCE(c.sp_del,0) AS sp_delivered,
-      ROUND(COALESCE(c.sp_del,0)::numeric / NULLIF(c.nsprints,0), 1) AS velocity,
+      ROUND(COALESCE(c.sp_completed,0)::numeric / NULLIF(c.nsprints,0), 1) AS velocity,
       ROUND(100.0*COALESCE(c.sp_del,0) / NULLIF(c.sp_com,0), 1) AS delivery_pct,
       COALESCE(p.sp_del,0) AS prev_sp_delivered,
-      ROUND(COALESCE(p.sp_del,0)::numeric / NULLIF(p.nsprints,0), 1) AS prev_velocity,
+      ROUND(COALESCE(p.sp_completed,0)::numeric / NULLIF(p.nsprints,0), 1) AS prev_velocity,
       ROUND(100.0*COALESCE(p.sp_del,0) / NULLIF(p.sp_com,0), 1) AS prev_delivery_pct
     FROM cur c FULL JOIN prv p ON c.project_key = p.project_key
     ORDER BY team
@@ -293,9 +297,10 @@ def trend_quarterly(conn, metric, n=6):
         SELECT pd.project_key AS team,
           EXTRACT(YEAR FROM po_quarter_date(pd.sprint_name, pd.start_date))::int AS yr,
           EXTRACT(QUARTER FROM po_quarter_date(pd.sprint_name, pd.start_date))::int AS q,
-          {'ROUND(SUM(pd.delivered_points)::numeric/NULLIF(COUNT(DISTINCT pd.sprint_id),0),1)' if metric=='velocity'
+          {'ROUND(SUM(COALESCE(sc.completed_points,0))::numeric/NULLIF(COUNT(DISTINCT pd.sprint_id),0),1)' if metric=='velocity'
            else 'ROUND(100.0*SUM(pd.delivered_points)/NULLIF(SUM(pd.committed_points),0),1)'} AS val
         FROM v_planning_deviation_proj pd
+        LEFT JOIN v_sprint_completion_proj sc ON sc.sprint_id = pd.sprint_id AND sc.project_key = pd.project_key
         WHERE pd.state='closed' AND pd.project_key IN {TEAMS_SQL}
         GROUP BY pd.project_key, yr, q ORDER BY yr, q
         """

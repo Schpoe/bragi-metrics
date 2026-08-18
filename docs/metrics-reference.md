@@ -137,7 +137,11 @@ Same grain as `v_planning_deviation_proj` — `(sprint_id, project_key)` — and
 **Used by:**
 
 - Sprint Detail **"Total Completed SP"** stat panel.
+- Sprint Detail **"Avg Velocity (Last 6 Sprints)"** and **"Velocity Booked %"** — both read `completed_points` (via `LEFT JOIN v_sprint_completion_proj sc`) for the 6-sprint average, not `v_planning_deviation_proj.delivered_points`. Velocity is throughput, not planning accuracy — a team that pulls in and finishes unplanned work has a real, higher velocity, and this dashboard's "Committed" figure and "Delivery %" already cover the plan-vs-actual side separately.
 - PO KPIs **Avg Capacity Ratio** / **Capacity Ratio per Sprint** — `delivered_points`/`avg_vel` in those panels' `ms` CTE is sourced from here (`LEFT JOIN v_sprint_completion_proj sc`), not from `v_planning_deviation_proj`. Capacity utilization is about what the team actually burned against its available person-days, not about hitting the original plan — `committed_points` in the same CTE is still the scope-gated planning number, unchanged.
+- Reporter `quarterly_efficiency()` / `trend_quarterly(metric='velocity')` — same split: `velocity`/`prev_velocity` now come from `sp_completed` (this view), while `delivery_pct`/`sp_delivered` are untouched (still `v_planning_deviation_proj.delivered_points`, matching Delivery %).
+
+**Deliberately NOT changed** — `department-overview.json`'s "Avg Velocity (SP/sprint)" and "Velocity Trend" already query `sprint_scope_final WHERE was_completed = TRUE` directly, with no `sprint_scope_initial` join gating it to original scope — they were already scope-agnostic before this view existed. `home.json`/`sprint-health.json`'s "Sprint Velocity — Committed vs Delivered" bar charts are left on the narrow `v_planning_deviation` (note: whole-board grain, not `_proj` — see the grain caveat above) because their explicit two-bar "Committed vs Delivered" framing is a planning-accuracy comparison by design, the same family as Delivery %/Completed, not a standalone throughput number.
 
 ---
 
