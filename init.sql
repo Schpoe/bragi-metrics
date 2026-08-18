@@ -924,29 +924,33 @@ WITH sprint_days AS (
     WHERE s.start_date IS NOT NULL AND s.end_date IS NOT NULL
     GROUP BY s.id, s.start_date, s.end_date
 ),
+-- NOTE: GREATEST()/LEAST() in Postgres ignore NULL arguments instead of
+-- propagating them, so a bare LEFT JOIN absences feeding straight into
+-- GREATEST(a.start_date, sd.d_start) silently collapsed to the sprint's full
+-- window whenever there was no matching absence (the common case), making
+-- holiday_days/absence_days == working_days for everyone. Gate the date
+-- generation behind a LATERAL join keyed on the joined row actually existing
+-- so it never runs on the unmatched (NULL) side.
 holidays AS (
     SELECT sd.sprint_id,
-        COALESCE(SUM((
-            SELECT COUNT(*)
-            FROM generate_series(GREATEST(a.start_date, sd.d_start),
-                                 LEAST(a.end_date, sd.d_end), INTERVAL '1 day') g
-            WHERE EXTRACT(DOW FROM g) NOT IN (0, 6)
-        )), 0) AS holiday_days
+        -- ::numeric keeps this column's type identical to the old SUM(...)-based
+        -- version — CREATE OR REPLACE VIEW errors (silently, mid-psql-run) if a
+        -- view's column type changes, which would leave the old buggy view live.
+        (COUNT(DISTINCT g.d) FILTER (WHERE EXTRACT(DOW FROM g.d) NOT IN (0, 6)))::numeric AS holiday_days
     FROM sprint_days sd
     LEFT JOIN absences a
         ON a.kind = 'holiday'
        AND a.start_date <= sd.d_end
        AND a.end_date   >= sd.d_start
+    LEFT JOIN LATERAL generate_series(GREATEST(a.start_date, sd.d_start),
+                                       LEAST(a.end_date, sd.d_end), INTERVAL '1 day') AS g(d)
+        ON a.id IS NOT NULL
     GROUP BY sd.sprint_id
 ),
 person_off AS (
     SELECT r.sprint_id, r.project_key, r.account_id,
-        COALESCE(SUM((
-            SELECT COUNT(*)
-            FROM generate_series(GREATEST(a.start_date, sd.d_start),
-                                 LEAST(a.end_date, sd.d_end), INTERVAL '1 day') g
-            WHERE EXTRACT(DOW FROM g) NOT IN (0, 6)
-        )), 0) AS absence_days
+        -- ::numeric — see holidays CTE above for why this cast matters.
+        (COUNT(DISTINCT g.d) FILTER (WHERE EXTRACT(DOW FROM g.d) NOT IN (0, 6)))::numeric AS absence_days
     FROM v_sprint_roster r
     JOIN sprint_days sd ON sd.sprint_id = r.sprint_id
     JOIN bamboohr_employees e ON e.jira_account_id = r.account_id
@@ -955,6 +959,9 @@ person_off AS (
        AND a.kind = 'timeOff'
        AND a.start_date <= sd.d_end
        AND a.end_date   >= sd.d_start
+    LEFT JOIN LATERAL generate_series(GREATEST(a.start_date, sd.d_start),
+                                       LEAST(a.end_date, sd.d_end), INTERVAL '1 day') AS g(d)
+        ON a.id IS NOT NULL
     GROUP BY r.sprint_id, r.project_key, r.account_id
 )
 SELECT
