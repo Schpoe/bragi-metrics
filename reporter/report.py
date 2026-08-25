@@ -26,7 +26,8 @@ import queries as q
 
 REPORTS_DIR = Path(os.environ.get("REPORTS_DIR", "/reports"))
 TEAMS = q.TEAMS
-TEAM_COLORS = {"STORE": "#4e79a7", "AAONE": "#f28e2b", "AATWO": "#59a14f", "CONNECT": "#e15759"}
+TEAM_COLORS = {"STORE": "#4e79a7", "AAONE": "#f28e2b", "AATWO": "#59a14f", "CONNECT": "#e15759",
+               "BEST": "#76b7b2", "GROW": "#edc948", "TCSA": "#b07aa1"}
 MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
 
 # KPI targets from the Operational Improvement Framework
