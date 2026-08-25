@@ -1,7 +1,10 @@
 .env
+.env.bak*
 .backup.conf
 backup.log
 *.swp
 .claude
+__pycache__/
+.DS_Store
 # Local VS Code settings
 .vscode/settings.json
