@@ -1008,6 +1008,21 @@ def sync_sprints(conn):
                         end_date      = EXCLUDED.end_date,
                         complete_date = EXCLUDED.complete_date,
                         goal          = EXCLUDED.goal,
+                        -- start_date is user-editable while a sprint stays open, so it
+                        -- can't be trusted alone as the real activation moment. Capture
+                        -- our own first observation of state='active' (set once, never
+                        -- overwritten) as a tamper-resistant fallback — see init.sql.
+                        first_seen_active_at = COALESCE(
+                            sprints.first_seen_active_at,
+                            CASE WHEN EXCLUDED.state = 'active' THEN NOW() END
+                        ),
+                        -- Direct proof the sprint was still 'future' after its own
+                        -- start_date had already passed (a delayed "Start Sprint" click).
+                        late_start_detected = sprints.late_start_detected OR (
+                            EXCLUDED.state = 'future'
+                            AND EXCLUDED.start_date IS NOT NULL
+                            AND EXCLUDED.start_date < NOW()
+                        ),
                         synced_at     = NOW()
                     """,
                     sprint_rows,
@@ -1080,6 +1095,14 @@ def sync_sprint_scope(conn):
 
     Closed sprints without scope_synced_at are processed once and marked done.
     Active sprints are refreshed on every run.
+
+    Cutoff caveat: sprint.start_date is user-editable in Jira for as long as a sprint
+    stays open (e.g. backdated to match a planned cadence date after a delayed "Start
+    Sprint" click), so it can't always be trusted as the real activation moment. When
+    sprints.late_start_detected is set (we directly observed this sprint sitting in
+    'future' state after its own start_date had already passed), first_seen_active_at —
+    our own first sync poll that saw it 'active', immune to later start_date edits — is
+    used instead. See init.sql / sync_sprints().
     """
     START_BUFFER = timedelta(hours=2)  # timing slack for sprint-start changelog entries
 
@@ -1088,7 +1111,8 @@ def sync_sprint_scope(conn):
     with conn.cursor() as cur:
         cur.execute(
             """
-            SELECT id, start_date, end_date, complete_date, state
+            SELECT id, start_date, end_date, complete_date,
+                   first_seen_active_at, late_start_detected, state
             FROM sprints
             WHERE (state = 'closed' AND scope_synced_at IS NULL)
                OR state = 'active'
@@ -1102,8 +1126,14 @@ def sync_sprint_scope(conn):
     log.info("Sprint scope: %d closed to backfill, %d active to refresh", n_closed, n_active)
     synced = 0
 
-    for sprint_id, start_date, end_date, complete_date, state in pending:
-        cutoff = (start_date + START_BUFFER) if start_date else None
+    for (sprint_id, start_date, end_date, complete_date,
+         first_seen_active_at, late_start_detected, state) in pending:
+        effective_start = (
+            first_seen_active_at
+            if late_start_detected and first_seen_active_at
+            else start_date
+        )
+        cutoff = (effective_start + START_BUFFER) if effective_start else None
         close_ts = complete_date or end_date
 
         with conn.cursor() as cur:

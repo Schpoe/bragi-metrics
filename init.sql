@@ -259,6 +259,17 @@ CREATE INDEX IF NOT EXISTS idx_ish_issue_event_occurred ON issue_sprint_history(
 -- Migration: track whether scope tables have been populated per sprint
 ALTER TABLE sprints ADD COLUMN IF NOT EXISTS scope_synced_at TIMESTAMPTZ;
 
+-- Migration: Jira's sprint start_date is user-editable via "Edit sprint" for as long as
+-- a sprint stays open, so it can't be trusted alone as "when did this sprint actually
+-- start" (e.g. a delayed "Start Sprint" click can leave start_date at the original
+-- planned date). first_seen_active_at is set once — the first sync poll that observes
+-- state = 'active' — and is never overwritten, so later start_date edits can't corrupt
+-- it. late_start_detected marks sprints we directly caught sitting in 'future' state
+-- after their own start_date had already passed. Used by sync_sprint_scope() to pick a
+-- reliable scope-change cutoff. See jira-sync/sync.py.
+ALTER TABLE sprints ADD COLUMN IF NOT EXISTS first_seen_active_at TIMESTAMPTZ;
+ALTER TABLE sprints ADD COLUMN IF NOT EXISTS late_start_detected   BOOLEAN DEFAULT FALSE;
+
 -- ─── Helper functions ───────────────────────────────────────────────────────
 
 -- Bragi's PO quarters (see Confluence "Sprint naming convention and sprint

@@ -98,7 +98,9 @@ Same filter plus `status_category = 'Done'` and `resolved_at <= COALESCE(complet
 
 **`delivery_pct`:** `ROUND(100.0 * delivered_points / committed_points, 1)` — NULL when committed = 0. Cannot exceed 100% because only committed issues are in the numerator.
 
-**How `was_in_initial_scope`, `was_punted`, and `was_completed` are set:** `sync_sprint_scope()` reads `issue_sprint_history` (changelog-derived sprint field changes) and compares event timestamps to `sprint.start_date + 2h` (cutoff).
+**How `was_in_initial_scope`, `was_punted`, and `was_completed` are set:** `sync_sprint_scope()` reads `issue_sprint_history` (changelog-derived sprint field changes) and compares event timestamps to a cutoff of `sprint.start_date + 2h` — or, when `sprints.late_start_detected` is set, `sprints.first_seen_active_at + 2h` instead (see below).
+
+**Cutoff caveat — late-started sprints:** Jira's `start_date` is user-editable via "Edit sprint" for as long as a sprint stays open, so a sprint whose "Start Sprint" click was delayed (e.g. PO out sick) can still show an earlier, stale "planned" `start_date` — wrongly flagging tickets added before the real activation as mid-sprint scope creep. `sync_sprints()` guards against this by recording `first_seen_active_at` (set once, the first sync poll that observes `state = 'active'`, never overwritten by later `start_date` edits) and `late_start_detected` (set when a poll directly caught the sprint still `'future'` after its own `start_date` had passed). The scope cutoff prefers `first_seen_active_at` only when `late_start_detected` is true, so on-time sprints are unaffected. This only protects sprints synced after this fix shipped (2026-08-25) — it cannot retroactively correct sprints that were already `closed`, or already `active` past their late start, before then.
 
 - **`was_in_initial_scope`**: the ticket's last event at or before cutoff was `'added'` — i.e. the ticket was actually in the sprint when it started. Tickets added then removed before sprint start are excluded (pre-sprint churn).
 - **`was_punted`**: a `'removed'` event exists after cutoff. Pre-sprint removals do not count.
